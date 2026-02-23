@@ -29,26 +29,18 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
             transition: all 0.2s ease;
         }
-        .card-shadow:active {
-            transform: scale(0.98);
-        }
+        .card-shadow:active { transform: scale(0.98); }
         @media (min-width: 768px) {
             .card-shadow:hover {
                 transform: translateY(-2px);
                 box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             }
-            .card-shadow:active {
-                transform: none;
-            }
+            .card-shadow:active { transform: none; }
         }
         
         .loader {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3b82f6;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
+            border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%;
+            width: 30px; height: 30px; animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
@@ -70,18 +62,18 @@
         const COST_OPTIONS = [2, 4, 5, 7, 8, 9, 10, 11, 13, 15, 17, 20, 22].sort((a,b) => a-b);
         const BH_OPTIONS_MEMBER = ['Pink', 'Red', 'Yellow', 'Green', 'Blue', 'Purple', 'None'];
         const BH_OPTIONS_LIVE = ['Pink', 'Red', 'Yellow', 'Green', 'Blue', 'Purple', 'ALL', 'Score', 'Draw'];
+        
+        const BH_SORT_ORDER = { 'Pink': 1, 'Red': 2, 'Yellow': 3, 'Green': 4, 'Blue': 5, 'Purple': 6, 'None': 7 };
 
         const STATS_OPTIONS = Array.from({length: 20}, (_, i) => i + 1);
         const MAX_STATS_OPTIONS = [...STATS_OPTIONS, '＋'];
         const GROUP_OPTIONS = ['μ\'s', 'A-RISE', 'Aqours', 'SaintSnow', '虹ヶ咲', 'Liella!', 'SunnyPassion', '蓮ノ空'];
 
-        // Contain (収録) の表示順序定義
         const CONTAIN_ORDER = [
             'bp1', 'bp2', 'bp3', 'bp4', 'bp5',
             'LL-pb1', 'S-pb1', 'N-pb1', 'SP-pb1',
             'LL-sd1', 'S-sd1', 'N-sd1', 'SP-sd1',
-            'HS-sd1',
-            'PR'
+            'HS-sd1', 'PR'
         ];
 
         const GROUP_STYLES = {
@@ -96,16 +88,16 @@
         };
 
         const BH_STYLES = {
-            'Pink':   { base: 'bg-pink-400 text-white', active: 'bg-pink-700 text-white ring-2 ring-pink-700 ring-offset-1' },
-            'Red':    { base: 'bg-red-400 text-white', active: 'bg-red-700 text-white ring-2 ring-red-700 ring-offset-1' },
-            'Yellow': { base: 'bg-yellow-300 text-black', active: 'bg-yellow-600 text-white ring-2 ring-yellow-600 ring-offset-1' },
-            'Green':  { base: 'bg-green-400 text-white', active: 'bg-green-700 text-white ring-2 ring-green-700 ring-offset-1' },
-            'Blue':   { base: 'bg-blue-400 text-white', active: 'bg-blue-700 text-white ring-2 ring-blue-700 ring-offset-1' },
-            'Purple': { base: 'bg-purple-400 text-white', active: 'bg-purple-700 text-white ring-2 ring-purple-700 ring-offset-1' },
-            'None':   { base: 'bg-gray-300 text-gray-700', active: 'bg-gray-600 text-white ring-2 ring-gray-600 ring-offset-1' },
-            'ALL':    { base: 'bg-gray-700 text-white', active: 'bg-gray-900 text-white ring-2 ring-gray-900 ring-offset-1' },
-            'Score':  { base: 'bg-cyan-500 text-white', active: 'bg-cyan-700 text-white ring-2 ring-cyan-700 ring-offset-1' },
-            'Draw':   { base: 'bg-orange-500 text-white', active: 'bg-orange-700 text-white ring-2 ring-orange-700 ring-offset-1' }
+            'Pink':   { base: 'bg-pink-400 text-white hover:bg-pink-500', active: 'bg-pink-700 text-white ring-2 ring-pink-700 ring-offset-1', bg: 'bg-pink-400' },
+            'Red':    { base: 'bg-red-400 text-white hover:bg-red-500', active: 'bg-red-700 text-white ring-2 ring-red-700 ring-offset-1', bg: 'bg-red-500' },
+            'Yellow': { base: 'bg-yellow-300 text-black hover:bg-yellow-400', active: 'bg-yellow-600 text-white ring-2 ring-yellow-600 ring-offset-1', bg: 'bg-yellow-400' },
+            'Green':  { base: 'bg-green-400 text-white hover:bg-green-500', active: 'bg-green-700 text-white ring-2 ring-green-700 ring-offset-1', bg: 'bg-green-500' },
+            'Blue':   { base: 'bg-blue-400 text-white hover:bg-blue-500', active: 'bg-blue-700 text-white ring-2 ring-blue-700 ring-offset-1', bg: 'bg-blue-500' },
+            'Purple': { base: 'bg-purple-400 text-white hover:bg-purple-500', active: 'bg-purple-700 text-white ring-2 ring-purple-700 ring-offset-1', bg: 'bg-purple-500' },
+            'None':   { base: 'bg-gray-300 text-gray-700 hover:bg-gray-400', active: 'bg-gray-600 text-white ring-2 ring-gray-600 ring-offset-1', bg: 'bg-gray-300' },
+            'ALL':    { base: 'bg-gray-700 text-white', active: 'bg-gray-900 text-white ring-2 ring-gray-900 ring-offset-1', bg: 'bg-gray-700' },
+            'Score':  { base: 'bg-cyan-500 text-white', active: 'bg-cyan-700 text-white ring-2 ring-cyan-700 ring-offset-1', bg: 'bg-cyan-500' },
+            'Draw':   { base: 'bg-orange-500 text-white', active: 'bg-orange-700 text-white ring-2 ring-orange-700 ring-offset-1', bg: 'bg-orange-500' }
         };
 
         const TAG_COLORS = [
@@ -174,7 +166,10 @@
             List: (p) => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>,
             Filter: (p) => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>,
             ChevronLeft: (p) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><polyline points="15 18 9 12 15 6"></polyline></svg>,
-            ChevronRight: (p) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><polyline points="9 18 15 12 9 6"></polyline></svg>
+            ChevronRight: (p) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><polyline points="9 18 15 12 9 6"></polyline></svg>,
+            Plus: (p) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
+            Minus: (p) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
+            Maximize: (p) => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
         };
 
         // ==========================================
@@ -195,26 +190,15 @@
 
         const getFallbackUrl = (id) => `https://drive.google.com/uc?export=view&id=${id}`;
 
-        const SafeImage = ({ src, alt, className, onError, onClick }) => {
-            return (
-                <img 
-                    src={src} 
-                    alt={alt} 
-                    loading="lazy" 
-                    className={className} 
-                    onError={onError}
-                    onClick={onClick}
-                />
-            );
-        };
+        const SafeImage = ({ src, alt, className, onError, onClick }) => (
+            <img src={src} alt={alt} loading="lazy" className={className} onError={onError} onClick={onClick} />
+        );
 
         const fetchSheetData = (gid) => {
             return new Promise((resolve, reject) => {
                 const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv&gid=${gid}`;
                 Papa.parse(url, {
-                    download: true,
-                    header: true,
-                    skipEmptyLines: true,
+                    download: true, header: true, skipEmptyLines: true,
                     complete: (results) => resolve(results.data),
                     error: (err) => reject(err)
                 });
@@ -226,17 +210,10 @@
             return rawData.map(row => {
                 const normalized = {};
                 Object.keys(map).forEach(key => {
-                    const possibleHeaders = map[key];
-                    const foundHeader = possibleHeaders.find(ph => 
-                        Object.keys(row).some(rk => rk.toLowerCase() === ph.toLowerCase())
-                    );
-                    if (foundHeader) {
-                        const actualKey = Object.keys(row).find(rk => rk.toLowerCase() === foundHeader.toLowerCase());
-                        normalized[key] = row[actualKey];
-                    } else {
-                        normalized[key] = '';
-                    }
+                    const foundHeader = map[key].find(h => row[h] !== undefined);
+                    normalized[key] = foundHeader ? row[foundHeader] : '';
                 });
+                normalized._type = type; 
                 return normalized;
             });
         };
@@ -264,15 +241,9 @@
             <div className="mb-4">
                 <FilterHeader label={label} onReset={onReset} isActive={minVal !== '' || maxVal !== ''} />
                 <div className="flex items-center gap-2">
-                    <select value={minVal} onChange={(e) => onMinChange(e.target.value)} className="w-full px-2 py-1 text-sm border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
-                        <option value="">Min</option>
-                        {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                    </select>
+                    <select value={minVal} onChange={(e) => onMinChange(e.target.value)} className="w-full px-2 py-1 text-sm border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"><option value="">Min</option>{options.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select>
                     <span className="text-gray-400">~</span>
-                    <select value={maxVal} onChange={(e) => onMaxChange(e.target.value)} className="w-full px-2 py-1 text-sm border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
-                        <option value="">Max</option>
-                        {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                    </select>
+                    <select value={maxVal} onChange={(e) => onMaxChange(e.target.value)} className="w-full px-2 py-1 text-sm border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"><option value="">Max</option>{options.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select>
                 </div>
             </div>
         );
@@ -290,10 +261,7 @@
                             let className = style.base;
                             if (isIncluded) className = style.active;
                             if (isExcluded) className = "bg-gray-800 text-gray-300 ring-2 ring-offset-2 ring-gray-800 line-through opacity-80";
-                            
-                            return (
-                                <button key={opt} onClick={() => onChange(opt)} className={`px-3 py-1 rounded-full text-xs font-bold transition-all border border-transparent shadow-sm ${className}`}>{opt}</button>
-                            );
+                            return <button key={opt} onClick={() => onChange(opt)} className={`px-3 py-1 rounded-full text-xs font-bold transition-all border border-transparent shadow-sm ${className}`}>{opt}</button>;
                         })}
                     </div>
                 </div>
@@ -314,17 +282,13 @@
                             let className = style.base;
                             if (isIncluded) className = style.active;
                             if (isExcluded) className = "bg-gray-800 text-gray-300 ring-2 ring-offset-2 ring-gray-800 line-through opacity-80";
-
-                            return (
-                                <button key={opt} onClick={() => onChange(opt)} className={`px-3 py-1 rounded-full text-xs font-bold transition-all border border-transparent shadow-sm ${className}`}>{opt}</button>
-                            );
+                            return <button key={opt} onClick={() => onChange(opt)} className={`px-3 py-1 rounded-full text-xs font-bold transition-all border border-transparent shadow-sm ${className}`}>{opt}</button>;
                         })}
                     </div>
                 </div>
             );
         };
 
-        // --- Filter Panel ---
         const FilterPanel = ({ 
             isMobile, activeTab, setActiveTab,
             filterName, setFilterName,
@@ -333,79 +297,83 @@
             filterCosts, toggleCost, setFilterCosts,
             numericFilters, updateNumericFilter, setNumericFilters,
             filterBladeHeart, toggleBladeHeart, setFilterBladeHeart,
-            filterBaseStats, setFilterBaseStats,
-            filterMaxStats, setFilterMaxStats,
+            filterBaseStats, setFilterBaseStats, filterMaxStats, setFilterMaxStats,
             uniqueAbilities, uniqueKeywords,
             filterKeywords, toggleKeyword, setFilterKeywords,
             filterContains, toggleContain, setFilterContains, uniqueContains,
-            resetFilters, initial3State
+            resetFilters, initial3State, deckSortType, setDeckSortType
         }) => {
             const bladeHeartOptions = activeTab === 'member' ? BH_OPTIONS_MEMBER : BH_OPTIONS_LIVE;
 
             return (
                 <div className="space-y-4">
                     {!isMobile && (
-                        <div className="flex bg-gray-100 p-1 rounded-lg mb-4">
-                            <button onClick={() => setActiveTab('member')} className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'member' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>メンバー</button>
-                            <button onClick={() => setActiveTab('live')} className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'live' ? 'bg-white shadow text-pink-600' : 'text-gray-500'}`}>ライブ</button>
+                        <div className="flex bg-gray-100 p-1 rounded-lg mb-4 text-xs font-medium">
+                            <button onClick={() => setActiveTab('member')} className={`flex-1 py-2 rounded-md transition-colors ${activeTab === 'member' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>メンバー</button>
+                            <button onClick={() => setActiveTab('live')} className={`flex-1 py-2 rounded-md transition-colors ${activeTab === 'live' ? 'bg-white shadow text-pink-600' : 'text-gray-500'}`}>ライブ</button>
+                            <button onClick={() => setActiveTab('deck')} className={`flex-1 py-2 rounded-md transition-colors ${activeTab === 'deck' ? 'bg-gray-800 shadow text-white' : 'text-gray-500'}`}>デッキ</button>
                         </div>
                     )}
 
-                    <div className="mb-4">
-                        <FilterHeader label="Keyword Search" onReset={() => setFilterName('')} isActive={filterName !== ''} />
-                        <div className="relative">
-                            <input type="text" placeholder="名前・テキスト検索..." value={filterName} onChange={(e) => setFilterName(e.target.value)} className="w-full pl-9 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm" />
-                            <div className="absolute left-3 top-2.5 text-gray-400"><Icons.Search /></div>
+                    {activeTab === 'deck' ? (
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <FilterHeader label="Deck Sort Order" />
+                            <select value={deckSortType} onChange={e => setDeckSortType(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-gray-800 bg-white">
+                                <option value="cost">コスト順</option>
+                                <option value="bladeHeart">ブレードハート順</option>
+                            </select>
+                            <p className="text-xs text-gray-500 mt-4">※ デッキタブではフィルタリングは行われず、デッキに追加されたすべてのカードが表示されます。</p>
                         </div>
-                    </div>
-
-                    {/* Contain Filter */}
-                    {uniqueContains.length > 0 && <TagFilter label="Contain" options={uniqueContains} filterState={filterContains} onChange={toggleContain} onReset={() => setFilterContains(initial3State())} />}
-
-                    <ButtonGroupFilter label="Groups" options={GROUP_OPTIONS} filterState={filterGroups} onChange={toggleGroup} styles={GROUP_STYLES} defaultStyle={GROUP_STYLES["μ's"]} onReset={() => setFilterGroups(initial3State())} />
-                    
-                    {uniqueAbilities.length > 0 && <TagFilter label="Ability" options={uniqueAbilities} filterState={filterAbilities} onChange={toggleAbility} onReset={() => setFilterAbilities(initial3State())} />}
-
-                    {activeTab === 'member' && (
+                    ) : (
                         <>
                             <div className="mb-4">
-                                <FilterHeader label="Cost" onReset={() => setFilterCosts(initial3State())} isActive={filterCosts.include.size > 0 || filterCosts.exclude.size > 0} />
-                                <div className="grid grid-cols-4 gap-2">
-                                    {COST_OPTIONS.map(c => {
-                                        const isIncluded = filterCosts.include.has(c);
-                                        const isExcluded = filterCosts.exclude.has(c);
-                                        let className = 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50';
-                                        if (isIncluded) className = 'bg-blue-600 text-white border-blue-600 font-bold';
-                                        if (isExcluded) className = 'bg-gray-800 text-gray-300 border-gray-800 line-through opacity-80';
-                                        return (
-                                            <button key={c} onClick={() => toggleCost(c)} className={`py-1 rounded text-sm border transition-colors select-none ${className}`}>{c}</button>
-                                        );
-                                    })}
+                                <FilterHeader label="Keyword Search" onReset={() => setFilterName('')} isActive={filterName !== ''} />
+                                <div className="relative">
+                                    <input type="text" placeholder="名前・テキスト検索..." value={filterName} onChange={(e) => setFilterName(e.target.value)} className="w-full pl-9 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm" />
+                                    <div className="absolute left-3 top-2.5 text-gray-400"><Icons.Search /></div>
                                 </div>
                             </div>
-                            <DropdownRangeFilter label="Blade" minVal={numericFilters.blade?.min||''} maxVal={numericFilters.blade?.max||''} options={[0,1,2,3,4,5,6,7]} onMinChange={(v) => updateNumericFilter('blade', 'min', v)} onMaxChange={(v) => updateNumericFilter('blade', 'max', v)} onReset={() => setNumericFilters(p => ({...p, blade: {min:'',max:''}}))} />
-                            <ButtonGroupFilter label="Blade Heart" options={bladeHeartOptions} filterState={filterBladeHeart} onChange={toggleBladeHeart} styles={BH_STYLES} defaultStyle={BH_STYLES['None']} onReset={() => setFilterBladeHeart(initial3State())} />
-                            <DropdownRangeFilter label="Base Stats" minVal={filterBaseStats.min} maxVal={filterBaseStats.max} options={STATS_OPTIONS} onMinChange={(v) => setFilterBaseStats(p=>({...p,min:v}))} onMaxChange={(v) => setFilterBaseStats(p=>({...p,max:v}))} onReset={() => setFilterBaseStats({min:'',max:''})} />
-                            <DropdownRangeFilter label="Max Stats" minVal={filterMaxStats.min} maxVal={filterMaxStats.max} options={MAX_STATS_OPTIONS} onMinChange={(v) => setFilterMaxStats(p=>({...p,min:v}))} onMaxChange={(v) => setFilterMaxStats(p=>({...p,max:v}))} onReset={() => setFilterMaxStats({min:'',max:''})} />
+
+                            {uniqueContains.length > 0 && <TagFilter label="Contain" options={uniqueContains} filterState={filterContains} onChange={toggleContain} onReset={() => setFilterContains(initial3State())} />}
+                            <ButtonGroupFilter label="Groups" options={GROUP_OPTIONS} filterState={filterGroups} onChange={toggleGroup} styles={GROUP_STYLES} defaultStyle={GROUP_STYLES["μ's"]} onReset={() => setFilterGroups(initial3State())} />
+                            {uniqueAbilities.length > 0 && <TagFilter label="Ability" options={uniqueAbilities} filterState={filterAbilities} onChange={toggleAbility} onReset={() => setFilterAbilities(initial3State())} />}
+
+                            {activeTab === 'member' && (
+                                <>
+                                    <div className="mb-4">
+                                        <FilterHeader label="Cost" onReset={() => setFilterCosts(initial3State())} isActive={filterCosts.include.size > 0 || filterCosts.exclude.size > 0} />
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {COST_OPTIONS.map(c => {
+                                                const isIncluded = filterCosts.include.has(c);
+                                                const isExcluded = filterCosts.exclude.has(c);
+                                                let className = 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50';
+                                                if (isIncluded) className = 'bg-blue-600 text-white border-blue-600 font-bold';
+                                                if (isExcluded) className = 'bg-gray-800 text-gray-300 border-gray-800 line-through opacity-80';
+                                                return <button key={c} onClick={() => toggleCost(c)} className={`py-1 rounded text-sm border transition-colors select-none ${className}`}>{c}</button>;
+                                            })}
+                                        </div>
+                                    </div>
+                                    <DropdownRangeFilter label="Blade" minVal={numericFilters.blade?.min||''} maxVal={numericFilters.blade?.max||''} options={[0,1,2,3,4,5,6,7]} onMinChange={(v) => updateNumericFilter('blade', 'min', v)} onMaxChange={(v) => updateNumericFilter('blade', 'max', v)} onReset={() => setNumericFilters(p => ({...p, blade: {min:'',max:''}}))} />
+                                    <ButtonGroupFilter label="Blade Heart" options={bladeHeartOptions} filterState={filterBladeHeart} onChange={toggleBladeHeart} styles={BH_STYLES} defaultStyle={BH_STYLES['None']} onReset={() => setFilterBladeHeart(initial3State())} />
+                                    <DropdownRangeFilter label="Base Stats" minVal={filterBaseStats.min} maxVal={filterBaseStats.max} options={STATS_OPTIONS} onMinChange={(v) => setFilterBaseStats(p=>({...p,min:v}))} onMaxChange={(v) => setFilterBaseStats(p=>({...p,max:v}))} onReset={() => setFilterBaseStats({min:'',max:''})} />
+                                    <DropdownRangeFilter label="Max Stats" minVal={filterMaxStats.min} maxVal={filterMaxStats.max} options={MAX_STATS_OPTIONS} onMinChange={(v) => setFilterMaxStats(p=>({...p,min:v}))} onMaxChange={(v) => setFilterMaxStats(p=>({...p,max:v}))} onReset={() => setFilterMaxStats({min:'',max:''})} />
+                                </>
+                            )}
+
+                            {activeTab === 'live' && (
+                                <>
+                                    <ButtonGroupFilter label="Blade Heart" options={bladeHeartOptions} filterState={filterBladeHeart} onChange={toggleBladeHeart} styles={BH_STYLES} defaultStyle={BH_STYLES['None']} onReset={() => setFilterBladeHeart(initial3State())} />
+                                    {uniqueKeywords.length > 0 && <TagFilter label="Keyword" options={uniqueKeywords} filterState={filterKeywords} onChange={toggleKeyword} onReset={() => setFilterKeywords(initial3State())} />}
+                                    <RangeFilter label="Score" minVal={numericFilters.score?.min||''} maxVal={numericFilters.score?.max||''} onMinChange={(v) => updateNumericFilter('score', 'min', v)} onMaxChange={(v) => updateNumericFilter('score', 'max', v)} onReset={() => setNumericFilters(p => ({...p, score: {min:'',max:''}}))} />
+                                    <RangeFilter label="Max Score" minVal={numericFilters.maxScore?.min||''} maxVal={numericFilters.maxScore?.max||''} onMinChange={(v) => updateNumericFilter('maxScore', 'min', v)} onMaxChange={(v) => updateNumericFilter('maxScore', 'max', v)} onReset={() => setNumericFilters(p => ({...p, maxScore: {min:'',max:''}}))} />
+                                    <RangeFilter label="Cost" minVal={numericFilters.req?.min||''} maxVal={numericFilters.req?.max||''} onMinChange={(v) => updateNumericFilter('req', 'min', v)} onMaxChange={(v) => updateNumericFilter('req', 'max', v)} onReset={() => setNumericFilters(p => ({...p, req: {min:'',max:''}}))} />
+                                    <RangeFilter label="Effective Cost" minVal={numericFilters.effReq?.min||''} maxVal={numericFilters.effReq?.max||''} onMinChange={(v) => updateNumericFilter('effReq', 'min', v)} onMaxChange={(v) => updateNumericFilter('effReq', 'max', v)} onReset={() => setNumericFilters(p => ({...p, effReq: {min:'',max:''}}))} />
+                                    <RangeFilter label="Efficiency" minVal={numericFilters.efficiency?.min||''} maxVal={numericFilters.efficiency?.max||''} onMinChange={(v) => updateNumericFilter('efficiency', 'min', v)} onMaxChange={(v) => updateNumericFilter('efficiency', 'max', v)} onReset={() => setNumericFilters(p => ({...p, efficiency: {min:'',max:''}}))} />
+                                </>
+                            )}
+                            <button onClick={resetFilters} className="w-full py-2.5 mt-4 text-sm text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors flex items-center justify-center gap-2"><Icons.Close /> Reset All Filters</button>
                         </>
                     )}
-
-                    {activeTab === 'live' && (
-                        <>
-                            <ButtonGroupFilter label="Blade Heart" options={bladeHeartOptions} filterState={filterBladeHeart} onChange={toggleBladeHeart} styles={BH_STYLES} defaultStyle={BH_STYLES['None']} onReset={() => setFilterBladeHeart(initial3State())} />
-                            
-                            {uniqueKeywords.length > 0 && <TagFilter label="Keyword" options={uniqueKeywords} filterState={filterKeywords} onChange={toggleKeyword} onReset={() => setFilterKeywords(initial3State())} />}
-
-                            <RangeFilter label="Score" minVal={numericFilters.score?.min||''} maxVal={numericFilters.score?.max||''} onMinChange={(v) => updateNumericFilter('score', 'min', v)} onMaxChange={(v) => updateNumericFilter('score', 'max', v)} onReset={() => setNumericFilters(p => ({...p, score: {min:'',max:''}}))} />
-                            <RangeFilter label="Max Score" minVal={numericFilters.maxScore?.min||''} maxVal={numericFilters.maxScore?.max||''} onMinChange={(v) => updateNumericFilter('maxScore', 'min', v)} onMaxChange={(v) => updateNumericFilter('maxScore', 'max', v)} onReset={() => setNumericFilters(p => ({...p, maxScore: {min:'',max:''}}))} />
-                            <RangeFilter label="Cost" minVal={numericFilters.req?.min||''} maxVal={numericFilters.req?.max||''} onMinChange={(v) => updateNumericFilter('req', 'min', v)} onMaxChange={(v) => updateNumericFilter('req', 'max', v)} onReset={() => setNumericFilters(p => ({...p, req: {min:'',max:''}}))} />
-                            <RangeFilter label="Effective Cost" minVal={numericFilters.effReq?.min||''} maxVal={numericFilters.effReq?.max||''} onMinChange={(v) => updateNumericFilter('effReq', 'min', v)} onMaxChange={(v) => updateNumericFilter('effReq', 'max', v)} onReset={() => setNumericFilters(p => ({...p, effReq: {min:'',max:''}}))} />
-                            
-                            <RangeFilter label="Efficiency" minVal={numericFilters.efficiency?.min||''} maxVal={numericFilters.efficiency?.max||''} onMinChange={(v) => updateNumericFilter('efficiency', 'min', v)} onMaxChange={(v) => updateNumericFilter('efficiency', 'max', v)} onReset={() => setNumericFilters(p => ({...p, efficiency: {min:'',max:''}}))} />
-                        </>
-                    )}
-                    
-                    <button onClick={resetFilters} className="w-full py-2.5 mt-4 text-sm text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors flex items-center justify-center gap-2"><Icons.Close /> Reset All Filters</button>
                 </div>
             );
         };
@@ -421,16 +389,17 @@
         const App = () => {
             const [activeTab, setActiveTab] = useState('member'); 
             const [viewMode, setViewMode] = useState('grid');
-            const [data, setData] = useState([]);
-            const [loading, setLoading] = useState(false);
+            const [cardData, setCardData] = useState({ member: [], live: [] }); 
+            const [loading, setLoading] = useState(true);
             const [error, setError] = useState(null);
             const [selectedItem, setSelectedItem] = useState(null);
             const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
-            // 3-State Filter Initialization
+            const [deck, setDeck] = useState({ member: {}, live: {} });
+            const [deckSortType, setDeckSortType] = useState('cost');
+
             const initial3State = () => ({ include: new Set(), exclude: new Set() });
 
-            // Filters
             const [filterName, setFilterName] = useState('');
             const [filterContains, setFilterContains] = useState(initial3State()); 
             const [filterGroups, setFilterGroups] = useState(initial3State());
@@ -438,104 +407,151 @@
             const [filterBladeHeart, setFilterBladeHeart] = useState(initial3State()); 
             const [filterAbilities, setFilterAbilities] = useState(initial3State());
             const [filterKeywords, setFilterKeywords] = useState(initial3State()); 
-            
             const [filterBaseStats, setFilterBaseStats] = useState({ min: '', max: '' });
             const [filterMaxStats, setFilterMaxStats] = useState({ min: '', max: '' });
             const [numericFilters, setNumericFilters] = useState({});
-            
             const [sortConfig, setSortConfig] = useState({ key: 'cost', direction: 'asc' });
 
             useEffect(() => {
-                const loadData = async () => {
+                const loadAllData = async () => {
                     setLoading(true); setError(null);
                     try {
-                        const gid = activeTab === 'member' ? GID_MEMBER : GID_LIVE;
-                        const raw = await fetchSheetData(gid);
-                        setData(normalizeData(raw, activeTab));
-                        resetAll();
-                    } catch (err) { console.error(err); setError(err.message); } finally { setLoading(false); }
+                        const memRaw = await fetchSheetData(GID_MEMBER);
+                        const livRaw = await fetchSheetData(GID_LIVE);
+                        setCardData({
+                            member: normalizeData(memRaw, 'member'),
+                            live: normalizeData(livRaw, 'live')
+                        });
+                    } catch (err) { 
+                        console.error(err); 
+                        setError(err.message); 
+                    } finally { 
+                        setLoading(false); 
+                    }
                 };
-                loadData();
+                loadAllData();
+            }, []);
+
+            useEffect(() => {
+                if (activeTab === 'member') setSortConfig({ key: 'cost', direction: 'asc' });
+                else if (activeTab === 'live') setSortConfig({ key: 'score', direction: 'asc' });
             }, [activeTab]);
 
             const resetAll = () => {
                 setFilterName(''); 
-                setFilterContains(initial3State()); 
-                setFilterGroups(initial3State()); 
-                setFilterCosts(initial3State());
-                setFilterBladeHeart(initial3State()); 
-                setFilterAbilities(initial3State()); 
-                setFilterKeywords(initial3State());
-                setFilterBaseStats({ min: '', max: '' }); 
-                setFilterMaxStats({ min: '', max: '' });
+                setFilterContains(initial3State()); setFilterGroups(initial3State()); 
+                setFilterCosts(initial3State()); setFilterBladeHeart(initial3State()); 
+                setFilterAbilities(initial3State()); setFilterKeywords(initial3State());
+                setFilterBaseStats({ min: '', max: '' }); setFilterMaxStats({ min: '', max: '' });
                 setNumericFilters({});
-                
-                // Set default sort based on active tab
-                if (activeTab === 'member') {
-                    setSortConfig({ key: 'cost', direction: 'asc' });
-                } else {
-                    setSortConfig({ key: 'score', direction: 'asc' });
-                }
             };
 
-            // 3-State Toggle Logic
+            const addCardToDeck = (e, item) => {
+                e.stopPropagation();
+                const type = item._type;
+                if (!type) return;
+                setDeck(prev => {
+                    const currentCount = prev[type][item.number]?.count || 0;
+                    if (currentCount >= 4) return prev;
+                    return { ...prev, [type]: { ...prev[type], [item.number]: { card: item, count: currentCount + 1 } } };
+                });
+            };
+
+            const removeCardFromDeck = (e, item) => {
+                e.stopPropagation();
+                const type = item._type;
+                if (!type) return;
+                setDeck(prev => {
+                    const currentCount = prev[type][item.number]?.count || 0;
+                    if (currentCount <= 0) return prev;
+                    const nextTypeDeck = { ...prev[type] };
+                    if (currentCount === 1) delete nextTypeDeck[item.number];
+                    else nextTypeDeck[item.number] = { card: item, count: currentCount - 1 };
+                    return { ...prev, [type]: nextTypeDeck };
+                });
+            };
+
+            const getDeckCount = (item) => {
+                if (!item || !item._type || !item.number) return 0;
+                return deck[item._type][item.number]?.count || 0;
+            };
+
+            const deckStats = useMemo(() => {
+                const costs = {};
+                const bhs = { Pink: 0, Red: 0, Yellow: 0, Green: 0, Blue: 0, Purple: 0, None: 0 };
+                let total = 0;
+
+                const processItem = (d, type) => {
+                    const count = d.count;
+                    total += count;
+
+                    if (type === 'member') {
+                        const costVal = parseInt(d.card.cost);
+                        if (!isNaN(costVal)) costs[costVal] = (costs[costVal] || 0) + count;
+
+                        const bhList = d.card.bladeHeart ? d.card.bladeHeart.split(/[,、\s]+/).map(s=>s.trim()) : ['None'];
+                        if (bhList.length === 0 || (bhList.length === 1 && bhList[0] === '')) bhList[0] = 'None';
+                        bhList.forEach(bh => {
+                            const key = Object.keys(bhs).find(k => k.toLowerCase() === bh.toLowerCase());
+                            if (key) bhs[key] += count;
+                        });
+                    }
+                };
+
+                Object.values(deck.member).forEach(d => processItem(d, 'member'));
+                Object.values(deck.live).forEach(d => processItem(d, 'live'));
+
+                return { costs, bhs, total };
+            }, [deck]);
+
             const toggle3State = (state, val, setter) => {
                 const nextInclude = new Set(state.include);
                 const nextExclude = new Set(state.exclude);
-                
                 if (nextInclude.has(val)) {
-                    // include -> exclude
                     nextInclude.delete(val);
                     nextExclude.add(val);
                 } else if (nextExclude.has(val)) {
-                    // exclude -> none
                     nextExclude.delete(val);
                 } else {
-                    // none -> include
                     nextInclude.add(val);
                 }
-                
                 setter({ include: nextInclude, exclude: nextExclude });
             };
 
             const updateNumFilter = (key, type, val) => setNumericFilters(p => ({ ...p, [key]: { ...p[key], [type]: val } }));
 
+            const currentTabData = activeTab === 'deck' ? [] : cardData[activeTab];
+
             const uniqueAbilities = useMemo(() => {
                 const s = new Set();
-                data.forEach(d => d.ability && d.ability.split(/[,、\s]+/).forEach(a => a.trim() && s.add(a.trim())));
+                currentTabData.forEach(d => d.ability && d.ability.split(/[,、\s]+/).forEach(a => a.trim() && s.add(a.trim())));
                 return Array.from(s).sort();
-            }, [data]);
+            }, [currentTabData]);
 
             const uniqueKeywords = useMemo(() => {
                 const s = new Set();
-                data.forEach(d => d.keyword && d.keyword.split(/[,、\s]+/).forEach(a => a.trim() && s.add(a.trim())));
+                currentTabData.forEach(d => d.keyword && d.keyword.split(/[,、\s]+/).forEach(a => a.trim() && s.add(a.trim())));
                 return Array.from(s).sort();
-            }, [data]);
+            }, [currentTabData]);
 
             const uniqueContains = useMemo(() => {
                 const dataContains = new Set();
-                data.forEach(d => d.contain && d.contain.split(/[,、\s]+/).forEach(a => a.trim() && dataContains.add(a.trim())));
-                
-                // Merge user defined order with any other found tags
+                currentTabData.forEach(d => d.contain && d.contain.split(/[,、\s]+/).forEach(a => a.trim() && dataContains.add(a.trim())));
                 const mergedOptions = new Set([...CONTAIN_ORDER, ...dataContains]);
-
                 return Array.from(mergedOptions).sort((a, b) => {
                     const idxA = CONTAIN_ORDER.indexOf(a);
                     const idxB = CONTAIN_ORDER.indexOf(b);
-                    
                     if (idxA !== -1 && idxB !== -1) return idxA - idxB;
                     if (idxA !== -1) return -1;
                     if (idxB !== -1) return 1;
                     return a.localeCompare(b, 'ja');
                 });
-            }, [data]);
+            }, [currentTabData]);
 
             const filteredData = useMemo(() => {
-                return data.filter(item => {
-                    // Check NoViewer flag first
+                return currentTabData.filter(item => {
                     if (item.noViewer == 1) return false;
 
-                    // Keyword Search (Name OR Text)
                     if (filterName) {
                         const lowerFilter = filterName.toLowerCase();
                         const inName = item.name && item.name.toLowerCase().includes(lowerFilter);
@@ -543,60 +559,45 @@
                         if (!inName && !inText) return false;
                     }
 
-                    // Contain Filter
                     const c = item.contain ? item.contain.split(/[,、\s]+/).map(s=>s.trim()) : [];
                     if (filterContains.exclude.size > 0 && [...filterContains.exclude].some(x => c.includes(x))) return false;
                     if (filterContains.include.size > 0 && ![...filterContains.include].some(x => c.includes(x))) return false;
                     
-                    // Group Filter
                     const g = item.group ? item.group.split(',').map(s=>s.trim()) : [];
                     if (filterGroups.exclude.size > 0 && [...filterGroups.exclude].some(x => g.includes(x))) return false;
                     if (filterGroups.include.size > 0 && ![...filterGroups.include].some(x => g.includes(x))) return false;
 
-                    // Ability Filter
                     const a = item.ability ? item.ability.split(/[,、\s]+/).map(s=>s.trim()) : [];
                     if (filterAbilities.exclude.size > 0 && [...filterAbilities.exclude].some(x => a.includes(x))) return false;
                     if (filterAbilities.include.size > 0 && ![...filterAbilities.include].some(x => a.includes(x))) return false;
                     
                     if (activeTab === 'member') {
-                        // Cost
                         const costVal = parseInt(item.cost);
                         if (filterCosts.exclude.size > 0 && filterCosts.exclude.has(costVal)) return false;
                         if (filterCosts.include.size > 0 && (isNaN(costVal) || !filterCosts.include.has(costVal))) return false;
 
-                        // Stats
                         const bs = parseInt(item.baseStats);
                         if ((filterBaseStats.min !== '' && (isNaN(bs) || bs < parseInt(filterBaseStats.min))) || (filterBaseStats.max !== '' && (isNaN(bs) || bs > parseInt(filterBaseStats.max)))) return false;
                         if (filterMaxStats.min === '＋' || filterMaxStats.max === '＋') { if (!item.maxStats?.includes('+')) return false; }
                         else { const ms = parseInt(item.maxStats); if ((filterMaxStats.min !== '' && (isNaN(ms) || ms < parseInt(filterMaxStats.min))) || (filterMaxStats.max !== '' && (isNaN(ms) || ms > parseInt(filterMaxStats.max)))) return false; }
                         
-                        // BladeHeart (Member: 完全一致に近い、Noneは空文字)
                         const itemBH = item.bladeHeart ? item.bladeHeart.trim().toLowerCase() : '';
-                        const hasBH = (targetBH) => {
-                            if (targetBH === 'None') return itemBH === '';
-                            return itemBH === targetBH.toLowerCase();
-                        };
+                        const hasBH = (targetBH) => targetBH === 'None' ? itemBH === '' : itemBH === targetBH.toLowerCase();
                         if (filterBladeHeart.exclude.size > 0 && [...filterBladeHeart.exclude].some(hasBH)) return false;
                         if (filterBladeHeart.include.size > 0 && ![...filterBladeHeart.include].some(hasBH)) return false;
                     }
 
                     if (activeTab === 'live') {
-                        // Keyword (Live)
                         const k = item.keyword ? item.keyword.split(/[,、\s]+/).map(s=>s.trim()) : [];
                         if (filterKeywords.exclude.size > 0 && [...filterKeywords.exclude].some(x => k.includes(x))) return false;
                         if (filterKeywords.include.size > 0 && ![...filterKeywords.include].some(x => k.includes(x))) return false;
 
-                        // BladeHeart (Live: カンマ区切り包含チェック)
                         const cardBHs = item.bladeHeart ? item.bladeHeart.split(/[,、\s]+/).map(s => s.trim().toLowerCase()) : [];
-                        const hasBHLive = (targetBH) => {
-                            if (targetBH === 'None') return cardBHs.length === 0;
-                            return cardBHs.includes(targetBH.toLowerCase());
-                        };
+                        const hasBHLive = (targetBH) => targetBH === 'None' ? cardBHs.length === 0 : cardBHs.includes(targetBH.toLowerCase());
                         if (filterBladeHeart.exclude.size > 0 && [...filterBladeHeart.exclude].some(hasBHLive)) return false;
                         if (filterBladeHeart.include.size > 0 && ![...filterBladeHeart.include].some(hasBHLive)) return false;
                     }
 
-                    // Numeric filters
                     for (const [k, r] of Object.entries(numericFilters)) {
                         const v = parseFloat(item[k]);
                         if (isNaN(v)) { if (r?.min || r?.max) return false; continue; }
@@ -604,7 +605,7 @@
                     }
                     return true;
                 });
-            }, [data, filterName, filterContains, filterGroups, filterCosts, filterBladeHeart, filterAbilities, filterKeywords, filterBaseStats, filterMaxStats, numericFilters, activeTab]);
+            }, [currentTabData, filterName, filterContains, filterGroups, filterCosts, filterBladeHeart, filterAbilities, filterKeywords, filterBaseStats, filterMaxStats, numericFilters, activeTab]);
 
             const sortedData = useMemo(() => {
                 let items = [...filteredData];
@@ -617,6 +618,42 @@
                 });
                 return items;
             }, [filteredData, sortConfig]);
+
+            const sortedDeckCards = useMemo(() => {
+                if (activeTab !== 'deck') return { member: [], live: [] };
+                
+                const members = Object.values(deck.member).map(d => d.card);
+                const lives = Object.values(deck.live).map(d => d.card);
+
+                const sortFn = (a, b) => {
+                    if (deckSortType === 'cost') {
+                        const costA = parseInt(a.cost || a.req) || 0;
+                        const costB = parseInt(b.cost || b.req) || 0;
+                        return costA - costB;
+                    } else if (deckSortType === 'bladeHeart') {
+                        const getBhVal = (card) => {
+                            const bhStr = card.bladeHeart ? card.bladeHeart.split(/[,、\s]+/)[0].trim() : 'None';
+                            const key = Object.keys(BH_SORT_ORDER).find(k => k.toLowerCase() === bhStr.toLowerCase());
+                            return BH_SORT_ORDER[key] || 8;
+                        };
+                        const bhA = getBhVal(a);
+                        const bhB = getBhVal(b);
+                        if (bhA !== bhB) return bhA - bhB;
+                        
+                        const costA = parseInt(a.cost || a.req) || 0;
+                        const costB = parseInt(b.cost || b.req) || 0;
+                        return costA - costB;
+                    }
+                    return (a.number || '').localeCompare(b.number || '');
+                };
+
+                members.sort(sortFn);
+                lives.sort(sortFn);
+                return { member: members, live: lives };
+            }, [deck, activeTab, deckSortType]);
+
+            const displayList = activeTab === 'deck' ? [...sortedDeckCards.member, ...sortedDeckCards.live] : sortedData;
+            const actualViewMode = (activeTab !== 'deck' && viewMode === 'compact') ? 'grid' : viewMode;
 
             const activeFilters = useMemo(() => {
                 const list = [];
@@ -653,7 +690,142 @@
                 filterBladeHeart, toggleBladeHeart: (v)=>toggle3State(filterBladeHeart,v,setFilterBladeHeart), setFilterBladeHeart,
                 filterBaseStats, setFilterBaseStats, filterMaxStats, setFilterMaxStats,
                 numericFilters, updateNumericFilter: updateNumFilter, setNumericFilters,
-                uniqueAbilities, uniqueKeywords, uniqueContains, resetFilters: resetAll, initial3State
+                uniqueAbilities, uniqueKeywords, uniqueContains, resetFilters: resetAll, initial3State,
+                deckSortType, setDeckSortType
+            };
+
+            const renderCompactItem = (item, index) => {
+                const cCount = getDeckCount(item);
+                const isLive = item._type === 'live';
+
+                return (
+                    <div key={`${item.number}-${index}`} className="relative group cursor-pointer flex flex-col items-center z-10 hover:z-40" onClick={() => item.image && setSelectedItem(item)}>
+                        <div className={`relative w-full ${isLive ? 'aspect-[16/9]' : 'aspect-[3/4]'} rounded-sm overflow-hidden bg-gray-200 transition-transform duration-300 group-hover:scale-105`}>
+                            {item.image ? (
+                                <SafeImage src={getImageUrl(item.image)} alt={item.name} className="w-full h-full object-contain" onError={(e) => { if (!e.target.dataset.triedFallback) { e.target.dataset.triedFallback = "true"; e.target.src = getFallbackUrl(item.image); } else { e.target.src = 'https://placehold.co/400x600?text=No+Image'; } }} />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100 text-[8px]">No Img</div>
+                            )}
+                        </div>
+                        <div className="absolute bottom-0 right-0 bg-black text-white font-bold text-[10px] px-1.5 py-0.5 rounded-tl shadow-md z-30 opacity-90 pointer-events-none">
+                            {cCount}
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderCardItem = (item, index, asGrid = true) => {
+                const cCount = getDeckCount(item);
+                const isLive = item._type === 'live';
+                const uniqueAbilitiesList = isLive ? uniqueKeywords : uniqueAbilities; 
+
+                if (!asGrid) {
+                    return (
+                        <tr key={`${item.number}-${index}`} className="hover:bg-gray-50">
+                            <td className="px-3 py-2">
+                                <div className="h-10 w-10 cursor-pointer relative" onClick={() => item.image && setSelectedItem(item)}>
+                                    {item.image ? <SafeImage src={getImageUrl(item.image)} className="h-10 w-10 rounded object-cover" /> : <div className="h-10 w-10 rounded bg-gray-200"></div>}
+                                </div>
+                            </td>
+                            <td className="px-3 py-2 text-gray-500">{item.number}</td>
+                            <td className="px-3 py-2 font-medium">{item.name}</td>
+                            <td className="px-3 py-2"><span className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 whitespace-nowrap">{item.group}</span></td>
+                            <td className="px-3 py-2 hidden sm:table-cell">
+                                <div className="flex flex-wrap gap-1 max-w-xs">
+                                    {item.ability && item.ability.split(/[,、\s]+/).map((a,i) => { 
+                                        const ta=a.trim();if(!ta)return null;
+                                        const ci=uniqueAbilitiesList.indexOf(ta);
+                                        const fi=ta.split('').reduce((x,y)=>x+y.charCodeAt(0),0);
+                                        return <span key={i} className={`px-1 rounded ${getTagColor(ci!==-1?ci:fi).base}`}>{ta}</span>; 
+                                    })}
+                                </div>
+                            </td>
+                            {!isLive ? ( 
+                                <><td className="px-3 py-2">{item.cost}</td><td className="px-3 py-2 whitespace-nowrap">{item.baseStats}/{item.maxStats}</td></> 
+                            ) : ( 
+                                <><td className="px-3 py-2 font-bold text-pink-600">{item.score}/{item.maxScore}</td><td className="px-3 py-2">{item.req}/{item.effReq}</td></> 
+                            )}
+                            <td className="px-3 py-2">
+                                <div className="flex items-center gap-2 bg-gray-100 rounded-full px-2 py-1 w-max ml-auto">
+                                    <button onClick={(e) => removeCardFromDeck(e, item)} disabled={cCount === 0} className={`p-1.5 rounded-full transition-colors ${cCount === 0 ? 'text-gray-300' : 'text-gray-700 hover:bg-white hover:text-red-500 shadow-sm'}`}><Icons.Minus className="w-4 h-4"/></button>
+                                    <span className="text-sm font-bold w-4 text-center">{cCount}</span>
+                                    <button onClick={(e) => addCardToDeck(e, item)} disabled={cCount >= 4} className={`p-1.5 rounded-full transition-colors ${cCount >= 4 ? 'text-gray-300' : 'text-gray-700 hover:bg-white hover:text-green-500 shadow-sm'}`}><Icons.Plus className="w-4 h-4"/></button>
+                                </div>
+                            </td>
+                        </tr>
+                    );
+                }
+
+                return (
+                    <div key={`${item.number}-${index}`} className="relative z-10 hover:z-40 bg-white rounded-lg card-shadow overflow-hidden flex flex-col h-full border border-gray-100 text-[10px] md:text-xs">
+                        <div 
+                            className={`relative w-full bg-gray-100 group cursor-pointer ${isLive ? 'aspect-[16/9]' : 'aspect-[3/4]'}`}
+                            onClick={() => item.image && setSelectedItem(item)}
+                        >
+                            {/* Overlay Controls & Badges */}
+                            <div className="absolute bottom-2 right-2 flex flex-col items-end gap-1.5 z-20 pointer-events-none">
+                                {/* Group Badge */}
+                                {item.group && (
+                                    <span className="bg-black/60 text-white px-2 py-0.5 rounded-full backdrop-blur-sm text-[9px] md:text-[10px] truncate max-w-[80px] md:max-w-[100px] shadow-sm">
+                                        {item.group}
+                                    </span>
+                                )}
+                                
+                                {/* Deck Control Overlay */}
+                                <div className="flex items-center gap-1.5 bg-black/70 rounded-full p-1 backdrop-blur-md border border-white/10 shadow-md pointer-events-auto" onClick={e => e.stopPropagation()}>
+                                    {cCount > 0 && (
+                                        <>
+                                            <button onClick={(e) => removeCardFromDeck(e, item)} className="text-white hover:text-red-400 p-1.5 bg-white/10 hover:bg-white/20 rounded-full transition-colors"><Icons.Minus className="w-4 h-4 md:w-5 md:h-5"/></button>
+                                            <span className="text-white text-xs md:text-sm font-bold px-1 min-w-[24px] text-center">{cCount}/4</span>
+                                        </>
+                                    )}
+                                    <button 
+                                        onClick={(e) => addCardToDeck(e, item)} 
+                                        className={`p-1.5 rounded-full transition-colors ${cCount >= 4 ? 'text-gray-500 bg-black/40 cursor-not-allowed' : 'text-white hover:text-green-400 bg-white/10 hover:bg-white/20'}`} 
+                                        disabled={cCount >= 4}
+                                    >
+                                        <Icons.Plus className="w-4 h-4 md:w-5 md:h-5"/>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {item.image ? (
+                                <SafeImage 
+                                    src={getImageUrl(item.image)} 
+                                    alt={item.name} 
+                                    className={`w-full h-full object-contain p-1 transition-transform duration-500 md:group-hover:scale-105 ${isLive ? 'rotate-0 md:rotate-0' : ''}`}
+                                    onError={(e) => { if (!e.target.dataset.triedFallback) { e.target.dataset.triedFallback = "true"; e.target.src = getFallbackUrl(item.image); } else { e.target.src = 'https://placehold.co/400x600?text=No+Image'; } }}
+                                />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100"><Icons.Image className="w-8 h-8 opacity-50" /></div>
+                            )}
+                        </div>
+                        <div className="p-2 flex-1 flex flex-col gap-1 pointer-events-none">
+                            <h3 className="font-bold text-gray-800 leading-tight truncate mb-0.5" title={item.name}>{item.name || 'Untitled'}</h3>
+                            <div className="flex flex-wrap gap-0.5 max-h-6 overflow-hidden mb-1">
+                                {item.ability && item.ability.split(/[,、\s]+/).map((a, i) => { 
+                                    const ta=a.trim();if(!ta)return null;
+                                    const ci=uniqueAbilitiesList.indexOf(ta);
+                                    const fi=ta.split('').reduce((x,y)=>x+y.charCodeAt(0),0);
+                                    return <span key={i} className={`px-1 py-0 rounded border border-black/5 whitespace-nowrap ${getTagColor(ci!==-1?ci:fi).base}`} style={{fontSize:'9px'}}>{ta}</span>; 
+                                })}
+                            </div>
+                            <div className="mt-auto">
+                                {!isLive ? (
+                                    <div className="pt-1 border-t border-dashed border-gray-100 flex justify-between items-end">
+                                        <div className="flex flex-col"><span className="text-[9px] text-gray-400 uppercase leading-none mb-0.5">Cost</span><span className="text-sm font-bold text-gray-700 leading-none">{item.cost}</span></div>
+                                        <div className="flex flex-col items-end"><span className="text-[9px] text-gray-400 uppercase leading-none mb-0.5">Stats (B/M)</span><div className="font-bold text-gray-700 leading-none bg-gray-50 px-1 py-0.5 rounded">{item.baseStats||'-'}<span className="text-gray-300 mx-0.5">/</span><span className="text-blue-600">{item.maxStats||'-'}</span></div></div>
+                                    </div>
+                                ) : (
+                                    <div className="pt-1.5 border-t border-dashed border-gray-100 space-y-1">
+                                        <div className="flex justify-between items-center"><span className="text-[9px] text-gray-400 uppercase">Score</span><span className="text-[10px] font-bold text-pink-600">{item.score||'-'} <span className="text-gray-300">/</span> {item.maxScore||'-'}</span></div>
+                                        <div className="flex justify-between items-center"><span className="text-[9px] text-gray-400 uppercase">Cost</span><span className="text-[10px] font-bold text-gray-700">{item.req||'-'} <span className="text-gray-300">/</span> {item.effReq||'-'}</span></div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                );
             };
 
             return (
@@ -672,13 +844,14 @@
                         
                         {/* Tab Switcher for Mobile */}
                         <div className="px-4 pb-3">
-                            <div className="flex bg-gray-100 p-1 rounded-lg">
-                                <button onClick={() => setActiveTab('member')} className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-colors ${activeTab === 'member' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>メンバー</button>
-                                <button onClick={() => setActiveTab('live')} className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-colors ${activeTab === 'live' ? 'bg-white shadow text-pink-600' : 'text-gray-500'}`}>ライブ</button>
+                            <div className="flex bg-gray-100 p-1 rounded-lg text-xs font-medium">
+                                <button onClick={() => setActiveTab('member')} className={`flex-1 py-1.5 rounded-md transition-colors ${activeTab === 'member' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>メンバー</button>
+                                <button onClick={() => setActiveTab('live')} className={`flex-1 py-1.5 rounded-md transition-colors ${activeTab === 'live' ? 'bg-white shadow text-pink-600' : 'text-gray-500'}`}>ライブ</button>
+                                <button onClick={() => setActiveTab('deck')} className={`flex-1 py-1.5 rounded-md transition-colors ${activeTab === 'deck' ? 'bg-gray-800 shadow text-white' : 'text-gray-500'}`}>デッキ</button>
                             </div>
                         </div>
 
-                        {!isMobileFilterOpen && activeFilters.length > 0 && (
+                        {!isMobileFilterOpen && activeFilters.length > 0 && activeTab !== 'deck' && (
                             <div className="px-4 pb-3 flex gap-2 overflow-x-auto no-scrollbar">
                                 {activeFilters.map(f => <ActiveFilterBadge key={f.id} label={f.label} onRemove={f.fn} isExclude={f.isExclude} />)}
                                 <button onClick={resetAll} className="text-xs text-red-500 underline whitespace-nowrap ml-1">Clear All</button>
@@ -693,7 +866,7 @@
                     <aside className="hidden md:flex w-80 bg-white border-r border-gray-200 p-6 flex-col h-screen sticky top-0 overflow-y-auto flex-shrink-0">
                         <div className="flex items-center justify-between mb-6">
                             <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2"><span className="text-blue-600">Card</span>List</h1>
-                            <button onClick={resetAll} className="text-xs flex items-center gap-1 text-gray-500 hover:text-red-600 border border-gray-200 hover:border-red-200 px-2 py-1 rounded transition-colors"><Icons.Close className="w-3 h-3" /> Reset</button>
+                            {activeTab !== 'deck' && <button onClick={resetAll} className="text-xs flex items-center gap-1 text-gray-500 hover:text-red-600 border border-gray-200 hover:border-red-200 px-2 py-1 rounded transition-colors"><Icons.Close className="w-3 h-3" /> Reset</button>}
                         </div>
                         <FilterPanel {...filterProps} />
                     </aside>
@@ -701,33 +874,40 @@
                     {/* Main Content */}
                     <div className="flex-1 p-4 md:p-6 bg-gray-50 min-h-screen">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
-                            <div className="text-sm text-gray-500"><span>{activeTab === 'member' ? 'Member' : 'Live'} Cards: </span><span className="font-bold text-gray-800">{filteredData.length}</span> / {data.length}</div>
+                            <div className="text-sm text-gray-500">
+                                {activeTab === 'deck' ? (
+                                    <><span>Deck Total: </span><span className="font-bold text-gray-800">{deckStats.total}</span> cards</>
+                                ) : (
+                                    <><span>{activeTab === 'member' ? 'Member' : 'Live'} Cards: </span><span className="font-bold text-gray-800">{displayList.length}</span> / {currentTabData.length}</>
+                                )}
+                            </div>
+                            
                             <div className="flex items-center gap-2 w-full sm:w-auto">
-                                <select value={`${sortConfig.key}-${sortConfig.direction}`} onChange={(e) => { const [k, d] = e.target.value.split('-'); setSortConfig({ key: k, direction: d }); }} className="flex-1 sm:flex-none px-3 py-2 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                    {activeTab === 'member' && (
-                                        <>
-                                            <option value="cost-asc">Cost 昇順</option>
-                                            <option value="cost-desc">Cost 降順</option>
-                                            <option value="baseStats-asc">BaseStats 昇順</option>
-                                            <option value="baseStats-desc">BaseStats 降順</option>
-                                            <option value="maxStats-asc">MaxStats 昇順</option>
-                                            <option value="maxStats-desc">MaxStats 降順</option>
-                                        </>
-                                    )}
-                                    {activeTab === 'live' && (
-                                        <>
-                                            <option value="score-asc">Score 昇順</option>
-                                            <option value="score-desc">Score 降順</option>
-                                            <option value="req-asc">Cost 昇順</option>
-                                            <option value="req-desc">Cost 降順</option>
-                                        </>
-                                    )}
-                                </select>
+                                {activeTab !== 'deck' && (
+                                    <select value={`${sortConfig.key}-${sortConfig.direction}`} onChange={(e) => { const [k, d] = e.target.value.split('-'); setSortConfig({ key: k, direction: d }); }} className="flex-1 sm:flex-none px-3 py-2 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                        {activeTab === 'member' && (
+                                            <>
+                                                <option value="cost-asc">Cost 昇順</option><option value="cost-desc">Cost 降順</option>
+                                                <option value="baseStats-asc">BaseStats 昇順</option><option value="baseStats-desc">BaseStats 降順</option>
+                                                <option value="maxStats-asc">MaxStats 昇順</option><option value="maxStats-desc">MaxStats 降順</option>
+                                            </>
+                                        )}
+                                        {activeTab === 'live' && (
+                                            <>
+                                                <option value="score-asc">Score 昇順</option><option value="score-desc">Score 降順</option>
+                                                <option value="req-asc">Cost 昇順</option><option value="req-desc">Cost 降順</option>
+                                            </>
+                                        )}
+                                    </select>
+                                )}
                                 <div className="flex bg-white rounded border border-gray-300 p-0.5">
-                                    <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded ${viewMode === 'grid' ? 'bg-gray-100 text-blue-600' : 'text-gray-400'}`}><Icons.Grid /></button>
-                                    <button onClick={() => setViewMode('list')} className={`p-1.5 rounded ${viewMode === 'list' ? 'bg-gray-100 text-blue-600' : 'text-gray-400'}`}><Icons.List /></button>
+                                    {activeTab === 'deck' && (
+                                        <button onClick={() => setViewMode('compact')} className={`p-1.5 rounded transition-all ${actualViewMode === 'compact' ? 'bg-gray-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`} title="Compact View"><Icons.Maximize /></button>
+                                    )}
+                                    <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded transition-all ${actualViewMode === 'grid' ? 'bg-gray-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`} title="Grid View"><Icons.Grid /></button>
+                                    <button onClick={() => setViewMode('list')} className={`p-1.5 rounded transition-all ${actualViewMode === 'list' ? 'bg-gray-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`} title="List View"><Icons.List /></button>
                                 </div>
-                                <button onClick={() => window.location.reload()} className="hidden md:flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded hover:bg-gray-50 transition text-xs"><Icons.Refresh className="w-3 h-3" /> Sync</button>
+                                <button onClick={() => window.location.reload()} className="hidden md:flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded hover:bg-gray-50 transition text-sm"><Icons.Refresh className="w-4 h-4" /> Sync</button>
                             </div>
                         </div>
 
@@ -735,101 +915,202 @@
                         {loading && <div className="flex flex-col items-center justify-center h-64"><div className="loader mb-4"></div><p className="text-gray-500">Loading...</p></div>}
 
                         {!loading && !error && (
-                            viewMode === 'grid' ? (
-                                <div className={`grid gap-2 md:gap-4 ${activeTab === 'member' ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'}`}>
-                                    {sortedData.map((item, index) => (
-                                        <div key={index} className="bg-white rounded-lg card-shadow overflow-hidden flex flex-col h-full border border-gray-100 text-[10px] md:text-xs">
-                                            <div 
-                                                className={`relative w-full bg-gray-100 group cursor-pointer ${activeTab==='live'?'aspect-[16/9]':'aspect-[3/4]'}`}
-                                                onClick={() => item.image && setSelectedItem(item)}
-                                            >
-                                                {item.group && (
-                                                    <span className="absolute bottom-1 right-1 bg-black/60 text-white px-1.5 py-0.5 rounded-full backdrop-blur-sm z-10 truncate max-w-[70px] md:max-w-[90px]">
-                                                        {item.group}
-                                                    </span>
-                                                )}
-                                                {item.image ? (
-                                                    <SafeImage 
-                                                        src={getImageUrl(item.image)} 
-                                                        alt={item.name} 
-                                                        className={`w-full h-full object-contain p-1 transition-transform duration-500 md:group-hover:scale-105 ${activeTab === 'live' ? 'rotate-0 md:rotate-0' : ''}`}
-                                                        onError={(e) => { if (!e.target.dataset.triedFallback) { e.target.dataset.triedFallback = "true"; e.target.src = getFallbackUrl(item.image); } else { e.target.src = 'https://placehold.co/400x600?text=No+Image'; } }}
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100"><Icons.Image className="w-8 h-8 opacity-50" /></div>
-                                                )}
-                                            </div>
-                                            <div className="p-2 flex-1 flex flex-col gap-1">
-                                                <h3 className="font-bold text-gray-800 leading-tight truncate mb-0.5" title={item.name}>{item.name || 'Untitled'}</h3>
-                                                <div className="flex flex-wrap gap-0.5 max-h-6 overflow-hidden mb-1">
-                                                    {item.ability && item.ability.split(/[,、\s]+/).map((a, i) => { const ta=a.trim();if(!ta)return null;const ci=uniqueAbilities.indexOf(ta);const fi=ta.split('').reduce((x,y)=>x+y.charCodeAt(0),0);return <span key={i} className={`px-1 py-0 rounded border border-black/5 whitespace-nowrap ${getTagColor(ci!==-1?ci:fi).base}`} style={{fontSize:'9px'}}>{ta}</span>; })}
-                                                </div>
-                                                <div className="mt-auto">
-                                                    {activeTab === 'member' ? (
-                                                        <div className="pt-1 border-t border-dashed border-gray-100 flex justify-between items-end">
-                                                            <div className="flex flex-col"><span className="text-[9px] text-gray-400 uppercase leading-none mb-0.5">Cost</span><span className="text-sm font-bold text-gray-700 leading-none">{item.cost}</span></div>
-                                                            <div className="flex flex-col items-end"><span className="text-[9px] text-gray-400 uppercase leading-none mb-0.5">Stats (B/M)</span><div className="font-bold text-gray-700 leading-none bg-gray-50 px-1 py-0.5 rounded">{item.baseStats||'-'}<span className="text-gray-300 mx-0.5">/</span><span className="text-blue-600">{item.maxStats||'-'}</span></div></div>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="pt-1.5 border-t border-dashed border-gray-100 space-y-1">
-                                                            <div className="flex justify-between items-center"><span className="text-[9px] text-gray-400 uppercase">Score</span><span className="text-[10px] font-bold text-pink-600">{item.score||'-'} <span className="text-gray-300">/</span> {item.maxScore||'-'}</span></div>
-                                                            <div className="flex justify-between items-center"><span className="text-[9px] text-gray-400 uppercase">Cost</span><span className="text-[10px] font-bold text-gray-700">{item.req||'-'} <span className="text-gray-300">/</span> {item.effReq||'-'}</span></div>
-                                                        </div>
-                                                    )}
-                                                </div>
+                            <>
+                                {/* Deck Specific UI: Stats Panels */}
+                                {activeTab === 'deck' && displayList.length > 0 && (
+                                    <div className="flex flex-wrap gap-4 mb-6">
+                                        <div className="flex-1 min-w-[250px] bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
+                                            <div className="text-xs font-bold text-gray-500 mb-3 border-b pb-1">メンバーカード コスト分布</div>
+                                            <div className="flex flex-wrap gap-3">
+                                                {Object.keys(deckStats.costs).length === 0 ? <span className="text-sm text-gray-400">-</span> : 
+                                                    Object.keys(deckStats.costs).sort((a,b)=>Number(a)-Number(b)).map(cost => (
+                                                    <div key={cost} className="flex flex-col items-center">
+                                                        <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-xs font-bold mb-1 shadow-sm">{cost}</span>
+                                                        <span className="text-sm font-bold text-gray-700">{deckStats.costs[cost]}</span>
+                                                    </div>
+                                                ))}
                                             </div>
                                         </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200 overflow-x-auto">
-                                    <table className="min-w-full divide-y divide-gray-200 text-xs md:text-sm">
-                                        <thead className="bg-gray-50">
-                                            <tr>
-                                                <th className="px-3 py-2 text-left font-medium text-gray-500">Img</th>
-                                                <th className="px-3 py-2 text-left font-medium text-gray-500">No.</th>
-                                                <th className="px-3 py-2 text-left font-medium text-gray-500">Name</th>
-                                                <th className="px-3 py-2 text-left font-medium text-gray-500">Group</th>
-                                                <th className="px-3 py-2 text-left font-medium text-gray-500 hidden sm:table-cell">Ability</th>
-                                                {activeTab === 'member' ? ( <><th className="px-3 py-2 text-left font-medium text-gray-500">Cost</th><th className="px-3 py-2 text-left font-medium text-gray-500">Stats</th></> ) : ( <><th className="px-3 py-2 text-left font-medium text-gray-500">Score</th><th className="px-3 py-2 text-left font-medium text-gray-500">Cost</th></> )}
-                                            </tr>
-                                        </thead>
-                                        <tbody className="bg-white divide-y divide-gray-200">
-                                            {sortedData.map((item, index) => (
-                                                <tr key={index} className="hover:bg-gray-50">
-                                                    <td className="px-3 py-2"><div className="h-8 w-8 cursor-pointer" onClick={() => item.image && setSelectedItem(item)}>{item.image ? <SafeImage src={getImageUrl(item.image)} className="h-8 w-8 rounded object-cover" /> : <div className="h-8 w-8 rounded bg-gray-200"></div>}</div></td>
-                                                    <td className="px-3 py-2 text-gray-500">{item.number}</td>
-                                                    <td className="px-3 py-2 font-medium">{item.name}</td>
-                                                    <td className="px-3 py-2"><span className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 whitespace-nowrap">{item.group}</span></td>
-                                                    <td className="px-3 py-2 hidden sm:table-cell"><div className="flex flex-wrap gap-1 max-w-xs">{item.ability && item.ability.split(/[,、\s]+/).map((a,i) => { const ta=a.trim();if(!ta)return null;const ci=uniqueAbilities.indexOf(ta);const fi=ta.split('').reduce((x,y)=>x+y.charCodeAt(0),0);return <span key={i} className={`px-1 rounded ${getTagColor(ci!==-1?ci:fi).base}`}>{ta}</span>; })}</div></td>
-                                                    {activeTab === 'member' ? ( <><td className="px-3 py-2">{item.cost}</td><td className="px-3 py-2 whitespace-nowrap">{item.baseStats}/{item.maxStats}</td></> ) : ( <><td className="px-3 py-2 font-bold text-pink-600">{item.score}/{item.maxScore}</td><td className="px-3 py-2">{item.req}/{item.effReq}</td></> )}
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )
-                        )}
-                        {!loading && filteredData.length === 0 && !error && (
-                            <div className="flex flex-col items-center justify-center h-48 text-gray-400 text-sm"><Icons.Search className="w-8 h-8 mb-2 opacity-30" /><p>No cards found.</p></div>
+                                        <div className="flex-1 min-w-[250px] bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
+                                            <div className="text-xs font-bold text-gray-500 mb-3 border-b pb-1">メンバーカード ブレードハート分布</div>
+                                            <div className="flex flex-wrap gap-3">
+                                                {Object.keys(BH_SORT_ORDER).filter(k => k !== 'None').map(color => {
+                                                    const count = deckStats.bhs[color] || 0;
+                                                    if (count === 0) return null;
+                                                    const style = BH_STYLES[color] || BH_STYLES['None'];
+                                                    return (
+                                                        <div key={color} className="flex flex-col items-center">
+                                                            <span className={`w-6 h-6 rounded-full flex items-center justify-center shadow-sm ${style.bg}`}></span>
+                                                            <span className="text-sm font-bold text-gray-700 mt-1">{count}</span>
+                                                        </div>
+                                                    );
+                                                })}
+                                                {deckStats.bhs['None'] > 0 && (
+                                                    <div className="flex flex-col items-center">
+                                                        <span className="w-6 h-6 rounded-full flex items-center justify-center shadow-sm bg-gray-300"></span>
+                                                        <span className="text-sm font-bold text-gray-700 mt-1">{deckStats.bhs['None']}</span>
+                                                    </div>
+                                                )}
+                                                {Object.keys(deckStats.bhs).every(k => deckStats.bhs[k] === 0) && <span className="text-sm text-gray-400">-</span>}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Card Display */}
+                                {actualViewMode === 'compact' && activeTab === 'deck' ? (
+                                    <div className="space-y-6">
+                                        {/* Member Section */}
+                                        {sortedDeckCards.member.length > 0 && (
+                                            <div>
+                                                <h3 className="text-lg font-bold text-gray-700 border-b-2 border-blue-200 pb-1 mb-3">メンバーカード</h3>
+                                                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-1 px-1 pb-2">
+                                                    {sortedDeckCards.member.map((item, index) => renderCompactItem(item, index))}
+                                                </div>
+                                            </div>
+                                        )}
+                                        {/* Live Section */}
+                                        {sortedDeckCards.live.length > 0 && (
+                                            <div>
+                                                <h3 className="text-lg font-bold text-gray-700 border-b-2 border-pink-200 pb-1 mb-3 mt-4">ライブカード</h3>
+                                                <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-1 px-1 pb-2">
+                                                    {sortedDeckCards.live.map((item, index) => renderCompactItem(item, index))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : actualViewMode === 'grid' ? (
+                                    activeTab === 'deck' ? (
+                                        <div className="space-y-8">
+                                            {/* Member Section */}
+                                            {sortedDeckCards.member.length > 0 && (
+                                                <div>
+                                                    <h3 className="text-xl font-bold text-gray-800 border-b-2 border-blue-200 pb-2 mb-4">メンバーカード</h3>
+                                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-2 gap-y-6 md:gap-x-4 md:gap-y-8 px-1 pb-4">
+                                                        {sortedDeckCards.member.map((item, index) => renderCardItem(item, index, true))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {/* Live Section */}
+                                            {sortedDeckCards.live.length > 0 && (
+                                                <div>
+                                                    <h3 className="text-xl font-bold text-gray-800 border-b-2 border-pink-200 pb-2 mb-4 mt-6">ライブカード</h3>
+                                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-2 gap-y-6 md:gap-x-4 md:gap-y-8 px-1 pb-4">
+                                                        {sortedDeckCards.live.map((item, index) => renderCardItem(item, index, true))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className={`grid gap-2 md:gap-4 ${activeTab === 'member' ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'}`}>
+                                            {displayList.map((item, index) => renderCardItem(item, index, true))}
+                                        </div>
+                                    )
+                                ) : (
+                                    activeTab === 'deck' ? (
+                                        <div className="space-y-6">
+                                            {/* Member Table */}
+                                            {sortedDeckCards.member.length > 0 && (
+                                                <div>
+                                                    <h3 className="text-lg font-bold text-gray-700 border-b-2 border-blue-200 pb-1 mb-2">メンバーカード</h3>
+                                                    <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200 overflow-x-auto">
+                                                        <table className="min-w-full divide-y divide-gray-200 text-xs md:text-sm">
+                                                            <thead className="bg-gray-50">
+                                                                <tr>
+                                                                    <th className="px-3 py-2 text-left font-medium text-gray-500">Img</th>
+                                                                    <th className="px-3 py-2 text-left font-medium text-gray-500">No.</th>
+                                                                    <th className="px-3 py-2 text-left font-medium text-gray-500">Name</th>
+                                                                    <th className="px-3 py-2 text-left font-medium text-gray-500">Group</th>
+                                                                    <th className="px-3 py-2 text-left font-medium text-gray-500 hidden sm:table-cell">Ability</th>
+                                                                    <th className="px-3 py-2 text-left font-medium text-gray-500">Cost</th>
+                                                                    <th className="px-3 py-2 text-left font-medium text-gray-500">Stats</th>
+                                                                    <th className="px-3 py-2 text-right font-medium text-gray-500">Deck</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody className="bg-white divide-y divide-gray-200">
+                                                                {sortedDeckCards.member.map((item, index) => renderCardItem(item, index, false))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {/* Live Table */}
+                                            {sortedDeckCards.live.length > 0 && (
+                                                <div>
+                                                    <h3 className="text-lg font-bold text-gray-700 border-b-2 border-pink-200 pb-1 mb-2 mt-4">ライブカード</h3>
+                                                    <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200 overflow-x-auto">
+                                                        <table className="min-w-full divide-y divide-gray-200 text-xs md:text-sm">
+                                                            <thead className="bg-gray-50">
+                                                                <tr>
+                                                                    <th className="px-3 py-2 text-left font-medium text-gray-500">Img</th>
+                                                                    <th className="px-3 py-2 text-left font-medium text-gray-500">No.</th>
+                                                                    <th className="px-3 py-2 text-left font-medium text-gray-500">Name</th>
+                                                                    <th className="px-3 py-2 text-left font-medium text-gray-500">Group</th>
+                                                                    <th className="px-3 py-2 text-left font-medium text-gray-500 hidden sm:table-cell">Ability</th>
+                                                                    <th className="px-3 py-2 text-left font-medium text-gray-500">Score</th>
+                                                                    <th className="px-3 py-2 text-left font-medium text-gray-500">Cost</th>
+                                                                    <th className="px-3 py-2 text-right font-medium text-gray-500">Deck</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody className="bg-white divide-y divide-gray-200">
+                                                                {sortedDeckCards.live.map((item, index) => renderCardItem(item, index, false))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200 overflow-x-auto">
+                                            <table className="min-w-full divide-y divide-gray-200 text-xs md:text-sm">
+                                                <thead className="bg-gray-50">
+                                                    <tr>
+                                                        <th className="px-3 py-2 text-left font-medium text-gray-500">Img</th>
+                                                        <th className="px-3 py-2 text-left font-medium text-gray-500">No.</th>
+                                                        <th className="px-3 py-2 text-left font-medium text-gray-500">Name</th>
+                                                        <th className="px-3 py-2 text-left font-medium text-gray-500">Group</th>
+                                                        <th className="px-3 py-2 text-left font-medium text-gray-500 hidden sm:table-cell">Ability</th>
+                                                        {activeTab === 'member' ? ( <><th className="px-3 py-2 text-left font-medium text-gray-500">Cost</th><th className="px-3 py-2 text-left font-medium text-gray-500">Stats</th></> ) : ( <><th className="px-3 py-2 text-left font-medium text-gray-500">Score</th><th className="px-3 py-2 text-left font-medium text-gray-500">Cost</th></> )}
+                                                        <th className="px-3 py-2 text-right font-medium text-gray-500">Deck</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="bg-white divide-y divide-gray-200">
+                                                    {displayList.map((item, index) => renderCardItem(item, index, false))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )
+                                )}
+                                
+                                {displayList.length === 0 && (
+                                    <div className="flex flex-col items-center justify-center h-48 text-gray-400 text-sm">
+                                        <Icons.Search className="w-8 h-8 mb-2 opacity-30" />
+                                        <p>{activeTab === 'deck' ? 'デッキにカードがありません。' : 'No cards found.'}</p>
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
 
                     {/* Image Modal */}
                     {selectedItem && (() => {
-                        const currentIndex = sortedData.findIndex(item => item === selectedItem);
+                        const sourceList = activeTab === 'deck' ? displayList : sortedData;
+                        const currentIndex = sourceList.findIndex(item => item === selectedItem);
                         const hasPrev = currentIndex > 0;
-                        const hasNext = currentIndex >= 0 && currentIndex < sortedData.length - 1;
+                        const hasNext = currentIndex >= 0 && currentIndex < sourceList.length - 1;
 
                         const handlePrev = (e) => {
                             e.stopPropagation();
-                            if (hasPrev) setSelectedItem(sortedData[currentIndex - 1]);
+                            if (hasPrev) setSelectedItem(sourceList[currentIndex - 1]);
                         };
 
                         const handleNext = (e) => {
                             e.stopPropagation();
-                            if (hasNext) setSelectedItem(sortedData[currentIndex + 1]);
+                            if (hasNext) setSelectedItem(sourceList[currentIndex + 1]);
                         };
+                        
+                        const isLiveModal = selectedItem._type === 'live';
+                        const mDeckCount = getDeckCount(selectedItem);
 
                         return (
                             <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 p-4" onClick={() => setSelectedItem(null)}>
@@ -837,28 +1118,28 @@
                                     <Icons.Close className="w-6 h-6" />
                                 </button>
                                 
-                                {/* Prev Button */}
                                 {hasPrev && (
-                                    <button 
-                                        className="fixed left-2 md:left-8 top-1/2 -translate-y-1/2 text-white/50 hover:text-white bg-black/50 hover:bg-black/80 rounded-full p-2 md:p-3 z-50 transition-all" 
-                                        onClick={handlePrev}
-                                    >
+                                    <button className="fixed left-2 md:left-8 top-1/2 -translate-y-1/2 text-white/50 hover:text-white bg-black/50 hover:bg-black/80 rounded-full p-2 md:p-3 z-50 transition-all" onClick={handlePrev}>
                                         <Icons.ChevronLeft className="w-8 h-8 md:w-10 md:h-10" />
                                     </button>
                                 )}
 
-                                {/* Next Button */}
                                 {hasNext && (
-                                    <button 
-                                        className="fixed right-2 md:right-8 top-1/2 -translate-y-1/2 text-white/50 hover:text-white bg-black/50 hover:bg-black/80 rounded-full p-2 md:p-3 z-50 transition-all" 
-                                        onClick={handleNext}
-                                    >
+                                    <button className="fixed right-2 md:right-8 top-1/2 -translate-y-1/2 text-white/50 hover:text-white bg-black/50 hover:bg-black/80 rounded-full p-2 md:p-3 z-50 transition-all" onClick={handleNext}>
                                         <Icons.ChevronRight className="w-8 h-8 md:w-10 md:h-10" />
                                     </button>
                                 )}
 
                                 <div className="relative w-full max-w-lg flex flex-col items-center pointer-events-none">
-                                    <div className="pointer-events-auto flex flex-col items-center w-full" onClick={e => e.stopPropagation()}>
+                                    <div className="pointer-events-auto flex flex-col items-center w-full relative" onClick={e => e.stopPropagation()}>
+                                        
+                                        {/* Modal Deck Control */}
+                                        <div className="absolute top-2 right-2 flex items-center gap-2 z-20 bg-black/80 rounded-full p-2 backdrop-blur-md border border-white/20">
+                                            <button onClick={(e) => removeCardFromDeck(e, selectedItem)} disabled={mDeckCount === 0} className={`p-2 rounded-full transition-colors ${mDeckCount === 0 ? 'text-gray-500' : 'text-white hover:text-red-400 bg-white/10 hover:bg-white/20'}`}><Icons.Minus className="w-5 h-5 md:w-6 md:h-6"/></button>
+                                            <span className="text-white text-base font-bold min-w-[32px] text-center">{mDeckCount}/4</span>
+                                            <button onClick={(e) => addCardToDeck(e, selectedItem)} disabled={mDeckCount >= 4} className={`p-2 rounded-full transition-colors ${mDeckCount >= 4 ? 'text-gray-500 bg-black/40 cursor-not-allowed' : 'text-white hover:text-green-400 bg-white/10 hover:bg-white/20'}`}><Icons.Plus className="w-5 h-5 md:w-6 md:h-6"/></button>
+                                        </div>
+
                                         <SafeImage 
                                             src={getImageUrl(selectedItem.image)} 
                                             alt={selectedItem.name} 
@@ -867,7 +1148,7 @@
                                         />
                                         <div className="text-white text-center w-full">
                                             <h3 className="text-xl font-bold mb-2">{selectedItem.name}</h3>
-                                            {activeTab === 'member' ? (
+                                            {!isLiveModal ? (
                                                 <div className="flex justify-center items-center gap-6 text-sm bg-white/10 px-6 py-3 rounded-xl backdrop-blur-sm mx-auto inline-flex">
                                                     <div className="text-center"><span className="block text-white/50 text-[10px] uppercase mb-0.5">Cost</span><span className="text-xl font-bold">{selectedItem.cost}</span></div>
                                                     <div className="w-px h-8 bg-white/20"></div>
