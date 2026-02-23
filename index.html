@@ -1,47 +1,64 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Card Game List Viewer</title>
-    
+
     <!-- React & ReactDOM -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
+
     <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- PapaParse for CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    
+
     <style>
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #aaa; }
-        
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
+        }
+
         .card-shadow {
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
             transition: all 0.2s ease;
         }
+
         .card-shadow:active {
             transform: scale(0.98);
         }
+
         @media (min-width: 768px) {
             .card-shadow:hover {
                 transform: translateY(-2px);
                 box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             }
+
             .card-shadow:active {
                 transform: none;
             }
         }
-        
+
         .loader {
             border: 3px solid #f3f3f3;
             border-top: 3px solid #3b82f6;
@@ -50,12 +67,28 @@
             height: 30px;
             animation: spin 1s linear infinite;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
     </style>
 </head>
+
 <body class="bg-gray-100 text-gray-800 font-sans">
     <div id="root"></div>
 
@@ -67,11 +100,11 @@
         const GID_MEMBER = '0';
         const GID_LIVE = '1118651569';
 
-        const COST_OPTIONS = [2, 4, 5, 7, 8, 9, 10, 11, 13, 15, 17, 20, 22].sort((a,b) => a-b);
+        const COST_OPTIONS = [2, 4, 5, 7, 8, 9, 10, 11, 13, 15, 17, 20, 22].sort((a, b) => a - b);
         const BH_OPTIONS_MEMBER = ['Pink', 'Red', 'Yellow', 'Green', 'Blue', 'Purple', 'None'];
         const BH_OPTIONS_LIVE = ['Pink', 'Red', 'Yellow', 'Green', 'Blue', 'Purple', 'ALL', 'Score', 'Draw'];
 
-        const STATS_OPTIONS = Array.from({length: 20}, (_, i) => i + 1);
+        const STATS_OPTIONS = Array.from({ length: 20 }, (_, i) => i + 1);
         const MAX_STATS_OPTIONS = [...STATS_OPTIONS, '＋'];
         const GROUP_OPTIONS = ['μ\'s', 'A-RISE', 'Aqours', 'SaintSnow', '虹ヶ咲', 'Liella!', 'SunnyPassion', '蓮ノ空'];
 
@@ -85,27 +118,27 @@
         ];
 
         const GROUP_STYLES = {
-            "μ's":          { base: "bg-pink-400 text-white hover:bg-pink-500", active: "bg-pink-600 ring-2 ring-pink-600 ring-offset-1" },
-            "A-RISE":       { base: "bg-blue-500 text-white hover:bg-blue-600", active: "bg-blue-700 ring-2 ring-blue-700 ring-offset-1" },
-            "Aqours":       { base: "bg-sky-400 text-white hover:bg-sky-500", active: "bg-sky-600 ring-2 ring-sky-600 ring-offset-1" },
-            "SaintSnow":    { base: "bg-gray-400 text-white hover:bg-gray-500", active: "bg-gray-600 ring-2 ring-gray-600 ring-offset-1" },
-            "虹ヶ咲":        { base: "bg-yellow-300 text-black hover:bg-yellow-400", active: "bg-yellow-500 ring-2 ring-yellow-500 ring-offset-1" },
-            "Liella!":      { base: "bg-purple-400 text-white hover:bg-purple-500", active: "bg-purple-600 ring-2 ring-purple-600 ring-offset-1" },
+            "μ's": { base: "bg-pink-400 text-white hover:bg-pink-500", active: "bg-pink-600 ring-2 ring-pink-600 ring-offset-1" },
+            "A-RISE": { base: "bg-blue-500 text-white hover:bg-blue-600", active: "bg-blue-700 ring-2 ring-blue-700 ring-offset-1" },
+            "Aqours": { base: "bg-sky-400 text-white hover:bg-sky-500", active: "bg-sky-600 ring-2 ring-sky-600 ring-offset-1" },
+            "SaintSnow": { base: "bg-gray-400 text-white hover:bg-gray-500", active: "bg-gray-600 ring-2 ring-gray-600 ring-offset-1" },
+            "虹ヶ咲": { base: "bg-yellow-300 text-black hover:bg-yellow-400", active: "bg-yellow-500 ring-2 ring-yellow-500 ring-offset-1" },
+            "Liella!": { base: "bg-purple-400 text-white hover:bg-purple-500", active: "bg-purple-600 ring-2 ring-purple-600 ring-offset-1" },
             "SunnyPassion": { base: "bg-orange-400 text-white hover:bg-orange-500", active: "bg-orange-600 ring-2 ring-orange-600 ring-offset-1" },
-            "蓮ノ空":        { base: "bg-rose-300 text-gray-800 hover:bg-rose-400", active: "bg-rose-500 text-white ring-2 ring-rose-500 ring-offset-1" },
+            "蓮ノ空": { base: "bg-rose-300 text-gray-800 hover:bg-rose-400", active: "bg-rose-500 text-white ring-2 ring-rose-500 ring-offset-1" },
         };
 
         const BH_STYLES = {
-            'Pink':   { base: 'bg-pink-400 text-white', active: 'bg-pink-700 text-white ring-2 ring-pink-700 ring-offset-1' },
-            'Red':    { base: 'bg-red-400 text-white', active: 'bg-red-700 text-white ring-2 ring-red-700 ring-offset-1' },
+            'Pink': { base: 'bg-pink-400 text-white', active: 'bg-pink-700 text-white ring-2 ring-pink-700 ring-offset-1' },
+            'Red': { base: 'bg-red-400 text-white', active: 'bg-red-700 text-white ring-2 ring-red-700 ring-offset-1' },
             'Yellow': { base: 'bg-yellow-300 text-black', active: 'bg-yellow-600 text-white ring-2 ring-yellow-600 ring-offset-1' },
-            'Green':  { base: 'bg-green-400 text-white', active: 'bg-green-700 text-white ring-2 ring-green-700 ring-offset-1' },
-            'Blue':   { base: 'bg-blue-400 text-white', active: 'bg-blue-700 text-white ring-2 ring-blue-700 ring-offset-1' },
+            'Green': { base: 'bg-green-400 text-white', active: 'bg-green-700 text-white ring-2 ring-green-700 ring-offset-1' },
+            'Blue': { base: 'bg-blue-400 text-white', active: 'bg-blue-700 text-white ring-2 ring-blue-700 ring-offset-1' },
             'Purple': { base: 'bg-purple-400 text-white', active: 'bg-purple-700 text-white ring-2 ring-purple-700 ring-offset-1' },
-            'None':   { base: 'bg-gray-300 text-gray-700', active: 'bg-gray-600 text-white ring-2 ring-gray-600 ring-offset-1' },
-            'ALL':    { base: 'bg-gray-700 text-white', active: 'bg-gray-900 text-white ring-2 ring-gray-900 ring-offset-1' },
-            'Score':  { base: 'bg-cyan-500 text-white', active: 'bg-cyan-700 text-white ring-2 ring-cyan-700 ring-offset-1' },
-            'Draw':   { base: 'bg-orange-500 text-white', active: 'bg-orange-700 text-white ring-2 ring-orange-700 ring-offset-1' }
+            'None': { base: 'bg-gray-300 text-gray-700', active: 'bg-gray-600 text-white ring-2 ring-gray-600 ring-offset-1' },
+            'ALL': { base: 'bg-gray-700 text-white', active: 'bg-gray-900 text-white ring-2 ring-gray-900 ring-offset-1' },
+            'Score': { base: 'bg-cyan-500 text-white', active: 'bg-cyan-700 text-white ring-2 ring-cyan-700 ring-offset-1' },
+            'Draw': { base: 'bg-orange-500 text-white', active: 'bg-orange-700 text-white ring-2 ring-orange-700 ring-offset-1' }
         };
 
         const TAG_COLORS = [
@@ -197,11 +230,11 @@
 
         const SafeImage = ({ src, alt, className, onError, onClick }) => {
             return (
-                <img 
-                    src={src} 
-                    alt={alt} 
-                    loading="lazy" 
-                    className={className} 
+                <img
+                    src={src}
+                    alt={alt}
+                    loading="lazy"
+                    className={className}
                     onError={onError}
                     onClick={onClick}
                 />
@@ -227,7 +260,7 @@
                 const normalized = {};
                 Object.keys(map).forEach(key => {
                     const possibleHeaders = map[key];
-                    const foundHeader = possibleHeaders.find(ph => 
+                    const foundHeader = possibleHeaders.find(ph =>
                         Object.keys(row).some(rk => rk.toLowerCase() === ph.toLowerCase())
                     );
                     if (foundHeader) {
@@ -259,7 +292,7 @@
                 </div>
             </div>
         );
-        
+
         const DropdownRangeFilter = ({ label, minVal, maxVal, options, onMinChange, onMaxChange, onReset }) => (
             <div className="mb-4">
                 <FilterHeader label={label} onReset={onReset} isActive={minVal !== '' || maxVal !== ''} />
@@ -290,7 +323,7 @@
                             let className = style.base;
                             if (isIncluded) className = style.active;
                             if (isExcluded) className = "bg-gray-800 text-gray-300 ring-2 ring-offset-2 ring-gray-800 line-through opacity-80";
-                            
+
                             return (
                                 <button key={opt} onClick={() => onChange(opt)} className={`px-3 py-1 rounded-full text-xs font-bold transition-all border border-transparent shadow-sm ${className}`}>{opt}</button>
                             );
@@ -325,7 +358,7 @@
         };
 
         // --- Filter Panel ---
-        const FilterPanel = ({ 
+        const FilterPanel = ({
             isMobile, activeTab, setActiveTab,
             filterName, setFilterName,
             filterGroups, toggleGroup, setFilterGroups,
@@ -348,6 +381,7 @@
                         <div className="flex bg-gray-100 p-1 rounded-lg mb-4">
                             <button onClick={() => setActiveTab('member')} className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'member' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>メンバー</button>
                             <button onClick={() => setActiveTab('live')} className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'live' ? 'bg-white shadow text-pink-600' : 'text-gray-500'}`}>ライブ</button>
+                            <button onClick={() => setActiveTab('deck')} className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'deck' ? 'bg-white shadow text-green-600' : 'text-gray-500'}`}>デッキ</button>
                         </div>
                     )}
 
@@ -363,7 +397,7 @@
                     {uniqueContains.length > 0 && <TagFilter label="Contain" options={uniqueContains} filterState={filterContains} onChange={toggleContain} onReset={() => setFilterContains(initial3State())} />}
 
                     <ButtonGroupFilter label="Groups" options={GROUP_OPTIONS} filterState={filterGroups} onChange={toggleGroup} styles={GROUP_STYLES} defaultStyle={GROUP_STYLES["μ's"]} onReset={() => setFilterGroups(initial3State())} />
-                    
+
                     {uniqueAbilities.length > 0 && <TagFilter label="Ability" options={uniqueAbilities} filterState={filterAbilities} onChange={toggleAbility} onReset={() => setFilterAbilities(initial3State())} />}
 
                     {activeTab === 'member' && (
@@ -383,28 +417,28 @@
                                     })}
                                 </div>
                             </div>
-                            <DropdownRangeFilter label="Blade" minVal={numericFilters.blade?.min||''} maxVal={numericFilters.blade?.max||''} options={[0,1,2,3,4,5,6,7]} onMinChange={(v) => updateNumericFilter('blade', 'min', v)} onMaxChange={(v) => updateNumericFilter('blade', 'max', v)} onReset={() => setNumericFilters(p => ({...p, blade: {min:'',max:''}}))} />
+                            <DropdownRangeFilter label="Blade" minVal={numericFilters.blade?.min || ''} maxVal={numericFilters.blade?.max || ''} options={[0, 1, 2, 3, 4, 5, 6, 7]} onMinChange={(v) => updateNumericFilter('blade', 'min', v)} onMaxChange={(v) => updateNumericFilter('blade', 'max', v)} onReset={() => setNumericFilters(p => ({ ...p, blade: { min: '', max: '' } }))} />
                             <ButtonGroupFilter label="Blade Heart" options={bladeHeartOptions} filterState={filterBladeHeart} onChange={toggleBladeHeart} styles={BH_STYLES} defaultStyle={BH_STYLES['None']} onReset={() => setFilterBladeHeart(initial3State())} />
-                            <DropdownRangeFilter label="Base Stats" minVal={filterBaseStats.min} maxVal={filterBaseStats.max} options={STATS_OPTIONS} onMinChange={(v) => setFilterBaseStats(p=>({...p,min:v}))} onMaxChange={(v) => setFilterBaseStats(p=>({...p,max:v}))} onReset={() => setFilterBaseStats({min:'',max:''})} />
-                            <DropdownRangeFilter label="Max Stats" minVal={filterMaxStats.min} maxVal={filterMaxStats.max} options={MAX_STATS_OPTIONS} onMinChange={(v) => setFilterMaxStats(p=>({...p,min:v}))} onMaxChange={(v) => setFilterMaxStats(p=>({...p,max:v}))} onReset={() => setFilterMaxStats({min:'',max:''})} />
+                            <DropdownRangeFilter label="Base Stats" minVal={filterBaseStats.min} maxVal={filterBaseStats.max} options={STATS_OPTIONS} onMinChange={(v) => setFilterBaseStats(p => ({ ...p, min: v }))} onMaxChange={(v) => setFilterBaseStats(p => ({ ...p, max: v }))} onReset={() => setFilterBaseStats({ min: '', max: '' })} />
+                            <DropdownRangeFilter label="Max Stats" minVal={filterMaxStats.min} maxVal={filterMaxStats.max} options={MAX_STATS_OPTIONS} onMinChange={(v) => setFilterMaxStats(p => ({ ...p, min: v }))} onMaxChange={(v) => setFilterMaxStats(p => ({ ...p, max: v }))} onReset={() => setFilterMaxStats({ min: '', max: '' })} />
                         </>
                     )}
 
                     {activeTab === 'live' && (
                         <>
                             <ButtonGroupFilter label="Blade Heart" options={bladeHeartOptions} filterState={filterBladeHeart} onChange={toggleBladeHeart} styles={BH_STYLES} defaultStyle={BH_STYLES['None']} onReset={() => setFilterBladeHeart(initial3State())} />
-                            
+
                             {uniqueKeywords.length > 0 && <TagFilter label="Keyword" options={uniqueKeywords} filterState={filterKeywords} onChange={toggleKeyword} onReset={() => setFilterKeywords(initial3State())} />}
 
-                            <RangeFilter label="Score" minVal={numericFilters.score?.min||''} maxVal={numericFilters.score?.max||''} onMinChange={(v) => updateNumericFilter('score', 'min', v)} onMaxChange={(v) => updateNumericFilter('score', 'max', v)} onReset={() => setNumericFilters(p => ({...p, score: {min:'',max:''}}))} />
-                            <RangeFilter label="Max Score" minVal={numericFilters.maxScore?.min||''} maxVal={numericFilters.maxScore?.max||''} onMinChange={(v) => updateNumericFilter('maxScore', 'min', v)} onMaxChange={(v) => updateNumericFilter('maxScore', 'max', v)} onReset={() => setNumericFilters(p => ({...p, maxScore: {min:'',max:''}}))} />
-                            <RangeFilter label="Cost" minVal={numericFilters.req?.min||''} maxVal={numericFilters.req?.max||''} onMinChange={(v) => updateNumericFilter('req', 'min', v)} onMaxChange={(v) => updateNumericFilter('req', 'max', v)} onReset={() => setNumericFilters(p => ({...p, req: {min:'',max:''}}))} />
-                            <RangeFilter label="Effective Cost" minVal={numericFilters.effReq?.min||''} maxVal={numericFilters.effReq?.max||''} onMinChange={(v) => updateNumericFilter('effReq', 'min', v)} onMaxChange={(v) => updateNumericFilter('effReq', 'max', v)} onReset={() => setNumericFilters(p => ({...p, effReq: {min:'',max:''}}))} />
-                            
-                            <RangeFilter label="Efficiency" minVal={numericFilters.efficiency?.min||''} maxVal={numericFilters.efficiency?.max||''} onMinChange={(v) => updateNumericFilter('efficiency', 'min', v)} onMaxChange={(v) => updateNumericFilter('efficiency', 'max', v)} onReset={() => setNumericFilters(p => ({...p, efficiency: {min:'',max:''}}))} />
+                            <RangeFilter label="Score" minVal={numericFilters.score?.min || ''} maxVal={numericFilters.score?.max || ''} onMinChange={(v) => updateNumericFilter('score', 'min', v)} onMaxChange={(v) => updateNumericFilter('score', 'max', v)} onReset={() => setNumericFilters(p => ({ ...p, score: { min: '', max: '' } }))} />
+                            <RangeFilter label="Max Score" minVal={numericFilters.maxScore?.min || ''} maxVal={numericFilters.maxScore?.max || ''} onMinChange={(v) => updateNumericFilter('maxScore', 'min', v)} onMaxChange={(v) => updateNumericFilter('maxScore', 'max', v)} onReset={() => setNumericFilters(p => ({ ...p, maxScore: { min: '', max: '' } }))} />
+                            <RangeFilter label="Cost" minVal={numericFilters.req?.min || ''} maxVal={numericFilters.req?.max || ''} onMinChange={(v) => updateNumericFilter('req', 'min', v)} onMaxChange={(v) => updateNumericFilter('req', 'max', v)} onReset={() => setNumericFilters(p => ({ ...p, req: { min: '', max: '' } }))} />
+                            <RangeFilter label="Effective Cost" minVal={numericFilters.effReq?.min || ''} maxVal={numericFilters.effReq?.max || ''} onMinChange={(v) => updateNumericFilter('effReq', 'min', v)} onMaxChange={(v) => updateNumericFilter('effReq', 'max', v)} onReset={() => setNumericFilters(p => ({ ...p, effReq: { min: '', max: '' } }))} />
+
+                            <RangeFilter label="Efficiency" minVal={numericFilters.efficiency?.min || ''} maxVal={numericFilters.efficiency?.max || ''} onMinChange={(v) => updateNumericFilter('efficiency', 'min', v)} onMaxChange={(v) => updateNumericFilter('efficiency', 'max', v)} onReset={() => setNumericFilters(p => ({ ...p, efficiency: { min: '', max: '' } }))} />
                         </>
                     )}
-                    
+
                     <button onClick={resetFilters} className="w-full py-2.5 mt-4 text-sm text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors flex items-center justify-center gap-2"><Icons.Close /> Reset All Filters</button>
                 </div>
             );
@@ -413,13 +447,13 @@
         const ActiveFilterBadge = ({ label, onRemove, isExclude }) => (
             <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium whitespace-nowrap ${isExclude ? 'bg-gray-800 text-gray-200 line-through' : 'bg-blue-100 text-blue-800'}`}>
                 {label}
-                <button onClick={(e) => { e.stopPropagation(); onRemove(); }} className={`rounded-full p-0.5 ${isExclude ? 'hover:bg-gray-600 text-white' : 'hover:bg-blue-200'}`}><Icons.Close style={{width:10, height:10}} /></button>
+                <button onClick={(e) => { e.stopPropagation(); onRemove(); }} className={`rounded-full p-0.5 ${isExclude ? 'hover:bg-gray-600 text-white' : 'hover:bg-blue-200'}`}><Icons.Close style={{ width: 10, height: 10 }} /></button>
             </span>
         );
 
         // --- Main App ---
         const App = () => {
-            const [activeTab, setActiveTab] = useState('member'); 
+            const [activeTab, setActiveTab] = useState('member');
             const [viewMode, setViewMode] = useState('grid');
             const [data, setData] = useState([]);
             const [loading, setLoading] = useState(false);
@@ -427,25 +461,52 @@
             const [selectedItem, setSelectedItem] = useState(null);
             const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
+            // Deck State
+            const [deck, setDeck] = useState({ member: {}, live: {} });
+            const [deckSortConfig, setDeckSortConfig] = useState({ mode: 'cost' });
+
+            const handleAddDeck = (e, item, type) => {
+                e.stopPropagation();
+                setDeck(prev => {
+                    const current = prev[type][item.number]?.count || 0;
+                    if (current >= 4) return prev;
+                    return { ...prev, [type]: { ...prev[type], [item.number]: { card: item, count: current + 1 } } };
+                });
+            };
+
+            const handleRemoveDeck = (e, item, type) => {
+                e.stopPropagation();
+                setDeck(prev => {
+                    const current = prev[type][item.number]?.count || 0;
+                    if (current <= 1) {
+                        const newTypeDeck = { ...prev[type] };
+                        delete newTypeDeck[item.number];
+                        return { ...prev, [type]: newTypeDeck };
+                    }
+                    return { ...prev, [type]: { ...prev[type], [item.number]: { card: item, count: current - 1 } } };
+                });
+            };
+
             // 3-State Filter Initialization
             const initial3State = () => ({ include: new Set(), exclude: new Set() });
 
             // Filters
             const [filterName, setFilterName] = useState('');
-            const [filterContains, setFilterContains] = useState(initial3State()); 
+            const [filterContains, setFilterContains] = useState(initial3State());
             const [filterGroups, setFilterGroups] = useState(initial3State());
             const [filterCosts, setFilterCosts] = useState(initial3State());
-            const [filterBladeHeart, setFilterBladeHeart] = useState(initial3State()); 
+            const [filterBladeHeart, setFilterBladeHeart] = useState(initial3State());
             const [filterAbilities, setFilterAbilities] = useState(initial3State());
-            const [filterKeywords, setFilterKeywords] = useState(initial3State()); 
-            
+            const [filterKeywords, setFilterKeywords] = useState(initial3State());
+
             const [filterBaseStats, setFilterBaseStats] = useState({ min: '', max: '' });
             const [filterMaxStats, setFilterMaxStats] = useState({ min: '', max: '' });
             const [numericFilters, setNumericFilters] = useState({});
-            
+
             const [sortConfig, setSortConfig] = useState({ key: 'cost', direction: 'asc' });
 
             useEffect(() => {
+                if (activeTab === 'deck') return;
                 const loadData = async () => {
                     setLoading(true); setError(null);
                     try {
@@ -459,17 +520,17 @@
             }, [activeTab]);
 
             const resetAll = () => {
-                setFilterName(''); 
-                setFilterContains(initial3State()); 
-                setFilterGroups(initial3State()); 
+                setFilterName('');
+                setFilterContains(initial3State());
+                setFilterGroups(initial3State());
                 setFilterCosts(initial3State());
-                setFilterBladeHeart(initial3State()); 
-                setFilterAbilities(initial3State()); 
+                setFilterBladeHeart(initial3State());
+                setFilterAbilities(initial3State());
                 setFilterKeywords(initial3State());
-                setFilterBaseStats({ min: '', max: '' }); 
+                setFilterBaseStats({ min: '', max: '' });
                 setFilterMaxStats({ min: '', max: '' });
                 setNumericFilters({});
-                
+
                 // Set default sort based on active tab
                 if (activeTab === 'member') {
                     setSortConfig({ key: 'cost', direction: 'asc' });
@@ -482,7 +543,7 @@
             const toggle3State = (state, val, setter) => {
                 const nextInclude = new Set(state.include);
                 const nextExclude = new Set(state.exclude);
-                
+
                 if (nextInclude.has(val)) {
                     // include -> exclude
                     nextInclude.delete(val);
@@ -494,7 +555,7 @@
                     // none -> include
                     nextInclude.add(val);
                 }
-                
+
                 setter({ include: nextInclude, exclude: nextExclude });
             };
 
@@ -515,14 +576,14 @@
             const uniqueContains = useMemo(() => {
                 const dataContains = new Set();
                 data.forEach(d => d.contain && d.contain.split(/[,、\s]+/).forEach(a => a.trim() && dataContains.add(a.trim())));
-                
+
                 // Merge user defined order with any other found tags
                 const mergedOptions = new Set([...CONTAIN_ORDER, ...dataContains]);
 
                 return Array.from(mergedOptions).sort((a, b) => {
                     const idxA = CONTAIN_ORDER.indexOf(a);
                     const idxB = CONTAIN_ORDER.indexOf(b);
-                    
+
                     if (idxA !== -1 && idxB !== -1) return idxA - idxB;
                     if (idxA !== -1) return -1;
                     if (idxB !== -1) return 1;
@@ -544,20 +605,20 @@
                     }
 
                     // Contain Filter
-                    const c = item.contain ? item.contain.split(/[,、\s]+/).map(s=>s.trim()) : [];
+                    const c = item.contain ? item.contain.split(/[,、\s]+/).map(s => s.trim()) : [];
                     if (filterContains.exclude.size > 0 && [...filterContains.exclude].some(x => c.includes(x))) return false;
                     if (filterContains.include.size > 0 && ![...filterContains.include].some(x => c.includes(x))) return false;
-                    
+
                     // Group Filter
-                    const g = item.group ? item.group.split(',').map(s=>s.trim()) : [];
+                    const g = item.group ? item.group.split(',').map(s => s.trim()) : [];
                     if (filterGroups.exclude.size > 0 && [...filterGroups.exclude].some(x => g.includes(x))) return false;
                     if (filterGroups.include.size > 0 && ![...filterGroups.include].some(x => g.includes(x))) return false;
 
                     // Ability Filter
-                    const a = item.ability ? item.ability.split(/[,、\s]+/).map(s=>s.trim()) : [];
+                    const a = item.ability ? item.ability.split(/[,、\s]+/).map(s => s.trim()) : [];
                     if (filterAbilities.exclude.size > 0 && [...filterAbilities.exclude].some(x => a.includes(x))) return false;
                     if (filterAbilities.include.size > 0 && ![...filterAbilities.include].some(x => a.includes(x))) return false;
-                    
+
                     if (activeTab === 'member') {
                         // Cost
                         const costVal = parseInt(item.cost);
@@ -569,7 +630,7 @@
                         if ((filterBaseStats.min !== '' && (isNaN(bs) || bs < parseInt(filterBaseStats.min))) || (filterBaseStats.max !== '' && (isNaN(bs) || bs > parseInt(filterBaseStats.max)))) return false;
                         if (filterMaxStats.min === '＋' || filterMaxStats.max === '＋') { if (!item.maxStats?.includes('+')) return false; }
                         else { const ms = parseInt(item.maxStats); if ((filterMaxStats.min !== '' && (isNaN(ms) || ms < parseInt(filterMaxStats.min))) || (filterMaxStats.max !== '' && (isNaN(ms) || ms > parseInt(filterMaxStats.max)))) return false; }
-                        
+
                         // BladeHeart (Member: 完全一致に近い、Noneは空文字)
                         const itemBH = item.bladeHeart ? item.bladeHeart.trim().toLowerCase() : '';
                         const hasBH = (targetBH) => {
@@ -582,7 +643,7 @@
 
                     if (activeTab === 'live') {
                         // Keyword (Live)
-                        const k = item.keyword ? item.keyword.split(/[,、\s]+/).map(s=>s.trim()) : [];
+                        const k = item.keyword ? item.keyword.split(/[,、\s]+/).map(s => s.trim()) : [];
                         if (filterKeywords.exclude.size > 0 && [...filterKeywords.exclude].some(x => k.includes(x))) return false;
                         if (filterKeywords.include.size > 0 && ![...filterKeywords.include].some(x => k.includes(x))) return false;
 
@@ -618,10 +679,47 @@
                 return items;
             }, [filteredData, sortConfig]);
 
+            const deckCards = useMemo(() => {
+                const members = Object.values(deck.member).map(d => ({ ...d.card, _deckType: 'member', _count: d.count }));
+                const lives = Object.values(deck.live).map(d => ({ ...d.card, _deckType: 'live', _count: d.count }));
+
+                const getVal = (i, k) => { const v = parseInt(i[k]); return isNaN(v) ? 0 : v; };
+
+                members.sort((a, b) => {
+                    if (deckSortConfig.mode === 'cost') {
+                        let valA = getVal(a, 'cost'), valB = getVal(b, 'cost');
+                        if (valA !== valB) return valA - valB;
+                    } else if (deckSortConfig.mode === 'bladeHeart') {
+                        const order = { 'pink': 1, 'red': 2, 'yellow': 3, 'green': 4, 'blue': 5, 'purple': 6, 'none': 7 };
+                        const bhA = (a.bladeHeart || '').trim().toLowerCase() || 'none';
+                        const bhB = (b.bladeHeart || '').trim().toLowerCase() || 'none';
+                        const valA = order[bhA] || 99;
+                        const valB = order[bhB] || 99;
+                        if (valA !== valB) return valA - valB;
+                    }
+                    return getVal(a, 'baseStats') - getVal(b, 'baseStats');
+                });
+
+                return [...members, ...lives];
+            }, [deck, deckSortConfig]);
+
+            const deckBladeHeartCounts = useMemo(() => {
+                if (deckSortConfig.mode !== 'bladeHeart') return null;
+                const counts = { 'Pink': 0, 'Red': 0, 'Yellow': 0, 'Green': 0, 'Blue': 0, 'Purple': 0 };
+                Object.values(deck.member).forEach(d => {
+                    const bh = d.card.bladeHeart ? d.card.bladeHeart.trim() : 'None';
+                    const key = Object.keys(counts).find(k => k.toLowerCase() === bh.toLowerCase());
+                    if (key) counts[key] += d.count;
+                });
+                return counts;
+            }, [deck, deckSortConfig]);
+
+            const displayData = activeTab === 'deck' ? deckCards : sortedData;
+
             const activeFilters = useMemo(() => {
                 const list = [];
                 if (filterName) list.push({ id: 'name', label: `Keyword: ${filterName}`, fn: () => setFilterName(''), isExclude: false });
-                
+
                 const add3StateFilters = (state, prefix, labelPrefix, setter) => {
                     state.include.forEach(val => list.push({ id: `inc-${prefix}-${val}`, label: `${labelPrefix}: ${val}`, fn: () => toggle3State(state, val, setter), isExclude: false }));
                     state.exclude.forEach(val => list.push({ id: `exc-${prefix}-${val}`, label: `NOT ${labelPrefix}: ${val}`, fn: () => toggle3State(state, val, setter), isExclude: true }));
@@ -634,23 +732,23 @@
                 add3StateFilters(filterCosts, 'c', 'Cost', setFilterCosts);
                 add3StateFilters(filterBladeHeart, 'bh', 'BH', setFilterBladeHeart);
 
-                const addRange = (obj, label, setter) => { if(obj.min || obj.max) list.push({ id: label, label: `${label}: ${obj.min||'0'}~${obj.max||'∞'}`, fn: () => setter({min:'',max:''}), isExclude: false }); };
+                const addRange = (obj, label, setter) => { if (obj.min || obj.max) list.push({ id: label, label: `${label}: ${obj.min || '0'}~${obj.max || '∞'}`, fn: () => setter({ min: '', max: '' }), isExclude: false }); };
                 addRange(filterBaseStats, 'Base', setFilterBaseStats);
                 addRange(filterMaxStats, 'Max', setFilterMaxStats);
-                Object.entries(numericFilters).forEach(([k, v]) => { if (v.min || v.max) list.push({ id: k, label: `${k}: ${v.min||'0'}~${v.max||'∞'}`, fn: () => updateNumFilter(k, 'min', '') || updateNumFilter(k, 'max', ''), isExclude: false }); });
-                
+                Object.entries(numericFilters).forEach(([k, v]) => { if (v.min || v.max) list.push({ id: k, label: `${k}: ${v.min || '0'}~${v.max || '∞'}`, fn: () => updateNumFilter(k, 'min', '') || updateNumFilter(k, 'max', ''), isExclude: false }); });
+
                 return list;
             }, [filterName, filterContains, filterGroups, filterCosts, filterBladeHeart, filterAbilities, filterKeywords, filterBaseStats, filterMaxStats, numericFilters]);
 
             const filterProps = {
                 isMobile: false, activeTab, setActiveTab,
                 filterName, setFilterName,
-                filterContains, toggleContain: (v)=>toggle3State(filterContains,v,setFilterContains), setFilterContains,
-                filterGroups, toggleGroup: (v)=>toggle3State(filterGroups,v,setFilterGroups), setFilterGroups,
-                filterAbilities, toggleAbility: (v)=>toggle3State(filterAbilities,v,setFilterAbilities), setFilterAbilities,
-                filterKeywords, toggleKeyword: (v)=>toggle3State(filterKeywords,v,setFilterKeywords), setFilterKeywords,
-                filterCosts, toggleCost: (v)=>toggle3State(filterCosts,v,setFilterCosts), setFilterCosts,
-                filterBladeHeart, toggleBladeHeart: (v)=>toggle3State(filterBladeHeart,v,setFilterBladeHeart), setFilterBladeHeart,
+                filterContains, toggleContain: (v) => toggle3State(filterContains, v, setFilterContains), setFilterContains,
+                filterGroups, toggleGroup: (v) => toggle3State(filterGroups, v, setFilterGroups), setFilterGroups,
+                filterAbilities, toggleAbility: (v) => toggle3State(filterAbilities, v, setFilterAbilities), setFilterAbilities,
+                filterKeywords, toggleKeyword: (v) => toggle3State(filterKeywords, v, setFilterKeywords), setFilterKeywords,
+                filterCosts, toggleCost: (v) => toggle3State(filterCosts, v, setFilterCosts), setFilterCosts,
+                filterBladeHeart, toggleBladeHeart: (v) => toggle3State(filterBladeHeart, v, setFilterBladeHeart), setFilterBladeHeart,
                 filterBaseStats, setFilterBaseStats, filterMaxStats, setFilterMaxStats,
                 numericFilters, updateNumericFilter: updateNumFilter, setNumericFilters,
                 uniqueAbilities, uniqueKeywords, uniqueContains, resetFilters: resetAll, initial3State
@@ -669,12 +767,13 @@
                                 </button>
                             </div>
                         </div>
-                        
+
                         {/* Tab Switcher for Mobile */}
                         <div className="px-4 pb-3">
                             <div className="flex bg-gray-100 p-1 rounded-lg">
                                 <button onClick={() => setActiveTab('member')} className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-colors ${activeTab === 'member' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>メンバー</button>
                                 <button onClick={() => setActiveTab('live')} className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-colors ${activeTab === 'live' ? 'bg-white shadow text-pink-600' : 'text-gray-500'}`}>ライブ</button>
+                                <button onClick={() => setActiveTab('deck')} className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-colors ${activeTab === 'deck' ? 'bg-white shadow text-green-600' : 'text-gray-500'}`}>デッキ</button>
                             </div>
                         </div>
 
@@ -701,9 +800,18 @@
                     {/* Main Content */}
                     <div className="flex-1 p-4 md:p-6 bg-gray-50 min-h-screen">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
-                            <div className="text-sm text-gray-500"><span>{activeTab === 'member' ? 'Member' : 'Live'} Cards: </span><span className="font-bold text-gray-800">{filteredData.length}</span> / {data.length}</div>
+                            <div className="text-sm text-gray-500"><span>{activeTab === 'member' ? 'Member' : activeTab === 'live' ? 'Live' : 'Deck'} Cards: </span><span className="font-bold text-gray-800">{displayData.length}</span>{activeTab !== 'deck' ? ` / ${data.length}` : ''}</div>
                             <div className="flex items-center gap-2 w-full sm:w-auto">
-                                <select value={`${sortConfig.key}-${sortConfig.direction}`} onChange={(e) => { const [k, d] = e.target.value.split('-'); setSortConfig({ key: k, direction: d }); }} className="flex-1 sm:flex-none px-3 py-2 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                <select value={activeTab === 'deck' ? deckSortConfig.mode : `${sortConfig.key}-${sortConfig.direction}`} onChange={(e) => {
+                                    if (activeTab === 'deck') setDeckSortConfig({ mode: e.target.value });
+                                    else { const [k, d] = e.target.value.split('-'); setSortConfig({ key: k, direction: d }); }
+                                }} className="flex-1 sm:flex-none px-3 py-2 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                    {activeTab === 'deck' && (
+                                        <>
+                                            <option value="cost">Cost 昇順</option>
+                                            <option value="bladeHeart">BladeHeart順</option>
+                                        </>
+                                    )}
                                     {activeTab === 'member' && (
                                         <>
                                             <option value="cost-asc">Cost 昇順</option>
@@ -731,55 +839,80 @@
                             </div>
                         </div>
 
+                        {activeTab === 'deck' && deckBladeHeartCounts && (
+                            <div className="flex flex-wrap gap-2 mb-4 p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-xs">
+                                <span className="font-bold text-gray-700 mr-2 flex items-center">BladeHeart:</span>
+                                {Object.entries(deckBladeHeartCounts).map(([color, count]) => count > 0 && (
+                                    <span key={color} className={`px-2 py-1 rounded-full font-bold ${BH_STYLES[color]?.base || 'bg-gray-200 text-gray-800'}`}>{color}: {count}枚</span>
+                                ))}
+                            </div>
+                        )}
+
                         {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6 text-sm">{error}</div>}
                         {loading && <div className="flex flex-col items-center justify-center h-64"><div className="loader mb-4"></div><p className="text-gray-500">Loading...</p></div>}
 
                         {!loading && !error && (
                             viewMode === 'grid' ? (
-                                <div className={`grid gap-2 md:gap-4 ${activeTab === 'member' ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'}`}>
-                                    {sortedData.map((item, index) => (
-                                        <div key={index} className="bg-white rounded-lg card-shadow overflow-hidden flex flex-col h-full border border-gray-100 text-[10px] md:text-xs">
-                                            <div 
-                                                className={`relative w-full bg-gray-100 group cursor-pointer ${activeTab==='live'?'aspect-[16/9]':'aspect-[3/4]'}`}
-                                                onClick={() => item.image && setSelectedItem(item)}
-                                            >
-                                                {item.group && (
-                                                    <span className="absolute bottom-1 right-1 bg-black/60 text-white px-1.5 py-0.5 rounded-full backdrop-blur-sm z-10 truncate max-w-[70px] md:max-w-[90px]">
-                                                        {item.group}
-                                                    </span>
-                                                )}
-                                                {item.image ? (
-                                                    <SafeImage 
-                                                        src={getImageUrl(item.image)} 
-                                                        alt={item.name} 
-                                                        className={`w-full h-full object-contain p-1 transition-transform duration-500 md:group-hover:scale-105 ${activeTab === 'live' ? 'rotate-0 md:rotate-0' : ''}`}
-                                                        onError={(e) => { if (!e.target.dataset.triedFallback) { e.target.dataset.triedFallback = "true"; e.target.src = getFallbackUrl(item.image); } else { e.target.src = 'https://placehold.co/400x600?text=No+Image'; } }}
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100"><Icons.Image className="w-8 h-8 opacity-50" /></div>
-                                                )}
-                                            </div>
-                                            <div className="p-2 flex-1 flex flex-col gap-1">
-                                                <h3 className="font-bold text-gray-800 leading-tight truncate mb-0.5" title={item.name}>{item.name || 'Untitled'}</h3>
-                                                <div className="flex flex-wrap gap-0.5 max-h-6 overflow-hidden mb-1">
-                                                    {item.ability && item.ability.split(/[,、\s]+/).map((a, i) => { const ta=a.trim();if(!ta)return null;const ci=uniqueAbilities.indexOf(ta);const fi=ta.split('').reduce((x,y)=>x+y.charCodeAt(0),0);return <span key={i} className={`px-1 py-0 rounded border border-black/5 whitespace-nowrap ${getTagColor(ci!==-1?ci:fi).base}`} style={{fontSize:'9px'}}>{ta}</span>; })}
-                                                </div>
-                                                <div className="mt-auto">
-                                                    {activeTab === 'member' ? (
-                                                        <div className="pt-1 border-t border-dashed border-gray-100 flex justify-between items-end">
-                                                            <div className="flex flex-col"><span className="text-[9px] text-gray-400 uppercase leading-none mb-0.5">Cost</span><span className="text-sm font-bold text-gray-700 leading-none">{item.cost}</span></div>
-                                                            <div className="flex flex-col items-end"><span className="text-[9px] text-gray-400 uppercase leading-none mb-0.5">Stats (B/M)</span><div className="font-bold text-gray-700 leading-none bg-gray-50 px-1 py-0.5 rounded">{item.baseStats||'-'}<span className="text-gray-300 mx-0.5">/</span><span className="text-blue-600">{item.maxStats||'-'}</span></div></div>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="pt-1.5 border-t border-dashed border-gray-100 space-y-1">
-                                                            <div className="flex justify-between items-center"><span className="text-[9px] text-gray-400 uppercase">Score</span><span className="text-[10px] font-bold text-pink-600">{item.score||'-'} <span className="text-gray-300">/</span> {item.maxScore||'-'}</span></div>
-                                                            <div className="flex justify-between items-center"><span className="text-[9px] text-gray-400 uppercase">Cost</span><span className="text-[10px] font-bold text-gray-700">{item.req||'-'} <span className="text-gray-300">/</span> {item.effReq||'-'}</span></div>
-                                                        </div>
+                                <div className={`grid gap-2 md:gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6`}>
+                                    {displayData.map((item, index) => {
+                                        const isMember = item._deckType ? item._deckType === 'member' : activeTab === 'member';
+                                        const inDeckCount = deck[isMember ? 'member' : 'live'][item.number]?.count || 0;
+                                        return (
+                                            <div key={index} className="bg-white rounded-lg card-shadow overflow-hidden flex flex-col h-full border border-gray-100 text-[10px] md:text-xs relative group/card">
+                                                {/* Deck Buttons Overlay */}
+                                                <div className={`absolute top-1 right-1 z-20 flex flex-col gap-1 ${inDeckCount === 0 ? 'opacity-0 md:group-hover/card:opacity-100' : 'opacity-100'} transition-opacity`}>
+                                                    <button onClick={(e) => handleAddDeck(e, item, isMember ? 'member' : 'live')} className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center shadow hover:bg-blue-700 font-bold text-sm leading-none pb-0.5">+</button>
+                                                    {inDeckCount > 0 && (
+                                                        <button onClick={(e) => handleRemoveDeck(e, item, isMember ? 'member' : 'live')} className="bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow hover:bg-red-600 font-bold text-sm leading-none pb-0.5">-</button>
                                                     )}
                                                 </div>
+                                                {inDeckCount > 0 && (
+                                                    <div className="absolute top-1 left-1 z-20 bg-black/70 text-white px-2 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-sm pointer-events-none">
+                                                        {inDeckCount}/4
+                                                    </div>
+                                                )}
+                                                <div
+                                                    className={`relative w-full bg-gray-100 group cursor-pointer ${!isMember ? 'aspect-[16/9]' : 'aspect-[3/4]'}`}
+                                                    onClick={() => item.image && setSelectedItem(item)}
+                                                >
+                                                    {item.group && (
+                                                        <span className="absolute bottom-1 right-1 bg-black/60 text-white px-1.5 py-0.5 rounded-full backdrop-blur-sm z-10 truncate max-w-[70px] md:max-w-[90px]">
+                                                            {item.group}
+                                                        </span>
+                                                    )}
+                                                    {item.image ? (
+                                                        <SafeImage
+                                                            src={getImageUrl(item.image)}
+                                                            alt={item.name}
+                                                            className={`w-full h-full object-contain p-1 transition-transform duration-500 md:group-hover:scale-105 ${!isMember ? 'rotate-0 md:rotate-0' : ''}`}
+                                                            onError={(e) => { if (!e.target.dataset.triedFallback) { e.target.dataset.triedFallback = "true"; e.target.src = getFallbackUrl(item.image); } else { e.target.src = 'https://placehold.co/400x600?text=No+Image'; } }}
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100"><Icons.Image className="w-8 h-8 opacity-50" /></div>
+                                                    )}
+                                                </div>
+                                                <div className="p-2 flex-1 flex flex-col gap-1">
+                                                    <h3 className="font-bold text-gray-800 leading-tight truncate mb-0.5" title={item.name}>{item.name || 'Untitled'}</h3>
+                                                    <div className="flex flex-wrap gap-0.5 max-h-6 overflow-hidden mb-1">
+                                                        {item.ability && item.ability.split(/[,、\s]+/).map((a, i) => { const ta = a.trim(); if (!ta) return null; const ci = uniqueAbilities.indexOf(ta); const fi = ta.split('').reduce((x, y) => x + y.charCodeAt(0), 0); return <span key={i} className={`px-1 py-0 rounded border border-black/5 whitespace-nowrap ${getTagColor(ci !== -1 ? ci : fi).base}`} style={{ fontSize: '9px' }}>{ta}</span>; })}
+                                                    </div>
+                                                    <div className="mt-auto">
+                                                        {isMember ? (
+                                                            <div className="pt-1 border-t border-dashed border-gray-100 flex justify-between items-end">
+                                                                <div className="flex flex-col"><span className="text-[9px] text-gray-400 uppercase leading-none mb-0.5">Cost</span><span className="text-sm font-bold text-gray-700 leading-none">{item.cost}</span></div>
+                                                                <div className="flex flex-col items-end"><span className="text-[9px] text-gray-400 uppercase leading-none mb-0.5">Stats (B/M)</span><div className="font-bold text-gray-700 leading-none bg-gray-50 px-1 py-0.5 rounded">{item.baseStats || '-'}<span className="text-gray-300 mx-0.5">/</span><span className="text-blue-600">{item.maxStats || '-'}</span></div></div>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="pt-1.5 border-t border-dashed border-gray-100 space-y-1">
+                                                                <div className="flex justify-between items-center"><span className="text-[9px] text-gray-400 uppercase">Score</span><span className="text-[10px] font-bold text-pink-600">{item.score || '-'} <span className="text-gray-300">/</span> {item.maxScore || '-'}</span></div>
+                                                                <div className="flex justify-between items-center"><span className="text-[9px] text-gray-400 uppercase">Cost</span><span className="text-[10px] font-bold text-gray-700">{item.req || '-'} <span className="text-gray-300">/</span> {item.effReq || '-'}</span></div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             ) : (
                                 <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200 overflow-x-auto">
@@ -791,20 +924,32 @@
                                                 <th className="px-3 py-2 text-left font-medium text-gray-500">Name</th>
                                                 <th className="px-3 py-2 text-left font-medium text-gray-500">Group</th>
                                                 <th className="px-3 py-2 text-left font-medium text-gray-500 hidden sm:table-cell">Ability</th>
-                                                {activeTab === 'member' ? ( <><th className="px-3 py-2 text-left font-medium text-gray-500">Cost</th><th className="px-3 py-2 text-left font-medium text-gray-500">Stats</th></> ) : ( <><th className="px-3 py-2 text-left font-medium text-gray-500">Score</th><th className="px-3 py-2 text-left font-medium text-gray-500">Cost</th></> )}
+                                                {activeTab === 'member' ? (<><th className="px-3 py-2 text-left font-medium text-gray-500">Cost</th><th className="px-3 py-2 text-left font-medium text-gray-500">Stats</th></>) : activeTab === 'live' ? (<><th className="px-3 py-2 text-left font-medium text-gray-500">Score</th><th className="px-3 py-2 text-left font-medium text-gray-500">Cost</th></>) : (<><th className="px-3 py-2 text-left font-medium text-gray-500">Cost / Score</th><th className="px-3 py-2 text-left font-medium text-gray-500">Stats / Cost</th></>)}
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-gray-200">
-                                            {sortedData.map((item, index) => (
-                                                <tr key={index} className="hover:bg-gray-50">
-                                                    <td className="px-3 py-2"><div className="h-8 w-8 cursor-pointer" onClick={() => item.image && setSelectedItem(item)}>{item.image ? <SafeImage src={getImageUrl(item.image)} className="h-8 w-8 rounded object-cover" /> : <div className="h-8 w-8 rounded bg-gray-200"></div>}</div></td>
-                                                    <td className="px-3 py-2 text-gray-500">{item.number}</td>
-                                                    <td className="px-3 py-2 font-medium">{item.name}</td>
-                                                    <td className="px-3 py-2"><span className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 whitespace-nowrap">{item.group}</span></td>
-                                                    <td className="px-3 py-2 hidden sm:table-cell"><div className="flex flex-wrap gap-1 max-w-xs">{item.ability && item.ability.split(/[,、\s]+/).map((a,i) => { const ta=a.trim();if(!ta)return null;const ci=uniqueAbilities.indexOf(ta);const fi=ta.split('').reduce((x,y)=>x+y.charCodeAt(0),0);return <span key={i} className={`px-1 rounded ${getTagColor(ci!==-1?ci:fi).base}`}>{ta}</span>; })}</div></td>
-                                                    {activeTab === 'member' ? ( <><td className="px-3 py-2">{item.cost}</td><td className="px-3 py-2 whitespace-nowrap">{item.baseStats}/{item.maxStats}</td></> ) : ( <><td className="px-3 py-2 font-bold text-pink-600">{item.score}/{item.maxScore}</td><td className="px-3 py-2">{item.req}/{item.effReq}</td></> )}
-                                                </tr>
-                                            ))}
+                                            {displayData.map((item, index) => {
+                                                const isMember = item._deckType ? item._deckType === 'member' : activeTab === 'member';
+                                                return (
+                                                    <tr key={index} className="hover:bg-gray-50 relative group/row">
+                                                        <td className="px-3 py-2 relative">
+                                                            <div className="absolute top-1/2 -translate-y-1/2 -left-2 opacity-0 group-hover/row:opacity-100 transition-opacity z-10 flex flex-col gap-0.5">
+                                                                <button onClick={(e) => handleAddDeck(e, item, isMember ? 'member' : 'live')} className="bg-blue-600 text-white w-5 h-5 rounded-full flex items-center justify-center shadow hover:bg-blue-700 font-bold text-xs leading-none pb-0.5">+</button>
+                                                                {(deck[isMember ? 'member' : 'live'][item.number]?.count || 0) > 0 && <button onClick={(e) => handleRemoveDeck(e, item, isMember ? 'member' : 'live')} className="bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center shadow hover:bg-red-600 font-bold text-xs leading-none pb-0.5">-</button>}
+                                                            </div>
+                                                            <div className="h-8 w-8 cursor-pointer ml-4 relative" onClick={() => item.image && setSelectedItem(item)}>
+                                                                {(deck[isMember ? 'member' : 'live'][item.number]?.count || 0) > 0 && <span className="absolute -top-1 -right-1 z-20 bg-black/70 text-white px-1.5 py-0 rounded-full text-[8px] font-bold backdrop-blur-sm pointer-events-none">{deck[isMember ? 'member' : 'live'][item.number]?.count}/4</span>}
+                                                                {item.image ? <SafeImage src={getImageUrl(item.image)} className="h-8 w-8 rounded object-cover" /> : <div className="h-8 w-8 rounded bg-gray-200"></div>}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-3 py-2 text-gray-500">{item.number}</td>
+                                                        <td className="px-3 py-2 font-medium">{item.name}</td>
+                                                        <td className="px-3 py-2"><span className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 whitespace-nowrap">{item.group}</span></td>
+                                                        <td className="px-3 py-2 hidden sm:table-cell"><div className="flex flex-wrap gap-1 max-w-xs">{item.ability && item.ability.split(/[,、\s]+/).map((a, i) => { const ta = a.trim(); if (!ta) return null; const ci = uniqueAbilities.indexOf(ta); const fi = ta.split('').reduce((x, y) => x + y.charCodeAt(0), 0); return <span key={i} className={`px-1 rounded ${getTagColor(ci !== -1 ? ci : fi).base}`}>{ta}</span>; })}</div></td>
+                                                        {isMember ? (<><td className="px-3 py-2">{item.cost}</td><td className="px-3 py-2 whitespace-nowrap">{item.baseStats}/{item.maxStats}</td></>) : (<><td className="px-3 py-2 font-bold text-pink-600">{item.score}/{item.maxScore}</td><td className="px-3 py-2">{item.req}/{item.effReq}</td></>)}
+                                                    </tr>
+                                                );
+                                            })}
                                         </tbody>
                                     </table>
                                 </div>
@@ -817,30 +962,32 @@
 
                     {/* Image Modal */}
                     {selectedItem && (() => {
-                        const currentIndex = sortedData.findIndex(item => item === selectedItem);
+                        const currentIndex = displayData.findIndex(item => item === selectedItem);
                         const hasPrev = currentIndex > 0;
-                        const hasNext = currentIndex >= 0 && currentIndex < sortedData.length - 1;
+                        const hasNext = currentIndex >= 0 && currentIndex < displayData.length - 1;
 
                         const handlePrev = (e) => {
                             e.stopPropagation();
-                            if (hasPrev) setSelectedItem(sortedData[currentIndex - 1]);
+                            if (hasPrev) setSelectedItem(displayData[currentIndex - 1]);
                         };
 
                         const handleNext = (e) => {
                             e.stopPropagation();
-                            if (hasNext) setSelectedItem(sortedData[currentIndex + 1]);
+                            if (hasNext) setSelectedItem(displayData[currentIndex + 1]);
                         };
+
+                        const isMember = selectedItem._deckType ? selectedItem._deckType === 'member' : activeTab === 'member';
 
                         return (
                             <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 p-4" onClick={() => setSelectedItem(null)}>
                                 <button className="fixed top-4 right-4 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-2 z-50 transition-colors" onClick={(e) => { e.stopPropagation(); setSelectedItem(null); }}>
                                     <Icons.Close className="w-6 h-6" />
                                 </button>
-                                
+
                                 {/* Prev Button */}
                                 {hasPrev && (
-                                    <button 
-                                        className="fixed left-2 md:left-8 top-1/2 -translate-y-1/2 text-white/50 hover:text-white bg-black/50 hover:bg-black/80 rounded-full p-2 md:p-3 z-50 transition-all" 
+                                    <button
+                                        className="fixed left-2 md:left-8 top-1/2 -translate-y-1/2 text-white/50 hover:text-white bg-black/50 hover:bg-black/80 rounded-full p-2 md:p-3 z-50 transition-all"
                                         onClick={handlePrev}
                                     >
                                         <Icons.ChevronLeft className="w-8 h-8 md:w-10 md:h-10" />
@@ -849,8 +996,8 @@
 
                                 {/* Next Button */}
                                 {hasNext && (
-                                    <button 
-                                        className="fixed right-2 md:right-8 top-1/2 -translate-y-1/2 text-white/50 hover:text-white bg-black/50 hover:bg-black/80 rounded-full p-2 md:p-3 z-50 transition-all" 
+                                    <button
+                                        className="fixed right-2 md:right-8 top-1/2 -translate-y-1/2 text-white/50 hover:text-white bg-black/50 hover:bg-black/80 rounded-full p-2 md:p-3 z-50 transition-all"
                                         onClick={handleNext}
                                     >
                                         <Icons.ChevronRight className="w-8 h-8 md:w-10 md:h-10" />
@@ -859,15 +1006,15 @@
 
                                 <div className="relative w-full max-w-lg flex flex-col items-center pointer-events-none">
                                     <div className="pointer-events-auto flex flex-col items-center w-full" onClick={e => e.stopPropagation()}>
-                                        <SafeImage 
-                                            src={getImageUrl(selectedItem.image)} 
-                                            alt={selectedItem.name} 
-                                            className="max-w-full max-h-[60vh] object-contain rounded-lg shadow-2xl mb-6" 
-                                            onError={(e) => { if (!e.target.dataset.triedFallback) { e.target.dataset.triedFallback = "true"; e.target.src = getFallbackUrl(selectedItem.image); } else { e.target.src = 'https://placehold.co/400x600?text=No+Image'; } }} 
+                                        <SafeImage
+                                            src={getImageUrl(selectedItem.image)}
+                                            alt={selectedItem.name}
+                                            className="max-w-full max-h-[60vh] object-contain rounded-lg shadow-2xl mb-6"
+                                            onError={(e) => { if (!e.target.dataset.triedFallback) { e.target.dataset.triedFallback = "true"; e.target.src = getFallbackUrl(selectedItem.image); } else { e.target.src = 'https://placehold.co/400x600?text=No+Image'; } }}
                                         />
                                         <div className="text-white text-center w-full">
                                             <h3 className="text-xl font-bold mb-2">{selectedItem.name}</h3>
-                                            {activeTab === 'member' ? (
+                                            {isMember ? (
                                                 <div className="flex justify-center items-center gap-6 text-sm bg-white/10 px-6 py-3 rounded-xl backdrop-blur-sm mx-auto inline-flex">
                                                     <div className="text-center"><span className="block text-white/50 text-[10px] uppercase mb-0.5">Cost</span><span className="text-xl font-bold">{selectedItem.cost}</span></div>
                                                     <div className="w-px h-8 bg-white/20"></div>
@@ -894,4 +1041,5 @@
         root.render(<App />);
     </script>
 </body>
+
 </html>
