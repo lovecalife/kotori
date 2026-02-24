@@ -479,13 +479,13 @@
             const deckStats = useMemo(() => {
                 const costs = {};
                 const bhs = { Pink: 0, Red: 0, Yellow: 0, Green: 0, Blue: 0, Purple: 0, None: 0 };
-                let total = 0;
+                let memberTotal = 0;
+                let liveTotal = 0;
 
                 const processItem = (d, type) => {
                     const count = d.count;
-                    total += count;
-
                     if (type === 'member') {
+                        memberTotal += count;
                         const costVal = parseInt(d.card.cost);
                         if (!isNaN(costVal)) costs[costVal] = (costs[costVal] || 0) + count;
 
@@ -495,13 +495,15 @@
                             const key = Object.keys(bhs).find(k => k.toLowerCase() === bh.toLowerCase());
                             if (key) bhs[key] += count;
                         });
+                    } else {
+                        liveTotal += count;
                     }
                 };
 
                 Object.values(deck.member).forEach(d => processItem(d, 'member'));
                 Object.values(deck.live).forEach(d => processItem(d, 'live'));
 
-                return { costs, bhs, total };
+                return { costs, bhs, memberTotal, liveTotal };
             }, [deck]);
 
             const toggle3State = (state, val, setter) => {
@@ -626,23 +628,29 @@
                 const lives = Object.values(deck.live).map(d => d.card);
 
                 const sortFn = (a, b) => {
+                    const getBhVal = (card) => {
+                        const bhStr = card.bladeHeart ? card.bladeHeart.split(/[,、\s]+/)[0].trim() : 'None';
+                        const key = Object.keys(BH_SORT_ORDER).find(k => k.toLowerCase() === bhStr.toLowerCase());
+                        return BH_SORT_ORDER[key] || 8;
+                    };
+
                     if (deckSortType === 'cost') {
                         const costA = parseInt(a.cost || a.req) || 0;
                         const costB = parseInt(b.cost || b.req) || 0;
-                        return costA - costB;
+                        if (costA !== costB) return costA - costB;
+                        
+                        const bhA = getBhVal(a);
+                        const bhB = getBhVal(b);
+                        if (bhA !== bhB) return bhA - bhB;
+
                     } else if (deckSortType === 'bladeHeart') {
-                        const getBhVal = (card) => {
-                            const bhStr = card.bladeHeart ? card.bladeHeart.split(/[,、\s]+/)[0].trim() : 'None';
-                            const key = Object.keys(BH_SORT_ORDER).find(k => k.toLowerCase() === bhStr.toLowerCase());
-                            return BH_SORT_ORDER[key] || 8;
-                        };
                         const bhA = getBhVal(a);
                         const bhB = getBhVal(b);
                         if (bhA !== bhB) return bhA - bhB;
                         
                         const costA = parseInt(a.cost || a.req) || 0;
                         const costB = parseInt(b.cost || b.req) || 0;
-                        return costA - costB;
+                        if (costA !== costB) return costA - costB;
                     }
                     return (a.number || '').localeCompare(b.number || '');
                 };
@@ -707,7 +715,7 @@
                                 <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100 text-[8px]">No Img</div>
                             )}
                         </div>
-                        <div className="absolute bottom-0 right-0 bg-black text-white font-bold text-[10px] px-1.5 py-0.5 rounded-tl shadow-md z-30 opacity-90 pointer-events-none">
+                        <div className="absolute bottom-0 right-0 bg-black text-white font-bold text-[11px] md:text-sm px-2 py-0.5 md:px-2.5 md:py-1 rounded-tl shadow-md z-30 opacity-90 pointer-events-none">
                             {cCount}
                         </div>
                     </div>
@@ -762,16 +770,13 @@
                             className={`relative w-full bg-gray-100 group cursor-pointer ${isLive ? 'aspect-[16/9]' : 'aspect-[3/4]'}`}
                             onClick={() => item.image && setSelectedItem(item)}
                         >
-                            {/* Overlay Controls & Badges */}
                             <div className="absolute bottom-2 right-2 flex flex-col items-end gap-1.5 z-20 pointer-events-none">
-                                {/* Group Badge */}
                                 {item.group && (
                                     <span className="bg-black/60 text-white px-2 py-0.5 rounded-full backdrop-blur-sm text-[9px] md:text-[10px] truncate max-w-[80px] md:max-w-[100px] shadow-sm">
                                         {item.group}
                                     </span>
                                 )}
                                 
-                                {/* Deck Control Overlay */}
                                 <div className="flex items-center gap-1.5 bg-black/70 rounded-full p-1 backdrop-blur-md border border-white/10 shadow-md pointer-events-auto" onClick={e => e.stopPropagation()}>
                                     {cCount > 0 && (
                                         <>
@@ -830,7 +835,6 @@
 
             return (
                 <div className="min-h-screen flex flex-col md:flex-row">
-                    {/* Mobile Header (Sticky) */}
                     <div className="md:hidden sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
                         <div className="flex items-center justify-between px-4 py-3">
                             <h1 className="text-xl font-bold text-gray-800 flex items-center gap-1"><span className="text-blue-600">Card</span>List</h1>
@@ -842,7 +846,6 @@
                             </div>
                         </div>
                         
-                        {/* Tab Switcher for Mobile */}
                         <div className="px-4 pb-3">
                             <div className="flex bg-gray-100 p-1 rounded-lg text-xs font-medium">
                                 <button onClick={() => setActiveTab('member')} className={`flex-1 py-1.5 rounded-md transition-colors ${activeTab === 'member' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>メンバー</button>
@@ -862,7 +865,6 @@
                         )}
                     </div>
 
-                    {/* PC Sidebar */}
                     <aside className="hidden md:flex w-80 bg-white border-r border-gray-200 p-6 flex-col h-screen sticky top-0 overflow-y-auto flex-shrink-0">
                         <div className="flex items-center justify-between mb-6">
                             <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2"><span className="text-blue-600">Card</span>List</h1>
@@ -871,12 +873,14 @@
                         <FilterPanel {...filterProps} />
                     </aside>
 
-                    {/* Main Content */}
                     <div className="flex-1 p-4 md:p-6 bg-gray-50 min-h-screen">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
-                            <div className="text-sm text-gray-500">
+                            <div className="text-xs md:text-sm text-gray-500">
                                 {activeTab === 'deck' ? (
-                                    <><span>Deck Total: </span><span className="font-bold text-gray-800">{deckStats.total}</span> cards</>
+                                    <div className="flex gap-3">
+                                        <span className={`font-bold ${deckStats.memberTotal > 48 ? 'text-red-500' : 'text-gray-800'}`}>メンバー: {deckStats.memberTotal} / 48</span>
+                                        <span className={`font-bold ${deckStats.liveTotal > 12 ? 'text-red-500' : 'text-gray-800'}`}>ライブ: {deckStats.liveTotal} / 12</span>
+                                    </div>
                                 ) : (
                                     <><span>{activeTab === 'member' ? 'Member' : 'Live'} Cards: </span><span className="font-bold text-gray-800">{displayList.length}</span> / {currentTabData.length}</>
                                 )}
@@ -916,64 +920,60 @@
 
                         {!loading && !error && (
                             <>
-                                {/* Deck Specific UI: Stats Panels */}
                                 {activeTab === 'deck' && displayList.length > 0 && (
-                                    <div className="flex flex-wrap gap-4 mb-6">
-                                        <div className="flex-1 min-w-[250px] bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
-                                            <div className="text-xs font-bold text-gray-500 mb-3 border-b pb-1">メンバーカード コスト分布</div>
-                                            <div className="flex flex-wrap gap-3">
-                                                {Object.keys(deckStats.costs).length === 0 ? <span className="text-sm text-gray-400">-</span> : 
+                                    <div className="flex flex-col sm:flex-row gap-2 mb-4">
+                                        <div className="flex-1 bg-white p-1.5 rounded border border-gray-200 shadow-sm flex items-center overflow-x-auto no-scrollbar">
+                                            <div className="text-[10px] font-bold text-gray-500 mr-2 whitespace-nowrap">コスト</div>
+                                            <div className="flex flex-wrap gap-1 md:gap-2">
+                                                {Object.keys(deckStats.costs).length === 0 ? <span className="text-[10px] text-gray-400">-</span> : 
                                                     Object.keys(deckStats.costs).sort((a,b)=>Number(a)-Number(b)).map(cost => (
-                                                    <div key={cost} className="flex flex-col items-center">
-                                                        <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-xs font-bold mb-1 shadow-sm">{cost}</span>
-                                                        <span className="text-sm font-bold text-gray-700">{deckStats.costs[cost]}</span>
+                                                    <div key={cost} className="flex items-center gap-0.5">
+                                                        <span className="w-3.5 h-3.5 md:w-4 md:h-4 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-[8px] md:text-[10px] font-bold">{cost}</span>
+                                                        <span className="text-[10px] font-bold text-gray-700">{deckStats.costs[cost]}</span>
                                                     </div>
                                                 ))}
                                             </div>
                                         </div>
-                                        <div className="flex-1 min-w-[250px] bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
-                                            <div className="text-xs font-bold text-gray-500 mb-3 border-b pb-1">メンバーカード ブレードハート分布</div>
-                                            <div className="flex flex-wrap gap-3">
+                                        <div className="flex-1 bg-white p-1.5 rounded border border-gray-200 shadow-sm flex items-center overflow-x-auto no-scrollbar">
+                                            <div className="text-[10px] font-bold text-gray-500 mr-2 whitespace-nowrap">BH</div>
+                                            <div className="flex flex-wrap gap-1 md:gap-2">
                                                 {Object.keys(BH_SORT_ORDER).filter(k => k !== 'None').map(color => {
                                                     const count = deckStats.bhs[color] || 0;
                                                     if (count === 0) return null;
                                                     const style = BH_STYLES[color] || BH_STYLES['None'];
                                                     return (
-                                                        <div key={color} className="flex flex-col items-center">
-                                                            <span className={`w-6 h-6 rounded-full flex items-center justify-center shadow-sm ${style.bg}`}></span>
-                                                            <span className="text-sm font-bold text-gray-700 mt-1">{count}</span>
+                                                        <div key={color} className="flex items-center gap-0.5">
+                                                            <span className={`w-3.5 h-3.5 md:w-4 md:h-4 rounded-full flex items-center justify-center ${style.bg}`}></span>
+                                                            <span className="text-[10px] font-bold text-gray-700">{count}</span>
                                                         </div>
                                                     );
                                                 })}
                                                 {deckStats.bhs['None'] > 0 && (
-                                                    <div className="flex flex-col items-center">
-                                                        <span className="w-6 h-6 rounded-full flex items-center justify-center shadow-sm bg-gray-300"></span>
-                                                        <span className="text-sm font-bold text-gray-700 mt-1">{deckStats.bhs['None']}</span>
+                                                    <div className="flex items-center gap-0.5">
+                                                        <span className="w-3.5 h-3.5 md:w-4 md:h-4 rounded-full flex items-center justify-center bg-gray-300"></span>
+                                                        <span className="text-[10px] font-bold text-gray-700">{deckStats.bhs['None']}</span>
                                                     </div>
                                                 )}
-                                                {Object.keys(deckStats.bhs).every(k => deckStats.bhs[k] === 0) && <span className="text-sm text-gray-400">-</span>}
+                                                {Object.keys(deckStats.bhs).every(k => deckStats.bhs[k] === 0) && <span className="text-[10px] text-gray-400">-</span>}
                                             </div>
                                         </div>
                                     </div>
                                 )}
 
-                                {/* Card Display */}
                                 {actualViewMode === 'compact' && activeTab === 'deck' ? (
-                                    <div className="space-y-6">
-                                        {/* Member Section */}
+                                    <div className="space-y-4 md:space-y-6">
                                         {sortedDeckCards.member.length > 0 && (
                                             <div>
-                                                <h3 className="text-lg font-bold text-gray-700 border-b-2 border-blue-200 pb-1 mb-3">メンバーカード</h3>
-                                                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-1 px-1 pb-2">
+                                                <h3 className="text-sm md:text-lg font-bold text-gray-700 border-b-2 border-blue-200 pb-1 mb-2 md:mb-3">メンバーカード</h3>
+                                                <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 xl:grid-cols-14 gap-1 px-1 pb-2">
                                                     {sortedDeckCards.member.map((item, index) => renderCompactItem(item, index))}
                                                 </div>
                                             </div>
                                         )}
-                                        {/* Live Section */}
                                         {sortedDeckCards.live.length > 0 && (
                                             <div>
-                                                <h3 className="text-lg font-bold text-gray-700 border-b-2 border-pink-200 pb-1 mb-3 mt-4">ライブカード</h3>
-                                                <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-1 px-1 pb-2">
+                                                <h3 className="text-sm md:text-lg font-bold text-gray-700 border-b-2 border-pink-200 pb-1 mb-2 md:mb-3 mt-2 md:mt-4">ライブカード</h3>
+                                                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-1 px-1 pb-2">
                                                     {sortedDeckCards.live.map((item, index) => renderCompactItem(item, index))}
                                                 </div>
                                             </div>
@@ -981,20 +981,18 @@
                                     </div>
                                 ) : actualViewMode === 'grid' ? (
                                     activeTab === 'deck' ? (
-                                        <div className="space-y-8">
-                                            {/* Member Section */}
+                                        <div className="space-y-6 md:space-y-8">
                                             {sortedDeckCards.member.length > 0 && (
                                                 <div>
-                                                    <h3 className="text-xl font-bold text-gray-800 border-b-2 border-blue-200 pb-2 mb-4">メンバーカード</h3>
+                                                    <h3 className="text-base md:text-xl font-bold text-gray-800 border-b-2 border-blue-200 pb-1 md:pb-2 mb-3 md:mb-4">メンバーカード</h3>
                                                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-2 gap-y-6 md:gap-x-4 md:gap-y-8 px-1 pb-4">
                                                         {sortedDeckCards.member.map((item, index) => renderCardItem(item, index, true))}
                                                     </div>
                                                 </div>
                                             )}
-                                            {/* Live Section */}
                                             {sortedDeckCards.live.length > 0 && (
                                                 <div>
-                                                    <h3 className="text-xl font-bold text-gray-800 border-b-2 border-pink-200 pb-2 mb-4 mt-6">ライブカード</h3>
+                                                    <h3 className="text-base md:text-xl font-bold text-gray-800 border-b-2 border-pink-200 pb-1 md:pb-2 mb-3 md:mb-4 mt-4 md:mt-6">ライブカード</h3>
                                                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-2 gap-y-6 md:gap-x-4 md:gap-y-8 px-1 pb-4">
                                                         {sortedDeckCards.live.map((item, index) => renderCardItem(item, index, true))}
                                                     </div>
@@ -1009,7 +1007,6 @@
                                 ) : (
                                     activeTab === 'deck' ? (
                                         <div className="space-y-6">
-                                            {/* Member Table */}
                                             {sortedDeckCards.member.length > 0 && (
                                                 <div>
                                                     <h3 className="text-lg font-bold text-gray-700 border-b-2 border-blue-200 pb-1 mb-2">メンバーカード</h3>
@@ -1034,7 +1031,6 @@
                                                     </div>
                                                 </div>
                                             )}
-                                            {/* Live Table */}
                                             {sortedDeckCards.live.length > 0 && (
                                                 <div>
                                                     <h3 className="text-lg font-bold text-gray-700 border-b-2 border-pink-200 pb-1 mb-2 mt-4">ライブカード</h3>
@@ -1092,22 +1088,14 @@
                         )}
                     </div>
 
-                    {/* Image Modal */}
                     {selectedItem && (() => {
                         const sourceList = activeTab === 'deck' ? displayList : sortedData;
                         const currentIndex = sourceList.findIndex(item => item === selectedItem);
                         const hasPrev = currentIndex > 0;
                         const hasNext = currentIndex >= 0 && currentIndex < sourceList.length - 1;
 
-                        const handlePrev = (e) => {
-                            e.stopPropagation();
-                            if (hasPrev) setSelectedItem(sourceList[currentIndex - 1]);
-                        };
-
-                        const handleNext = (e) => {
-                            e.stopPropagation();
-                            if (hasNext) setSelectedItem(sourceList[currentIndex + 1]);
-                        };
+                        const handlePrev = (e) => { e.stopPropagation(); if (hasPrev) setSelectedItem(sourceList[currentIndex - 1]); };
+                        const handleNext = (e) => { e.stopPropagation(); if (hasNext) setSelectedItem(sourceList[currentIndex + 1]); };
                         
                         const isLiveModal = selectedItem._type === 'live';
                         const mDeckCount = getDeckCount(selectedItem);
@@ -1132,8 +1120,6 @@
 
                                 <div className="relative w-full max-w-lg flex flex-col items-center pointer-events-none">
                                     <div className="pointer-events-auto flex flex-col items-center w-full relative" onClick={e => e.stopPropagation()}>
-                                        
-                                        {/* Modal Deck Control */}
                                         <div className="absolute top-2 right-2 flex items-center gap-2 z-20 bg-black/80 rounded-full p-2 backdrop-blur-md border border-white/20">
                                             <button onClick={(e) => removeCardFromDeck(e, selectedItem)} disabled={mDeckCount === 0} className={`p-2 rounded-full transition-colors ${mDeckCount === 0 ? 'text-gray-500' : 'text-white hover:text-red-400 bg-white/10 hover:bg-white/20'}`}><Icons.Minus className="w-5 h-5 md:w-6 md:h-6"/></button>
                                             <span className="text-white text-base font-bold min-w-[32px] text-center">{mDeckCount}/4</span>
