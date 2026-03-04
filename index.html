@@ -132,7 +132,13 @@
                 baseStats: ['BaseStats', '基本ステータス', '基本値', 'Stats'],
                 maxStats: ['MaxStats', '最大ステータス', '最大値'],
                 image: ['ImageID', 'Image', '画像', '画像ID'],
-                noViewer: ['NoViewer', '非表示', 'NoView']
+                noViewer: ['NoViewer', '非表示', 'NoView'],
+                Pink: ['Pink', 'ピンク'],
+                Red: ['Red', 'レッド', '赤'],
+                Yellow: ['Yellow', 'イエロー', '黄'],
+                Green: ['Green', 'グリーン', '緑'],
+                Blue: ['Blue', 'ブルー', '青'],
+                Purple: ['Purple', 'パープル', '紫']
             },
             live: {
                 number: ['Number', 'No', 'No.', '番号', 'ID'],
@@ -149,7 +155,13 @@
                 bladeHeart: ['BladeHeart', 'ブレードハート', 'BH'],
                 keyword: ['Keyword', 'キーワード', '特徴'],
                 efficiency: ['Efficiency', '効率', 'Eff'],
-                noViewer: ['NoViewer', '非表示', 'NoView']
+                noViewer: ['NoViewer', '非表示', 'NoView'],
+                Pink: ['Pink', 'ピンク'],
+                Red: ['Red', 'レッド', '赤'],
+                Yellow: ['Yellow', 'イエロー', '黄'],
+                Green: ['Green', 'グリーン', '緑'],
+                Blue: ['Blue', 'ブルー', '青'],
+                Purple: ['Purple', 'パープル', '紫']
             }
         };
 
@@ -169,7 +181,12 @@
             ChevronRight: (p) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><polyline points="9 18 15 12 9 6"></polyline></svg>,
             Plus: (p) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
             Minus: (p) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
-            Maximize: (p) => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+            Maximize: (p) => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>,
+            Save: (p) => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>,
+            Trash: (p) => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>,
+            Copy: (p) => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>,
+            Download: (p) => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>,
+            Upload: (p) => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
         };
 
         // ==========================================
@@ -289,6 +306,41 @@
             );
         };
 
+        const ColorCountFilter = ({ filterColors, setFilterColors, onReset }) => {
+            const colors = ['Pink', 'Red', 'Yellow', 'Green', 'Blue', 'Purple'];
+            const isActive = colors.some(c => filterColors[c] !== '');
+            
+            const handleChange = (color, value) => {
+                setFilterColors(prev => ({ ...prev, [color]: value }));
+            };
+
+            return (
+                <div className="mb-4">
+                    <FilterHeader label="Color Count" onReset={onReset} isActive={isActive} />
+                    <div className="grid grid-cols-2 gap-2">
+                        {colors.map(color => {
+                            const style = BH_STYLES[color];
+                            return (
+                                <div key={color} className="flex items-center gap-1.5 border border-gray-200 rounded px-2 py-1.5 bg-white shadow-sm focus-within:ring-1 focus-within:ring-blue-500">
+                                    <span className={`w-3 h-3 rounded-full flex-shrink-0 ${style.bg}`}></span>
+                                    <span className="text-[10px] font-bold text-gray-600 w-10 flex-shrink-0">{color}</span>
+                                    <input 
+                                        type="number" 
+                                        min="0" 
+                                        placeholder="-"
+                                        value={filterColors[color]} 
+                                        onChange={(e) => handleChange(color, e.target.value)}
+                                        className="w-full text-xs outline-none bg-transparent font-medium"
+                                    />
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <p className="text-[10px] text-gray-400 mt-1.5 leading-tight">※空欄:条件なし / 0:含まない / 1以上:その数以上</p>
+                </div>
+            );
+        };
+
         const FilterPanel = ({ 
             isMobile, activeTab, setActiveTab,
             filterName, setFilterName,
@@ -297,6 +349,7 @@
             filterCosts, toggleCost, setFilterCosts,
             numericFilters, updateNumericFilter, setNumericFilters,
             filterBladeHeart, toggleBladeHeart, setFilterBladeHeart,
+            filterColors, setFilterColors,
             filterBaseStats, setFilterBaseStats, filterMaxStats, setFilterMaxStats,
             uniqueAbilities, uniqueKeywords,
             filterKeywords, toggleKeyword, setFilterKeywords,
@@ -326,16 +379,27 @@
                         </div>
                     ) : (
                         <>
-                            <div className="mb-4">
-                                <FilterHeader label="Keyword Search" onReset={() => setFilterName('')} isActive={filterName !== ''} />
-                                <div className="relative">
-                                    <input type="text" placeholder="名前・テキスト検索..." value={filterName} onChange={(e) => setFilterName(e.target.value)} className="w-full pl-9 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm" />
-                                    <div className="absolute left-3 top-2.5 text-gray-400"><Icons.Search /></div>
+                            {/* PC表示のみ、フィルターパネル内に検索ボックスを表示 */}
+                            {!isMobile && (
+                                <div className="mb-4">
+                                    <FilterHeader label="Keyword Search" onReset={() => setFilterName('')} isActive={filterName !== ''} />
+                                    <div className="relative">
+                                        <input type="text" placeholder="名前・テキスト検索..." value={filterName} onChange={(e) => setFilterName(e.target.value)} className="w-full pl-9 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm" />
+                                        <div className="absolute left-3 top-2.5 text-gray-400"><Icons.Search /></div>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             {uniqueContains.length > 0 && <TagFilter label="Contain" options={uniqueContains} filterState={filterContains} onChange={toggleContain} onReset={() => setFilterContains(initial3State())} />}
                             <ButtonGroupFilter label="Groups" options={GROUP_OPTIONS} filterState={filterGroups} onChange={toggleGroup} styles={GROUP_STYLES} defaultStyle={GROUP_STYLES["μ's"]} onReset={() => setFilterGroups(initial3State())} />
+                            
+                            {/* メンバー/ライブ共通の色カウントフィルター */}
+                            <ColorCountFilter 
+                                filterColors={filterColors} 
+                                setFilterColors={setFilterColors} 
+                                onReset={() => setFilterColors({ Pink: '', Red: '', Yellow: '', Green: '', Blue: '', Purple: '' })} 
+                            />
+
                             {uniqueAbilities.length > 0 && <TagFilter label="Ability" options={uniqueAbilities} filterState={filterAbilities} onChange={toggleAbility} onReset={() => setFilterAbilities(initial3State())} />}
 
                             {activeTab === 'member' && (
@@ -398,6 +462,14 @@
             const [deck, setDeck] = useState({ member: {}, live: {} });
             const [deckSortType, setDeckSortType] = useState('cost');
 
+            // --- Deck Manager States ---
+            const [isDeckManagerOpen, setIsDeckManagerOpen] = useState(false);
+            const [savedDecks, setSavedDecks] = useState({});
+            const [selectedDeckId, setSelectedDeckId] = useState('');
+            const [deckNameInput, setDeckNameInput] = useState('');
+            const [ioText, setIoText] = useState('');
+            const [toastMessage, setToastMessage] = useState('');
+
             const initial3State = () => ({ include: new Set(), exclude: new Set() });
 
             const [filterName, setFilterName] = useState('');
@@ -405,12 +477,25 @@
             const [filterGroups, setFilterGroups] = useState(initial3State());
             const [filterCosts, setFilterCosts] = useState(initial3State());
             const [filterBladeHeart, setFilterBladeHeart] = useState(initial3State()); 
+            const [filterColors, setFilterColors] = useState({ Pink: '', Red: '', Yellow: '', Green: '', Blue: '', Purple: '' });
             const [filterAbilities, setFilterAbilities] = useState(initial3State());
             const [filterKeywords, setFilterKeywords] = useState(initial3State()); 
             const [filterBaseStats, setFilterBaseStats] = useState({ min: '', max: '' });
             const [filterMaxStats, setFilterMaxStats] = useState({ min: '', max: '' });
             const [numericFilters, setNumericFilters] = useState({});
             const [sortConfig, setSortConfig] = useState({ key: 'cost', direction: 'asc' });
+
+            // Load saved decks from localStorage on mount
+            useEffect(() => {
+                try {
+                    const saved = localStorage.getItem('card_viewer_saved_decks');
+                    if (saved) {
+                        setSavedDecks(JSON.parse(saved));
+                    }
+                } catch (e) {
+                    console.error("Failed to load saved decks", e);
+                }
+            }, []);
 
             useEffect(() => {
                 const loadAllData = async () => {
@@ -437,17 +522,23 @@
                 else if (activeTab === 'live') setSortConfig({ key: 'score', direction: 'asc' });
             }, [activeTab]);
 
+            const showToast = (msg) => {
+                setToastMessage(msg);
+                setTimeout(() => setToastMessage(''), 3000);
+            };
+
             const resetAll = () => {
                 setFilterName(''); 
                 setFilterContains(initial3State()); setFilterGroups(initial3State()); 
                 setFilterCosts(initial3State()); setFilterBladeHeart(initial3State()); 
+                setFilterColors({ Pink: '', Red: '', Yellow: '', Green: '', Blue: '', Purple: '' });
                 setFilterAbilities(initial3State()); setFilterKeywords(initial3State());
                 setFilterBaseStats({ min: '', max: '' }); setFilterMaxStats({ min: '', max: '' });
                 setNumericFilters({});
             };
 
             const addCardToDeck = (e, item) => {
-                e.stopPropagation();
+                if (e) e.stopPropagation();
                 const type = item._type;
                 if (!type) return;
                 setDeck(prev => {
@@ -458,7 +549,7 @@
             };
 
             const removeCardFromDeck = (e, item) => {
-                e.stopPropagation();
+                if (e) e.stopPropagation();
                 const type = item._type;
                 if (!type) return;
                 setDeck(prev => {
@@ -506,6 +597,156 @@
                 return { costs, bhs, memberTotal, liveTotal };
             }, [deck]);
 
+            // --- Deck Management Functions ---
+            const rebuildDeck = (simplifiedDeck) => {
+                const newDeck = { member: {}, live: {} };
+                if (!simplifiedDeck) return newDeck;
+
+                const addCards = (type, dict) => {
+                    if (!dict) return;
+                    Object.entries(dict).forEach(([num, count]) => {
+                        const card = cardData[type].find(c => c.number === num);
+                        if (card) {
+                            newDeck[type][num] = { card: card, count: count };
+                        }
+                    });
+                };
+
+                addCards('member', simplifiedDeck.member);
+                addCards('live', simplifiedDeck.live);
+                return newDeck;
+            };
+
+            const handleSelectSavedDeck = (id) => {
+                if (!id) {
+                    setSelectedDeckId('');
+                    setDeckNameInput('');
+                } else {
+                    setSelectedDeckId(id);
+                    setDeckNameInput(savedDecks[id]?.name || '');
+                }
+            };
+
+            const handleSaveDeck = () => {
+                let name = deckNameInput.trim();
+                if (!name) {
+                    const now = new Date();
+                    name = `${now.getFullYear()}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getDate().toString().padStart(2,'0')} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+                }
+                
+                const simpleDeck = { name, member: {}, live: {} };
+                Object.keys(deck.member).forEach(k => simpleDeck.member[k] = deck.member[k].count);
+                Object.keys(deck.live).forEach(k => simpleDeck.live[k] = deck.live[k].count);
+                
+                const id = selectedDeckId || Date.now().toString();
+                const newSavedDecks = { ...savedDecks, [id]: simpleDeck };
+                
+                setSavedDecks(newSavedDecks);
+                try {
+                    localStorage.setItem('card_viewer_saved_decks', JSON.stringify(newSavedDecks));
+                    setSelectedDeckId(id);
+                    setDeckNameInput(name);
+                    showToast('デッキを保存しました');
+                } catch(e) {
+                    showToast('保存に失敗しました(容量制限等)');
+                }
+            };
+
+            const handleLoadDeck = () => {
+                if (!selectedDeckId || !savedDecks[selectedDeckId]) return;
+                const newDeck = rebuildDeck(savedDecks[selectedDeckId]);
+                setDeck(newDeck);
+                showToast(`「${savedDecks[selectedDeckId].name}」を読み込みました`);
+            };
+
+            const handleDeleteDeck = () => {
+                if (!selectedDeckId) return;
+                if (!confirm('このデッキを削除しますか？')) return;
+                
+                const newSavedDecks = { ...savedDecks };
+                delete newSavedDecks[selectedDeckId];
+                
+                setSavedDecks(newSavedDecks);
+                try {
+                    localStorage.setItem('card_viewer_saved_decks', JSON.stringify(newSavedDecks));
+                    setSelectedDeckId('');
+                    setDeckNameInput('');
+                    showToast('デッキを削除しました');
+                } catch(e) {}
+            };
+
+            const handleExportFile = () => {
+                const simpleDeck = { member: {}, live: {} };
+                Object.keys(deck.member).forEach(k => simpleDeck.member[k] = deck.member[k].count);
+                Object.keys(deck.live).forEach(k => simpleDeck.live[k] = deck.live[k].count);
+                
+                // Add name if present
+                if (deckNameInput.trim()) simpleDeck.name = deckNameInput.trim();
+                
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(simpleDeck, null, 2));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", (deckNameInput.trim() || "deck") + ".json");
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+                showToast('ファイルとしてダウンロードしました');
+            };
+
+            const handleImportFile = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const parsed = JSON.parse(event.target.result);
+                        if (!parsed.member && !parsed.live) throw new Error();
+                        const newDeck = rebuildDeck(parsed);
+                        setDeck(newDeck);
+                        if(parsed.name) setDeckNameInput(parsed.name);
+                        setSelectedDeckId('');
+                        showToast('ファイルからデッキを読み込みました');
+                    } catch(err) {
+                        showToast('無効なファイル形式です');
+                    }
+                };
+                reader.readAsText(file);
+                e.target.value = ''; // reset input
+            };
+
+            const handleExportText = () => {
+                const simpleDeck = { member: {}, live: {} };
+                Object.keys(deck.member).forEach(k => simpleDeck.member[k] = deck.member[k].count);
+                Object.keys(deck.live).forEach(k => simpleDeck.live[k] = deck.live[k].count);
+                setIoText(JSON.stringify(simpleDeck));
+                showToast('テキストデータを出力しました');
+            };
+
+            const handleImportText = () => {
+                try {
+                    const parsed = JSON.parse(ioText);
+                    if (!parsed.member && !parsed.live) throw new Error();
+                    const newDeck = rebuildDeck(parsed);
+                    setDeck(newDeck);
+                    setSelectedDeckId('');
+                    setDeckNameInput('');
+                    setIoText('');
+                    showToast('テキストデータからデッキを読み込みました');
+                } catch(e) {
+                    showToast('無効なデータ形式です');
+                }
+            };
+
+            const copyToClipboard = () => {
+                if (!ioText) return;
+                navigator.clipboard.writeText(ioText).then(() => {
+                    showToast('クリップボードにコピーしました');
+                }).catch(() => {
+                    showToast('コピーに失敗しました');
+                });
+            };
+
+            // --- Other Filters & Logic ---
             const toggle3State = (state, val, setter) => {
                 const nextInclude = new Set(state.include);
                 const nextExclude = new Set(state.exclude);
@@ -569,6 +810,37 @@
                     if (filterGroups.exclude.size > 0 && [...filterGroups.exclude].some(x => g.includes(x))) return false;
                     if (filterGroups.include.size > 0 && ![...filterGroups.include].some(x => g.includes(x))) return false;
 
+                    // Color Count Filter Logic
+                    // (専用カラムがあればそれを利用、なければ bladeHeart の文字列からカウント)
+                    const colorCounts = { Pink: 0, Red: 0, Yellow: 0, Green: 0, Blue: 0, Purple: 0 };
+                    if (item.Pink !== undefined || item.Red !== undefined) {
+                        colorCounts.Pink = parseInt(item.Pink) || 0;
+                        colorCounts.Red = parseInt(item.Red) || 0;
+                        colorCounts.Yellow = parseInt(item.Yellow) || 0;
+                        colorCounts.Green = parseInt(item.Green) || 0;
+                        colorCounts.Blue = parseInt(item.Blue) || 0;
+                        colorCounts.Purple = parseInt(item.Purple) || 0;
+                    } else if (item.bladeHeart) {
+                        const bhs = item.bladeHeart.split(/[,、\s]+/).map(s => s.trim().toLowerCase());
+                        bhs.forEach(bh => {
+                            const key = Object.keys(colorCounts).find(k => k.toLowerCase() === bh);
+                            if (key) colorCounts[key]++;
+                        });
+                    }
+
+                    for (const color of Object.keys(filterColors)) {
+                        const reqVal = filterColors[color];
+                        if (reqVal === '') continue; // 指定なし
+                        const reqNum = parseInt(reqVal, 10);
+                        if (isNaN(reqNum)) continue;
+                        
+                        if (reqNum === 0) {
+                            if (colorCounts[color] > 0) return false; // 0なら一つでも含まれていればNG
+                        } else {
+                            if (colorCounts[color] < reqNum) return false; // 指定数以上でなければNG
+                        }
+                    }
+
                     const a = item.ability ? item.ability.split(/[,、\s]+/).map(s=>s.trim()) : [];
                     if (filterAbilities.exclude.size > 0 && [...filterAbilities.exclude].some(x => a.includes(x))) return false;
                     if (filterAbilities.include.size > 0 && ![...filterAbilities.include].some(x => a.includes(x))) return false;
@@ -607,7 +879,7 @@
                     }
                     return true;
                 });
-            }, [currentTabData, filterName, filterContains, filterGroups, filterCosts, filterBladeHeart, filterAbilities, filterKeywords, filterBaseStats, filterMaxStats, numericFilters, activeTab]);
+            }, [currentTabData, filterName, filterContains, filterGroups, filterCosts, filterBladeHeart, filterColors, filterAbilities, filterKeywords, filterBaseStats, filterMaxStats, numericFilters, activeTab]);
 
             const sortedData = useMemo(() => {
                 let items = [...filteredData];
@@ -679,13 +951,24 @@
                 add3StateFilters(filterCosts, 'c', 'Cost', setFilterCosts);
                 add3StateFilters(filterBladeHeart, 'bh', 'BH', setFilterBladeHeart);
 
+                Object.entries(filterColors).forEach(([color, val]) => {
+                    if (val !== '') {
+                        list.push({ 
+                            id: `color-${color}`, 
+                            label: `${color}: ${val === '0' ? '0(含まない)' : val + '以上'}`, 
+                            fn: () => setFilterColors(p => ({ ...p, [color]: '' })), 
+                            isExclude: val === '0' 
+                        });
+                    }
+                });
+
                 const addRange = (obj, label, setter) => { if(obj.min || obj.max) list.push({ id: label, label: `${label}: ${obj.min||'0'}~${obj.max||'∞'}`, fn: () => setter({min:'',max:''}), isExclude: false }); };
                 addRange(filterBaseStats, 'Base', setFilterBaseStats);
                 addRange(filterMaxStats, 'Max', setFilterMaxStats);
                 Object.entries(numericFilters).forEach(([k, v]) => { if (v.min || v.max) list.push({ id: k, label: `${k}: ${v.min||'0'}~${v.max||'∞'}`, fn: () => updateNumFilter(k, 'min', '') || updateNumFilter(k, 'max', ''), isExclude: false }); });
                 
                 return list;
-            }, [filterName, filterContains, filterGroups, filterCosts, filterBladeHeart, filterAbilities, filterKeywords, filterBaseStats, filterMaxStats, numericFilters]);
+            }, [filterName, filterContains, filterGroups, filterCosts, filterBladeHeart, filterColors, filterAbilities, filterKeywords, filterBaseStats, filterMaxStats, numericFilters]);
 
             const filterProps = {
                 isMobile: false, activeTab, setActiveTab,
@@ -696,6 +979,7 @@
                 filterKeywords, toggleKeyword: (v)=>toggle3State(filterKeywords,v,setFilterKeywords), setFilterKeywords,
                 filterCosts, toggleCost: (v)=>toggle3State(filterCosts,v,setFilterCosts), setFilterCosts,
                 filterBladeHeart, toggleBladeHeart: (v)=>toggle3State(filterBladeHeart,v,setFilterBladeHeart), setFilterBladeHeart,
+                filterColors, setFilterColors,
                 filterBaseStats, setFilterBaseStats, filterMaxStats, setFilterMaxStats,
                 numericFilters, updateNumericFilter: updateNumFilter, setNumericFilters,
                 uniqueAbilities, uniqueKeywords, uniqueContains, resetFilters: resetAll, initial3State,
@@ -834,7 +1118,16 @@
             };
 
             return (
-                <div className="min-h-screen flex flex-col md:flex-row">
+                <div className="min-h-screen flex flex-col md:flex-row relative">
+                    
+                    {/* Toast Notification */}
+                    {toastMessage && (
+                        <div className="fixed top-4 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-xl z-[60] text-sm font-bold animate-fade-in-down flex items-center gap-2">
+                            <Icons.Alert className="w-4 h-4 text-green-400" />
+                            {toastMessage}
+                        </div>
+                    )}
+
                     <div className="md:hidden sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
                         <div className="flex items-center justify-between px-4 py-3">
                             <h1 className="text-xl font-bold text-gray-800 flex items-center gap-1"><span className="text-blue-600">Card</span>List</h1>
@@ -853,6 +1146,26 @@
                                 <button onClick={() => setActiveTab('deck')} className={`flex-1 py-1.5 rounded-md transition-colors ${activeTab === 'deck' ? 'bg-gray-800 shadow text-white' : 'text-gray-500'}`}>デッキ</button>
                             </div>
                         </div>
+
+                        {activeTab !== 'deck' && (
+                            <div className="px-4 pb-3">
+                                <div className="relative shadow-sm">
+                                    <input 
+                                        type="text" 
+                                        placeholder="名前・テキスト検索..." 
+                                        value={filterName} 
+                                        onChange={(e) => setFilterName(e.target.value)} 
+                                        className="w-full pl-9 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none text-sm bg-gray-50" 
+                                    />
+                                    <div className="absolute left-3 top-2.5 text-gray-400"><Icons.Search className="w-4 h-4" /></div>
+                                    {filterName && (
+                                        <button onClick={() => setFilterName('')} className="absolute right-3 top-2.5 text-gray-400 hover:text-red-500 transition-colors">
+                                            <Icons.Close className="w-4 h-4" />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
                         {!isMobileFilterOpen && activeFilters.length > 0 && activeTab !== 'deck' && (
                             <div className="px-4 pb-3 flex gap-2 overflow-x-auto no-scrollbar">
@@ -874,6 +1187,100 @@
                     </aside>
 
                     <div className="flex-1 p-4 md:p-6 bg-gray-50 min-h-screen">
+                        
+                        {/* Deck Manager UI */}
+                        {activeTab === 'deck' && (
+                            <div className="mb-6 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                                <div 
+                                    className="flex items-center justify-between p-4 cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors"
+                                    onClick={() => setIsDeckManagerOpen(!isDeckManagerOpen)}
+                                >
+                                    <div className="font-bold text-gray-700 flex items-center gap-2">
+                                        <Icons.Save className="w-5 h-5 text-blue-600" />
+                                        デッキデータの保存 / 読み込み / 出力
+                                    </div>
+                                    <div className="text-gray-400">
+                                        {isDeckManagerOpen ? <Icons.Minus className="w-5 h-5" /> : <Icons.Plus className="w-5 h-5" />}
+                                    </div>
+                                </div>
+                                
+                                {isDeckManagerOpen && (
+                                    <div className="p-4 sm:p-5 border-t border-gray-200">
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+                                            {/* Local Storage Manager */}
+                                            <div className="space-y-4">
+                                                <h4 className="text-sm font-bold text-gray-700 flex items-center gap-1.5 border-b border-gray-100 pb-2">
+                                                    <Icons.Save className="w-4 h-4 text-gray-500"/> 端末に保存・読み込み
+                                                </h4>
+                                                
+                                                <div className="flex items-center gap-2">
+                                                    <select 
+                                                        value={selectedDeckId} 
+                                                        onChange={e => handleSelectSavedDeck(e.target.value)}
+                                                        className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    >
+                                                        <option value="">-- 新規として保存 --</option>
+                                                        {Object.entries(savedDecks).map(([id, d]) => (
+                                                            <option key={id} value={id}>{d.name}</option>
+                                                        ))}
+                                                    </select>
+                                                    {selectedDeckId && (
+                                                        <>
+                                                            <button onClick={handleLoadDeck} className="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 font-bold whitespace-nowrap shadow-sm transition-colors">読込</button>
+                                                            <button onClick={handleDeleteDeck} className="px-3 py-2 bg-red-50 text-red-600 border border-red-200 rounded text-sm hover:bg-red-100 transition-colors"><Icons.Trash className="w-4 h-4"/></button>
+                                                        </>
+                                                    )}
+                                                </div>
+                                                
+                                                <div className="flex items-center gap-2">
+                                                    <input 
+                                                        type="text" 
+                                                        placeholder="デッキ名（未記入で現在日時）" 
+                                                        value={deckNameInput} 
+                                                        onChange={e => setDeckNameInput(e.target.value)}
+                                                        className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    />
+                                                    <button onClick={handleSaveDeck} className={`px-4 py-2 text-white rounded text-sm font-bold whitespace-nowrap shadow-sm transition-colors ${selectedDeckId ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-green-600 hover:bg-green-700'}`}>
+                                                        {selectedDeckId ? '上書き保存' : '新規保存'}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            
+                                            {/* File & Text IO Manager */}
+                                            <div className="space-y-4">
+                                                <h4 className="text-sm font-bold text-gray-700 flex items-center gap-1.5 border-b border-gray-100 pb-2">
+                                                    <Icons.Copy className="w-4 h-4 text-gray-500"/> ファイル / テキスト入出力
+                                                </h4>
+                                                
+                                                <div className="flex gap-2">
+                                                    <button onClick={handleExportFile} className="flex-1 py-2 bg-white border border-gray-300 rounded text-sm hover:bg-gray-50 font-medium transition-colors shadow-sm flex items-center justify-center gap-1.5"><Icons.Download className="w-4 h-4" />ファイルに出力</button>
+                                                    <label className="flex-1 py-2 bg-gray-800 text-white rounded text-sm hover:bg-gray-900 font-medium transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
+                                                        <Icons.Upload className="w-4 h-4" />ファイルから読込
+                                                        <input type="file" accept=".json,.txt" className="hidden" onChange={handleImportFile} />
+                                                    </label>
+                                                </div>
+
+                                                <div>
+                                                    <div className="text-xs text-gray-500 mb-1.5">またはテキストデータでコピー＆ペースト：</div>
+                                                    <textarea 
+                                                        value={ioText}
+                                                        onChange={e => setIoText(e.target.value)}
+                                                        placeholder="ここにエクスポートされたデータが表示されます。インポートする場合はここにデータを貼り付けてください。"
+                                                        className="w-full h-16 px-3 py-2 border border-gray-300 rounded text-xs resize-none font-mono focus:outline-none focus:ring-2 focus:ring-gray-800 bg-gray-50 mb-2"
+                                                    />
+                                                    <div className="flex gap-2">
+                                                        <button onClick={handleExportText} className="flex-1 py-1.5 bg-white border border-gray-300 rounded text-xs hover:bg-gray-50 font-medium transition-colors shadow-sm">テキスト出力</button>
+                                                        <button onClick={handleImportText} className="flex-1 py-1.5 bg-white border border-gray-300 rounded text-xs hover:bg-gray-50 font-medium transition-colors shadow-sm">テキスト読込</button>
+                                                        <button onClick={copyToClipboard} title="テキストをコピー" className="px-3 py-1.5 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors shadow-sm"><Icons.Copy className="w-4 h-4 text-gray-600"/></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
                             <div className="text-xs md:text-sm text-gray-500">
                                 {activeTab === 'deck' ? (
@@ -1101,52 +1508,61 @@
                         const mDeckCount = getDeckCount(selectedItem);
 
                         return (
-                            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 p-4" onClick={() => setSelectedItem(null)}>
-                                <button className="fixed top-4 right-4 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-2 z-50 transition-colors" onClick={(e) => { e.stopPropagation(); setSelectedItem(null); }}>
-                                    <Icons.Close className="w-6 h-6" />
-                                </button>
-                                
-                                {hasPrev && (
-                                    <button className="fixed left-2 md:left-8 top-1/2 -translate-y-1/2 text-white/50 hover:text-white bg-black/50 hover:bg-black/80 rounded-full p-2 md:p-3 z-50 transition-all" onClick={handlePrev}>
-                                        <Icons.ChevronLeft className="w-8 h-8 md:w-10 md:h-10" />
-                                    </button>
-                                )}
-
-                                {hasNext && (
-                                    <button className="fixed right-2 md:right-8 top-1/2 -translate-y-1/2 text-white/50 hover:text-white bg-black/50 hover:bg-black/80 rounded-full p-2 md:p-3 z-50 transition-all" onClick={handleNext}>
-                                        <Icons.ChevronRight className="w-8 h-8 md:w-10 md:h-10" />
-                                    </button>
-                                )}
-
-                                <div className="relative w-full max-w-lg flex flex-col items-center pointer-events-none">
-                                    <div className="pointer-events-auto flex flex-col items-center w-full relative" onClick={e => e.stopPropagation()}>
-                                        <div className="absolute top-2 right-2 flex items-center gap-2 z-20 bg-black/80 rounded-full p-2 backdrop-blur-md border border-white/20">
-                                            <button onClick={(e) => removeCardFromDeck(e, selectedItem)} disabled={mDeckCount === 0} className={`p-2 rounded-full transition-colors ${mDeckCount === 0 ? 'text-gray-500' : 'text-white hover:text-red-400 bg-white/10 hover:bg-white/20'}`}><Icons.Minus className="w-5 h-5 md:w-6 md:h-6"/></button>
-                                            <span className="text-white text-base font-bold min-w-[32px] text-center">{mDeckCount}/4</span>
-                                            <button onClick={(e) => addCardToDeck(e, selectedItem)} disabled={mDeckCount >= 4} className={`p-2 rounded-full transition-colors ${mDeckCount >= 4 ? 'text-gray-500 bg-black/40 cursor-not-allowed' : 'text-white hover:text-green-400 bg-white/10 hover:bg-white/20'}`}><Icons.Plus className="w-5 h-5 md:w-6 md:h-6"/></button>
-                                        </div>
-
+                            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 p-4 sm:p-8" onClick={() => setSelectedItem(null)}>
+                                <div className="flex flex-col items-center w-full h-full max-w-6xl">
+                                    
+                                    <div className="flex-1 min-h-0 w-full flex items-center justify-center mb-4 sm:mb-8">
                                         <SafeImage 
                                             src={getImageUrl(selectedItem.image)} 
                                             alt={selectedItem.name} 
-                                            className="max-w-full max-h-[60vh] object-contain rounded-lg shadow-2xl mb-6" 
+                                            className="max-w-full max-h-full object-contain rounded-lg shadow-2xl bg-white/5" 
                                             onError={(e) => { if (!e.target.dataset.triedFallback) { e.target.dataset.triedFallback = "true"; e.target.src = getFallbackUrl(selectedItem.image); } else { e.target.src = 'https://placehold.co/400x600?text=No+Image'; } }} 
                                         />
-                                        <div className="text-white text-center w-full">
-                                            <h3 className="text-xl font-bold mb-2">{selectedItem.name}</h3>
-                                            {!isLiveModal ? (
-                                                <div className="flex justify-center items-center gap-6 text-sm bg-white/10 px-6 py-3 rounded-xl backdrop-blur-sm mx-auto inline-flex">
-                                                    <div className="text-center"><span className="block text-white/50 text-[10px] uppercase mb-0.5">Cost</span><span className="text-xl font-bold">{selectedItem.cost}</span></div>
-                                                    <div className="w-px h-8 bg-white/20"></div>
-                                                    <div className="text-center"><span className="block text-white/50 text-[10px] uppercase mb-0.5">Base / Max</span><div className="text-lg font-bold">{selectedItem.baseStats} <span className="text-white/30">/</span> <span className="text-blue-300">{selectedItem.maxStats}</span></div></div>
-                                                </div>
-                                            ) : (
-                                                <div className="flex justify-center items-center gap-6 text-sm bg-white/10 px-6 py-3 rounded-xl backdrop-blur-sm mx-auto inline-flex">
-                                                    <div className="text-center"><span className="block text-white/50 text-[10px] uppercase mb-0.5">Score</span><span className="text-xl font-bold text-pink-300">{selectedItem.score}/{selectedItem.maxScore}</span></div>
-                                                    <div className="w-px h-8 bg-white/20"></div>
-                                                    <div className="text-center"><span className="block text-white/50 text-[10px] uppercase mb-0.5">Cost</span><span className="text-lg font-bold">{selectedItem.req}/{selectedItem.effReq}</span></div>
-                                                </div>
-                                            )}
+                                    </div>
+
+                                    <div className="flex-shrink-0 w-full flex flex-col items-center">
+                                        <h3 className="text-white text-xl sm:text-2xl font-bold mb-4 text-center px-4 leading-tight">{selectedItem.name}</h3>
+                                        
+                                        {!isLiveModal ? (
+                                            <div className="flex justify-center items-center gap-6 sm:gap-8 text-base bg-white/10 px-8 py-3 sm:py-4 rounded-xl backdrop-blur-sm mx-auto mb-6">
+                                                <div className="text-center"><span className="block text-white/50 text-xs uppercase mb-1">Cost</span><span className="text-2xl sm:text-3xl font-bold text-white">{selectedItem.cost}</span></div>
+                                                <div className="w-px h-10 sm:h-12 bg-white/20"></div>
+                                                <div className="text-center"><span className="block text-white/50 text-xs uppercase mb-1">Base / Max</span><div className="text-xl sm:text-2xl font-bold text-white">{selectedItem.baseStats} <span className="text-white/30">/</span> <span className="text-blue-300">{selectedItem.maxStats}</span></div></div>
+                                            </div>
+                                        ) : (
+                                            <div className="flex justify-center items-center gap-6 sm:gap-8 text-base bg-white/10 px-8 py-3 sm:py-4 rounded-xl backdrop-blur-sm mx-auto mb-6">
+                                                <div className="text-center"><span className="block text-white/50 text-xs uppercase mb-1">Score</span><span className="text-2xl sm:text-3xl font-bold text-pink-300">{selectedItem.score}/{selectedItem.maxScore}</span></div>
+                                                <div className="w-px h-10 sm:h-12 bg-white/20"></div>
+                                                <div className="text-center"><span className="block text-white/50 text-xs uppercase mb-1">Cost</span><span className="text-xl sm:text-2xl font-bold text-white">{selectedItem.req}/{selectedItem.effReq}</span></div>
+                                            </div>
+                                        )}
+
+                                        <div className="flex items-center justify-center w-full max-w-[480px] gap-6 px-2 pb-2 sm:pb-4">
+                                            <button 
+                                                onClick={handlePrev} 
+                                                disabled={!hasPrev}
+                                                className={`flex items-center justify-center p-4 sm:p-5 rounded-full transition-all ${hasPrev ? 'text-white bg-white/10 hover:bg-white/20' : 'text-white/10 bg-transparent cursor-not-allowed'}`}
+                                            >
+                                                <Icons.ChevronLeft className="w-8 h-8 sm:w-10 sm:h-10" />
+                                            </button>
+
+                                            <div className="flex items-center gap-4 sm:gap-6 bg-white/10 rounded-full p-2 sm:p-3 backdrop-blur-md">
+                                                <button onClick={(e) => removeCardFromDeck(e, selectedItem)} disabled={mDeckCount === 0} className={`p-3 sm:p-4 rounded-full transition-colors ${mDeckCount === 0 ? 'text-white/20' : 'text-white hover:text-red-400 bg-white/10 hover:bg-white/20'}`}>
+                                                    <Icons.Minus className="w-6 h-6 sm:w-8 sm:h-8"/>
+                                                </button>
+                                                <span className="text-white text-2xl sm:text-3xl font-bold min-w-[48px] text-center">{mDeckCount}/4</span>
+                                                <button onClick={(e) => addCardToDeck(e, selectedItem)} disabled={mDeckCount >= 4} className={`p-3 sm:p-4 rounded-full transition-colors ${mDeckCount >= 4 ? 'text-white/20 cursor-not-allowed' : 'text-white hover:text-green-400 bg-white/10 hover:bg-white/20'}`}>
+                                                    <Icons.Plus className="w-6 h-6 sm:w-8 sm:h-8"/>
+                                                </button>
+                                            </div>
+
+                                            <button 
+                                                onClick={handleNext} 
+                                                disabled={!hasNext}
+                                                className={`flex items-center justify-center p-4 sm:p-5 rounded-full transition-all ${hasNext ? 'text-white bg-white/10 hover:bg-white/20' : 'text-white/10 bg-transparent cursor-not-allowed'}`}
+                                            >
+                                                <Icons.ChevronRight className="w-8 h-8 sm:w-10 sm:h-10" />
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
