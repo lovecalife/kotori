@@ -56,9 +56,9 @@ const ConsiderationCardItem = ({ item, onRemove, onAdd, isCompact = false }) => 
 const CompactCardItem = ({ item, deckCount, onSelect, cols = 8 }) => {
     const isLive = item._type === 'live';
     // 列数に反比例してバッジサイズをスケール（列数が少ない＝カード大きい＝バッジも大きく）
-    const badgeFontSize = Math.max(12, Math.min(32, Math.round(240 / cols)));
-    const badgePadH    = Math.max(4,  Math.min(14, Math.round(110 / cols)));
-    const badgePadV    = Math.max(2,  Math.min(10, Math.round(70 / cols)));
+    const badgeFontSize = Math.max(10, Math.min(26, Math.round(192 / cols)));
+    const badgePadH    = Math.max(3,  Math.min(11, Math.round(88 / cols)));
+    const badgePadV    = Math.max(2,  Math.min(8,  Math.round(56 / cols)));
     return (
         <div className="relative group cursor-pointer flex flex-col items-center z-10 hover:z-40" onClick={() => item.image && onSelect(item)}>
             <div className={`relative w-full ${isLive ? 'aspect-[16/9]' : 'aspect-[3/4]'} rounded-sm overflow-hidden bg-gray-200 transition-transform duration-300 group-hover:scale-105`}>
@@ -81,8 +81,8 @@ const CompactCardItem = ({ item, deckCount, onSelect, cols = 8 }) => {
                 )}
             </div>
             <div
-                className="absolute bottom-0 right-0 bg-black text-white font-bold rounded-tl shadow-md z-30 opacity-90 pointer-events-none"
-                style={{ fontSize: `${badgeFontSize}px`, padding: `${badgePadV}px ${badgePadH}px` }}
+                className="absolute bottom-0 right-0 font-bold rounded-tl z-30 pointer-events-none"
+                style={{ fontSize: `${badgeFontSize}px`, padding: `${badgePadV}px ${badgePadH}px`, background: 'rgba(240,240,240,0.72)', color: '#374151' }}
             >
                 {deckCount}
             </div>
