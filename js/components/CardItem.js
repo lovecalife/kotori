@@ -55,10 +55,15 @@ const ConsiderationCardItem = ({ item, onRemove, onAdd, isCompact = false }) => 
 // カード画像とデッキ枚数だけを表示する小型ビュー
 const CompactCardItem = ({ item, deckCount, onSelect, cols = 8 }) => {
     const isLive = item._type === 'live';
-    // 列数に反比例してバッジサイズをスケール（列数が少ない＝カード大きい＝バッジも大きく）
-    const badgeFontSize = Math.max(10, Math.min(26, Math.round(192 / cols)));
-    const badgePadH    = Math.max(3,  Math.min(11, Math.round(88 / cols)));
-    const badgePadV    = Math.max(2,  Math.min(8,  Math.round(56 / cols)));
+    // バッジサイズ: min(px上限, vw基準) でモバイルでも破綻しない
+    // vwはビューポート幅に対する割合 → カード幅 ≈ 100vw/cols なので
+    // フォントをカード幅の約22%、パディングも比例させる
+    const fsPx = Math.min(26, Math.round(192 / cols));          // デスクトップ上限
+    const fsVw = ((100 / cols) * 0.22).toFixed(2);              // カード幅の22% in vw
+    const phPx = Math.min(11, Math.round(88 / cols));
+    const phVw = ((100 / cols) * 0.09).toFixed(2);
+    const pvPx = Math.min(8,  Math.round(56 / cols));
+    const pvVw = ((100 / cols) * 0.06).toFixed(2);
     return (
         <div className="relative group cursor-pointer flex flex-col items-center z-10 hover:z-40" onClick={() => item.image && onSelect(item)}>
             <div className={`relative w-full ${isLive ? 'aspect-[16/9]' : 'aspect-[3/4]'} rounded-sm overflow-hidden bg-gray-200 transition-transform duration-300 group-hover:scale-105`}>
@@ -82,7 +87,12 @@ const CompactCardItem = ({ item, deckCount, onSelect, cols = 8 }) => {
             </div>
             <div
                 className="absolute bottom-0 right-0 font-bold rounded-tl z-30 pointer-events-none"
-                style={{ fontSize: `${badgeFontSize}px`, padding: `${badgePadV}px ${badgePadH}px`, background: 'rgba(240,240,240,0.72)', color: '#374151' }}
+                style={{
+                    fontSize: `min(${fsPx}px, ${fsVw}vw)`,
+                    padding: `min(${pvPx}px, ${pvVw}vw) min(${phPx}px, ${phVw}vw)`,
+                    background: 'rgba(0,0,0,0.52)',
+                    color: '#ffffff'
+                }}
             >
                 {deckCount}
             </div>
