@@ -14,6 +14,13 @@ const App = () => {
 
     const [deck, setDeck] = useState({ member: {}, live: {} });
     const [deckSortType, setDeckSortType] = useState('cost');
+    const [consideration, setConsideration] = useState({ member: {}, live: {} });
+    const [deckCardSize, setDeckCardSize] = useState(() => {
+        try { return parseInt(localStorage.getItem('card_viewer_deck_card_size')) || 140; } catch(e) { return 140; }
+    });
+    const [compactCardSize, setCompactCardSize] = useState(() => {
+        try { return parseInt(localStorage.getItem('card_viewer_compact_card_size')) || 70; } catch(e) { return 70; }
+    });
 
     const [isDeckManagerOpen, setIsDeckManagerOpen] = useState(false);
     const [savedDecks, setSavedDecks] = useState({});
@@ -77,6 +84,27 @@ const App = () => {
                 } catch (e) {
                     console.error("Failed to load autosave deck", e);
                 }
+
+                // 検討リストの復元
+                try {
+                    const considerStr = localStorage.getItem('card_viewer_consideration');
+                    if (considerStr) {
+                        const parsed = JSON.parse(considerStr);
+                        const newConsideration = { member: {}, live: {} };
+                        const addConsider = (type, nums, sourceData) => {
+                            if (!nums) return;
+                            nums.forEach(num => {
+                                const card = sourceData.find(c => c.number === num);
+                                if (card) newConsideration[type][num] = card;
+                            });
+                        };
+                        addConsider('member', parsed.member, normMem);
+                        addConsider('live', parsed.live, normLiv);
+                        setConsideration(newConsideration);
+                    }
+                } catch (e) {
+                    console.error("Failed to load consideration", e);
+                }
             } catch (err) {
                 console.error(err);
                 setError(err.message);
@@ -99,6 +127,30 @@ const App = () => {
             console.error("Failed to autosave deck", e);
         }
     }, [deck, loading]);
+
+    // 検討リスト変更時にオートセーブ
+    useEffect(() => {
+        if (loading) return;
+        const simpleConsider = {
+            member: Object.keys(consideration.member),
+            live: Object.keys(consideration.live)
+        };
+        try {
+            localStorage.setItem('card_viewer_consideration', JSON.stringify(simpleConsider));
+        } catch(e) {
+            console.error("Failed to autosave consideration", e);
+        }
+    }, [consideration, loading]);
+
+    // deckCardSize 変更時に保存
+    useEffect(() => {
+        try { localStorage.setItem('card_viewer_deck_card_size', String(deckCardSize)); } catch(e) {}
+    }, [deckCardSize]);
+
+    // compactCardSize 変更時に保存
+    useEffect(() => {
+        try { localStorage.setItem('card_viewer_compact_card_size', String(compactCardSize)); } catch(e) {}
+    }, [compactCardSize]);
 
     // タブ切り替え時にソート設定をリセット
     useEffect(() => {
@@ -126,25 +178,52 @@ const App = () => {
             if (currentCount >= 4) return prev;
             return { ...prev, [type]: { ...prev[type], [item.number]: { card: item, count: currentCount + 1 } } };
         });
+        // 検討リストにある場合は削除
+        if (consideration[type]?.[item.number]) {
+            setConsideration(prev => {
+                const next = { ...prev, [type]: { ...prev[type] } };
+                delete next[type][item.number];
+                return next;
+            });
+        }
     };
 
     const removeCardFromDeck = (e, item) => {
         if (e) e.stopPropagation();
         const type = item._type;
         if (!type) return;
+        const currentCount = deck[type][item.number]?.count || 0;
+        if (currentCount <= 0) return;
+
         setDeck(prev => {
-            const currentCount = prev[type][item.number]?.count || 0;
-            if (currentCount <= 0) return prev;
             const nextTypeDeck = { ...prev[type] };
             if (currentCount === 1) delete nextTypeDeck[item.number];
             else nextTypeDeck[item.number] = { card: item, count: currentCount - 1 };
             return { ...prev, [type]: nextTypeDeck };
         });
+
+        // 枚数が0になったら検討リストへ（まだ未登録の場合のみ）
+        if (currentCount === 1 && !consideration[type][item.number]) {
+            setConsideration(prev => ({
+                ...prev,
+                [type]: { ...prev[type], [item.number]: item }
+            }));
+        }
     };
 
     const getDeckCount = (item) => {
         if (!item || !item._type || !item.number) return 0;
         return deck[item._type][item.number]?.count || 0;
+    };
+
+    const removeFromConsideration = (item) => {
+        const type = item._type;
+        if (!type) return;
+        setConsideration(prev => {
+            const next = { ...prev, [type]: { ...prev[type] } };
+            delete next[type][item.number];
+            return next;
+        });
     };
 
     const handleClearDeck = () => {
@@ -532,6 +611,19 @@ const App = () => {
         return { member: members, live: lives };
     }, [deck, activeTab, deckSortType]);
 
+    const sortedConsiderationCards = useMemo(() => {
+        if (activeTab !== 'deck') return { member: [], live: [] };
+        const sortFn = (a, b) => {
+            const costA = parseInt(a.cost || a.req) || 0;
+            const costB = parseInt(b.cost || b.req) || 0;
+            if (costA !== costB) return costA - costB;
+            return (a.number || '').localeCompare(b.number || '');
+        };
+        const members = Object.values(consideration.member).sort(sortFn);
+        const lives = Object.values(consideration.live).sort(sortFn);
+        return { member: members, live: lives };
+    }, [consideration, activeTab]);
+
     const displayList = activeTab === 'deck' ? [...sortedDeckCards.member, ...sortedDeckCards.live] : sortedData;
     const actualViewMode = (activeTab !== 'deck' && viewMode === 'compact') ? 'grid' : viewMode;
 
@@ -634,13 +726,13 @@ const App = () => {
             <div>
                 <h3 className={`text-base md:text-xl font-bold text-gray-800 border-b-2 ${borderColor} pb-1 md:pb-2 mb-3 md:mb-4`}>{title}</h3>
                 {actualViewMode === 'compact' ? (
-                    <div className={`grid gap-1 px-1 pb-2 ${isMember ? 'grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 xl:grid-cols-14' : 'grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12'}`}>
+                    <div className="grid gap-1 px-1 pb-2" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${compactCardSize}px, 1fr))` }}>
                         {items.map((item, index) => (
                             <CompactCardItem key={`${item.number}-${index}`} item={item} deckCount={getDeckCount(item)} onSelect={setSelectedItem} />
                         ))}
                     </div>
                 ) : actualViewMode === 'grid' ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-2 gap-y-6 md:gap-x-4 md:gap-y-8 px-1 pb-4">
+                    <div className="grid gap-x-2 gap-y-6 md:gap-x-3 md:gap-y-8 px-1 pb-4" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${deckCardSize}px, 1fr))` }}>
                         {items.map((item, index) => (
                             <CardItem key={`${item.number}-${index}`} item={item} deckCount={getDeckCount(item)} onAdd={addCardToDeck} onRemove={removeCardFromDeck} onSelect={setSelectedItem} abilitiesList={getAbilitiesList(item)} asGrid={true} />
                         ))}
@@ -804,6 +896,20 @@ const App = () => {
                                 )}
                             </select>
                         )}
+                        {activeTab === 'deck' && actualViewMode === 'grid' && (
+                            <div className="flex items-center bg-white border border-gray-300 rounded px-1" title="カードサイズ調整">
+                                <button onClick={() => setDeckCardSize(s => Math.max(80, s - 20))} className="p-1.5 text-gray-500 hover:text-gray-800 transition-colors" title="小さく"><Icons.Minus style={{width:14,height:14}}/></button>
+                                <span className="text-[10px] text-gray-400 select-none px-0.5">SIZE</span>
+                                <button onClick={() => setDeckCardSize(s => Math.min(280, s + 20))} className="p-1.5 text-gray-500 hover:text-gray-800 transition-colors" title="大きく"><Icons.Plus style={{width:14,height:14}}/></button>
+                            </div>
+                        )}
+                        {activeTab === 'deck' && actualViewMode === 'compact' && (
+                            <div className="flex items-center bg-white border border-gray-300 rounded px-1" title="コンパクトカードサイズ調整">
+                                <button onClick={() => setCompactCardSize(s => Math.max(40, s - 10))} className="p-1.5 text-gray-500 hover:text-gray-800 transition-colors" title="小さく"><Icons.Minus style={{width:14,height:14}}/></button>
+                                <span className="text-[10px] text-gray-400 select-none px-0.5">SIZE</span>
+                                <button onClick={() => setCompactCardSize(s => Math.min(140, s + 10))} className="p-1.5 text-gray-500 hover:text-gray-800 transition-colors" title="大きく"><Icons.Plus style={{width:14,height:14}}/></button>
+                            </div>
+                        )}
                         <div className="flex bg-white rounded border border-gray-300 p-0.5">
                             {activeTab === 'deck' && (
                                 <button onClick={() => setViewMode('compact')} className={`p-1.5 rounded transition-all ${actualViewMode === 'compact' ? 'bg-gray-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`} title="Compact View"><Icons.Maximize /></button>
@@ -828,6 +934,26 @@ const App = () => {
                             <div className="space-y-4 md:space-y-6">
                                 {renderDeckSection('メンバーカード', sortedDeckCards.member, 'border-blue-200')}
                                 {renderDeckSection('ライブカード', sortedDeckCards.live, 'border-pink-200')}
+
+                                {/* 検討リストセクション */}
+                                {(sortedConsiderationCards.member.length > 0 || sortedConsiderationCards.live.length > 0) && (
+                                    <div>
+                                        <h3 className="text-base md:text-xl font-bold text-amber-700 border-b-2 border-amber-300 pb-1 md:pb-2 mb-3 md:mb-4 flex items-center gap-2">
+                                            検討中
+                                            <span className="text-xs font-normal text-amber-500">（デッキから外したカード）</span>
+                                        </h3>
+                                        <div className="grid gap-x-2 gap-y-6 md:gap-x-3 md:gap-y-8 px-1 pb-2" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${actualViewMode === 'compact' ? compactCardSize : deckCardSize}px, 1fr))` }}>
+                                            {[...sortedConsiderationCards.member, ...sortedConsiderationCards.live].map((item, index) => (
+                                                <ConsiderationCardItem
+                                                    key={`consider-${item.number}-${index}`}
+                                                    item={item}
+                                                    onRemove={removeFromConsideration}
+                                                    onAdd={(card) => addCardToDeck(null, card)}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         ) : actualViewMode === 'grid' ? (
                             renderCardGrid(displayList)

@@ -2,6 +2,51 @@
 // Card Item Components
 // ==========================================
 
+// 検討中カード（デッキから外れたカードのホールド表示）
+// Xボタンで削除、+ボタンでデッキに戻す
+const ConsiderationCardItem = ({ item, onRemove, onAdd }) => {
+    const isLive = item._type === 'live';
+    return (
+        <div className="relative group" title={item.name}>
+            <div className={`relative w-full ${isLive ? 'aspect-[16/9]' : 'aspect-[3/4]'} rounded overflow-hidden bg-gray-200`}>
+                {item.image ? (
+                    <SafeImage
+                        src={getImageUrl(item.image)}
+                        alt={item.name}
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                            if (!e.target.dataset.triedFallback) {
+                                e.target.dataset.triedFallback = "true";
+                                e.target.src = getFallbackUrl(item.image);
+                            } else {
+                                e.target.src = 'https://placehold.co/400x600?text=No+Image';
+                            }
+                        }}
+                    />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100 text-[8px]">No Img</div>
+                )}
+                {/* デッキに戻すボタン */}
+                <button
+                    onClick={() => onAdd(item)}
+                    className="absolute bottom-1 right-1 bg-green-500 hover:bg-green-600 text-white rounded-full p-0.5 transition-colors shadow-md z-10"
+                    title="デッキに戻す"
+                >
+                    <Icons.Plus style={{width: 10, height: 10}} />
+                </button>
+            </div>
+            {/* 削除ボタン（右上・常時表示） */}
+            <button
+                onClick={() => onRemove(item)}
+                className="absolute -top-1 -right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-0.5 z-20 transition-colors shadow-md"
+                title="検討リストから削除"
+            >
+                <Icons.Close style={{width: 10, height: 10}} />
+            </button>
+        </div>
+    );
+};
+
 // コンパクトビュー用（デッキタブのみ）
 // カード画像とデッキ枚数だけを表示する小型ビュー
 const CompactCardItem = ({ item, deckCount, onSelect }) => {
@@ -27,7 +72,7 @@ const CompactCardItem = ({ item, deckCount, onSelect }) => {
                     <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100 text-[8px]">No Img</div>
                 )}
             </div>
-            <div className="absolute bottom-0 right-0 bg-black text-white font-bold text-[11px] md:text-sm px-2 py-0.5 md:px-2.5 md:py-1 rounded-tl shadow-md z-30 opacity-90 pointer-events-none">
+            <div className="absolute bottom-0 right-0 bg-black text-white font-bold text-sm md:text-base px-2 py-1 md:px-2.5 md:py-1.5 rounded-tl shadow-md z-30 opacity-90 pointer-events-none">
                 {deckCount}
             </div>
         </div>
