@@ -728,7 +728,7 @@ const App = () => {
                 {actualViewMode === 'compact' ? (
                     <div className="grid gap-1 px-1 pb-2" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${compactCardSize}px, 1fr))` }}>
                         {items.map((item, index) => (
-                            <CompactCardItem key={`${item.number}-${index}`} item={item} deckCount={getDeckCount(item)} onSelect={setSelectedItem} />
+                            <CompactCardItem key={`${item.number}-${index}`} item={item} deckCount={getDeckCount(item)} onSelect={setSelectedItem} cardSize={compactCardSize} />
                         ))}
                     </div>
                 ) : actualViewMode === 'grid' ? (

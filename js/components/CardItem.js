@@ -49,8 +49,12 @@ const ConsiderationCardItem = ({ item, onRemove, onAdd }) => {
 
 // コンパクトビュー用（デッキタブのみ）
 // カード画像とデッキ枚数だけを表示する小型ビュー
-const CompactCardItem = ({ item, deckCount, onSelect }) => {
+const CompactCardItem = ({ item, deckCount, onSelect, cardSize = 70 }) => {
     const isLive = item._type === 'live';
+    // カードサイズに比例してバッジのフォントサイズ・パディングをスケール
+    const badgeFontSize = Math.max(10, Math.min(24, Math.round(cardSize * 0.22)));
+    const badgePadH    = Math.max(3,  Math.min(10, Math.round(cardSize * 0.07)));
+    const badgePadV    = Math.max(2,  Math.min(8,  Math.round(cardSize * 0.05)));
     return (
         <div className="relative group cursor-pointer flex flex-col items-center z-10 hover:z-40" onClick={() => item.image && onSelect(item)}>
             <div className={`relative w-full ${isLive ? 'aspect-[16/9]' : 'aspect-[3/4]'} rounded-sm overflow-hidden bg-gray-200 transition-transform duration-300 group-hover:scale-105`}>
@@ -72,7 +76,10 @@ const CompactCardItem = ({ item, deckCount, onSelect }) => {
                     <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100 text-[8px]">No Img</div>
                 )}
             </div>
-            <div className="absolute bottom-0 right-0 bg-black text-white font-bold text-sm md:text-base px-2 py-1 md:px-2.5 md:py-1.5 rounded-tl shadow-md z-30 opacity-90 pointer-events-none">
+            <div
+                className="absolute bottom-0 right-0 bg-black text-white font-bold rounded-tl shadow-md z-30 opacity-90 pointer-events-none"
+                style={{ fontSize: `${badgeFontSize}px`, padding: `${badgePadV}px ${badgePadH}px` }}
+            >
                 {deckCount}
             </div>
         </div>
