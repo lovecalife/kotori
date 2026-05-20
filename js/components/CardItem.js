@@ -29,19 +29,19 @@ const ConsiderationCardItem = ({ item, onRemove, onAdd }) => {
                 {/* デッキに戻すボタン */}
                 <button
                     onClick={() => onAdd(item)}
-                    className="absolute bottom-1 right-1 bg-green-500 hover:bg-green-600 text-white rounded-full p-0.5 transition-colors shadow-md z-10"
+                    className="absolute bottom-1.5 right-1.5 bg-green-500 hover:bg-green-600 text-white rounded-full p-1.5 transition-colors shadow-lg z-10"
                     title="デッキに戻す"
                 >
-                    <Icons.Plus style={{width: 10, height: 10}} />
+                    <Icons.Plus style={{width: 16, height: 16}} />
                 </button>
             </div>
             {/* 削除ボタン（右上・常時表示） */}
             <button
                 onClick={() => onRemove(item)}
-                className="absolute -top-1 -right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-0.5 z-20 transition-colors shadow-md"
+                className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 z-20 transition-colors shadow-lg"
                 title="検討リストから削除"
             >
-                <Icons.Close style={{width: 10, height: 10}} />
+                <Icons.Close style={{width: 14, height: 14}} />
             </button>
         </div>
     );

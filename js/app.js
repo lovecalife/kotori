@@ -942,17 +942,48 @@ const App = () => {
                                             検討中
                                             <span className="text-xs font-normal text-amber-500">（デッキから外したカード）</span>
                                         </h3>
-                                        <div className={`px-1 pb-2 grid ${actualViewMode === 'compact' ? 'gap-1' : 'gap-x-2 gap-y-6 md:gap-x-3 md:gap-y-8'}`}
-                                             style={{ gridTemplateColumns: actualViewMode === 'compact' ? `repeat(${compactCols}, 1fr)` : `repeat(auto-fill, minmax(${deckCardSize}px, 1fr))` }}>
-                                            {[...sortedConsiderationCards.member, ...sortedConsiderationCards.live].map((item, index) => (
-                                                <ConsiderationCardItem
-                                                    key={`consider-${item.number}-${index}`}
-                                                    item={item}
-                                                    onRemove={removeFromConsideration}
-                                                    onAdd={(card) => addCardToDeck(null, card)}
-                                                />
-                                            ))}
-                                        </div>
+
+                                        {/* メンバーカード */}
+                                        {sortedConsiderationCards.member.length > 0 && (
+                                            <div className="mb-4">
+                                                {sortedConsiderationCards.live.length > 0 && (
+                                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-1">メンバー</p>
+                                                )}
+                                                <div className={`px-1 pb-2 grid ${actualViewMode === 'compact' ? 'gap-1' : 'gap-x-2 gap-y-6 md:gap-x-3 md:gap-y-8'}`}
+                                                     style={{ gridTemplateColumns: actualViewMode === 'compact' ? `repeat(${compactCols}, 1fr)` : `repeat(auto-fill, minmax(${deckCardSize}px, 1fr))` }}>
+                                                    {sortedConsiderationCards.member.map((item, index) => (
+                                                        <ConsiderationCardItem
+                                                            key={`consider-${item.number}-${index}`}
+                                                            item={item}
+                                                            onRemove={removeFromConsideration}
+                                                            onAdd={(card) => addCardToDeck(null, card)}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* ライブカード（1.5倍サイズ） */}
+                                        {sortedConsiderationCards.live.length > 0 && (
+                                            <div>
+                                                {sortedConsiderationCards.member.length > 0 && (
+                                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-1">ライブ</p>
+                                                )}
+                                                <div className={`px-1 pb-2 grid ${actualViewMode === 'compact' ? 'gap-1' : 'gap-x-2 gap-y-6 md:gap-x-3 md:gap-y-8'}`}
+                                                     style={{ gridTemplateColumns: actualViewMode === 'compact'
+                                                         ? `repeat(${Math.max(2, Math.round(compactCols / 1.5))}, 1fr)`
+                                                         : `repeat(auto-fill, minmax(${Math.round(deckCardSize * 1.5)}px, 1fr))` }}>
+                                                    {sortedConsiderationCards.live.map((item, index) => (
+                                                        <ConsiderationCardItem
+                                                            key={`consider-${item.number}-${index}`}
+                                                            item={item}
+                                                            onRemove={removeFromConsideration}
+                                                            onAdd={(card) => addCardToDeck(null, card)}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
