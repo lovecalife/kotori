@@ -4,7 +4,7 @@
 
 // 検討中カード（デッキから外れたカードのホールド表示）
 // Xボタンで削除、+ボタンでデッキに戻す
-const ConsiderationCardItem = ({ item, onRemove, onAdd }) => {
+const ConsiderationCardItem = ({ item, onRemove, onAdd, isCompact = false }) => {
     const isLive = item._type === 'live';
     return (
         <div className="relative group" title={item.name}>
@@ -26,23 +26,27 @@ const ConsiderationCardItem = ({ item, onRemove, onAdd }) => {
                 ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100 text-[8px]">No Img</div>
                 )}
-                {/* デッキに戻すボタン */}
-                <button
-                    onClick={() => onAdd(item)}
-                    className="absolute bottom-1.5 right-1.5 bg-green-500 hover:bg-green-600 text-white rounded-full p-1.5 transition-colors shadow-lg z-10"
-                    title="デッキに戻す"
-                >
-                    <Icons.Plus style={{width: 16, height: 16}} />
-                </button>
+                {/* デッキに戻すボタン（コンパクトビューでは非表示） */}
+                {!isCompact && (
+                    <button
+                        onClick={() => onAdd(item)}
+                        className="absolute bottom-1.5 right-1.5 bg-green-500 hover:bg-green-600 text-white rounded-full p-1.5 transition-colors shadow-lg z-10"
+                        title="デッキに戻す"
+                    >
+                        <Icons.Plus style={{width: 16, height: 16}} />
+                    </button>
+                )}
             </div>
-            {/* 削除ボタン（右上・常時表示） */}
-            <button
-                onClick={() => onRemove(item)}
-                className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 z-20 transition-colors shadow-lg"
-                title="検討リストから削除"
-            >
-                <Icons.Close style={{width: 14, height: 14}} />
-            </button>
+            {/* 削除ボタン（右上・コンパクトビューでは非表示） */}
+            {!isCompact && (
+                <button
+                    onClick={() => onRemove(item)}
+                    className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 z-20 transition-colors shadow-lg"
+                    title="検討リストから削除"
+                >
+                    <Icons.Close style={{width: 14, height: 14}} />
+                </button>
+            )}
         </div>
     );
 };
@@ -52,9 +56,9 @@ const ConsiderationCardItem = ({ item, onRemove, onAdd }) => {
 const CompactCardItem = ({ item, deckCount, onSelect, cols = 8 }) => {
     const isLive = item._type === 'live';
     // 列数に反比例してバッジサイズをスケール（列数が少ない＝カード大きい＝バッジも大きく）
-    const badgeFontSize = Math.max(10, Math.min(22, Math.round(120 / cols)));
-    const badgePadH    = Math.max(3,  Math.min(10, Math.round(60 / cols)));
-    const badgePadV    = Math.max(2,  Math.min(7,  Math.round(40 / cols)));
+    const badgeFontSize = Math.max(12, Math.min(32, Math.round(240 / cols)));
+    const badgePadH    = Math.max(4,  Math.min(14, Math.round(110 / cols)));
+    const badgePadV    = Math.max(2,  Math.min(10, Math.round(70 / cols)));
     return (
         <div className="relative group cursor-pointer flex flex-col items-center z-10 hover:z-40" onClick={() => item.image && onSelect(item)}>
             <div className={`relative w-full ${isLive ? 'aspect-[16/9]' : 'aspect-[3/4]'} rounded-sm overflow-hidden bg-gray-200 transition-transform duration-300 group-hover:scale-105`}>

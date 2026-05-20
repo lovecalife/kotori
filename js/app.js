@@ -957,6 +957,7 @@ const App = () => {
                                                             item={item}
                                                             onRemove={removeFromConsideration}
                                                             onAdd={(card) => addCardToDeck(null, card)}
+                                                            isCompact={actualViewMode === 'compact'}
                                                         />
                                                     ))}
                                                 </div>
@@ -979,6 +980,7 @@ const App = () => {
                                                             item={item}
                                                             onRemove={removeFromConsideration}
                                                             onAdd={(card) => addCardToDeck(null, card)}
+                                                            isCompact={actualViewMode === 'compact'}
                                                         />
                                                     ))}
                                                 </div>
