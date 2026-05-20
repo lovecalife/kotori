@@ -726,13 +726,13 @@ const App = () => {
             <div>
                 <h3 className={`text-base md:text-xl font-bold text-gray-800 border-b-2 ${borderColor} pb-1 md:pb-2 mb-3 md:mb-4`}>{title}</h3>
                 {actualViewMode === 'compact' ? (
-                    <div className="grid gap-1 px-1 pb-2" style={{ gridTemplateColumns: `repeat(${compactCols}, 1fr)` }}>
+                    <div className="grid gap-1 px-1 pb-2" style={{ gridTemplateColumns: isMember ? `repeat(${compactCols}, 1fr)` : `repeat(${Math.max(2, Math.round(compactCols / 1.5))}, 1fr)` }}>
                         {items.map((item, index) => (
-                            <CompactCardItem key={`${item.number}-${index}`} item={item} deckCount={getDeckCount(item)} onSelect={setSelectedItem} cols={compactCols} />
+                            <CompactCardItem key={`${item.number}-${index}`} item={item} deckCount={getDeckCount(item)} onSelect={setSelectedItem} cols={isMember ? compactCols : Math.max(2, Math.round(compactCols / 1.5))} />
                         ))}
                     </div>
                 ) : actualViewMode === 'grid' ? (
-                    <div className="grid gap-x-2 gap-y-6 md:gap-x-3 md:gap-y-8 px-1 pb-4" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${deckCardSize}px, 1fr))` }}>
+                    <div className="grid gap-x-2 gap-y-6 md:gap-x-3 md:gap-y-8 px-1 pb-4" style={{ gridTemplateColumns: isMember ? `repeat(auto-fill, minmax(${deckCardSize}px, 1fr))` : `repeat(auto-fill, minmax(${Math.round(deckCardSize * 1.5)}px, 1fr))` }}>
                         {items.map((item, index) => (
                             <CardItem key={`${item.number}-${index}`} item={item} deckCount={getDeckCount(item)} onAdd={addCardToDeck} onRemove={removeCardFromDeck} onSelect={setSelectedItem} abilitiesList={getAbilitiesList(item)} asGrid={true} />
                         ))}
