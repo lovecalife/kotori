@@ -90,7 +90,7 @@ const CompactCardItem = ({ item, deckCount, onSelect, cols = 8 }) => {
                 style={{
                     fontSize: `min(${fsPx}px, ${fsVw}vw)`,
                     padding: `min(${pvPx}px, ${pvVw}vw) min(${phPx}px, ${phVw}vw)`,
-                    background: 'rgba(0,0,0,0.85)',
+                    background: 'rgba(0,0,0,0.70)',
                     color: '#ffffff'
                 }}
             >
