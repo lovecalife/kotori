@@ -4,10 +4,10 @@
 
 // 検討中カード（デッキから外れたカードのホールド表示）
 // Xボタンで削除、+ボタンでデッキに戻す
-const ConsiderationCardItem = ({ item, onRemove, onAdd, isCompact = false }) => {
+const ConsiderationCardItem = ({ item, onRemove, onAdd, isCompact = false, span = 1 }) => {
     const isLive = item._type === 'live';
     return (
-        <div className="relative group" title={item.name}>
+        <div className="relative group" title={item.name} style={span > 1 ? { gridColumn: `span ${span}` } : undefined}>
             <div className={`relative w-full ${isLive ? 'aspect-[16/9]' : 'aspect-[3/4]'} rounded overflow-hidden bg-gray-200`}>
                 {item.image ? (
                     <SafeImage
