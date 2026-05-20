@@ -1,0 +1,57 @@
+# =====================
+# OS
+# =====================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# =====================
+# Editor / IDE
+# =====================
+.vscode/
+.idea/
+*.suo
+*.user
+*.swp
+*.swo
+*~
+
+# =====================
+# Claude Code
+# =====================
+# ローカル固有の設定（個人環境のみ）
+.claude/settings.local.json
+# ワークツリー（一時的な作業ディレクトリ）
+.claude/worktrees/
+
+# =====================
+# Node.js（将来的な導入に備えて）
+# =====================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp/
+.pnp.js
+
+# =====================
+# Build output（将来的な導入に備えて）
+# =====================
+dist/
+build/
+out/
+
+# =====================
+# 環境変数・シークレット
+# =====================
+.env
+.env.local
+.env.*.local
