@@ -728,7 +728,7 @@ const App = () => {
                 {actualViewMode === 'compact' ? (
                     <div className="grid gap-1 px-1 pb-2" style={{ gridTemplateColumns: isMember ? `repeat(${compactCols}, 1fr)` : `repeat(${Math.max(2, Math.round(compactCols / 1.5))}, 1fr)` }}>
                         {items.map((item, index) => (
-                            <CompactCardItem key={`${item.number}-${index}`} item={item} deckCount={getDeckCount(item)} onSelect={setSelectedItem} cols={isMember ? compactCols : Math.max(2, Math.round(compactCols / 1.5))} />
+                            <CompactCardItem key={`${item.number}-${index}`} item={item} deckCount={getDeckCount(item)} onSelect={setSelectedItem} cols={compactCols} />
                         ))}
                     </div>
                 ) : actualViewMode === 'grid' ? (
