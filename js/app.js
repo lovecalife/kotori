@@ -18,8 +18,8 @@ const App = () => {
     const [deckCardSize, setDeckCardSize] = useState(() => {
         try { return parseInt(localStorage.getItem('card_viewer_deck_card_size')) || 140; } catch(e) { return 140; }
     });
-    const [compactCardSize, setCompactCardSize] = useState(() => {
-        try { return parseInt(localStorage.getItem('card_viewer_compact_card_size')) || 70; } catch(e) { return 70; }
+    const [compactCols, setCompactCols] = useState(() => {
+        try { return parseInt(localStorage.getItem('card_viewer_compact_cols')) || 8; } catch(e) { return 8; }
     });
 
     const [isDeckManagerOpen, setIsDeckManagerOpen] = useState(false);
@@ -147,10 +147,10 @@ const App = () => {
         try { localStorage.setItem('card_viewer_deck_card_size', String(deckCardSize)); } catch(e) {}
     }, [deckCardSize]);
 
-    // compactCardSize 変更時に保存
+    // compactCols 変更時に保存
     useEffect(() => {
-        try { localStorage.setItem('card_viewer_compact_card_size', String(compactCardSize)); } catch(e) {}
-    }, [compactCardSize]);
+        try { localStorage.setItem('card_viewer_compact_cols', String(compactCols)); } catch(e) {}
+    }, [compactCols]);
 
     // タブ切り替え時にソート設定をリセット
     useEffect(() => {
@@ -726,9 +726,9 @@ const App = () => {
             <div>
                 <h3 className={`text-base md:text-xl font-bold text-gray-800 border-b-2 ${borderColor} pb-1 md:pb-2 mb-3 md:mb-4`}>{title}</h3>
                 {actualViewMode === 'compact' ? (
-                    <div className="grid gap-1 px-1 pb-2" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${compactCardSize}px, 1fr))` }}>
+                    <div className="grid gap-1 px-1 pb-2" style={{ gridTemplateColumns: `repeat(${compactCols}, 1fr)` }}>
                         {items.map((item, index) => (
-                            <CompactCardItem key={`${item.number}-${index}`} item={item} deckCount={getDeckCount(item)} onSelect={setSelectedItem} cardSize={compactCardSize} />
+                            <CompactCardItem key={`${item.number}-${index}`} item={item} deckCount={getDeckCount(item)} onSelect={setSelectedItem} cols={compactCols} />
                         ))}
                     </div>
                 ) : actualViewMode === 'grid' ? (
@@ -905,9 +905,9 @@ const App = () => {
                         )}
                         {activeTab === 'deck' && actualViewMode === 'compact' && (
                             <div className="flex items-center bg-white border border-gray-300 rounded px-1" title="コンパクトカードサイズ調整">
-                                <button onClick={() => setCompactCardSize(s => Math.max(40, s - 10))} className="p-1.5 text-gray-500 hover:text-gray-800 transition-colors" title="小さく"><Icons.Minus style={{width:14,height:14}}/></button>
-                                <span className="text-[10px] text-gray-400 select-none px-0.5">SIZE</span>
-                                <button onClick={() => setCompactCardSize(s => Math.min(140, s + 10))} className="p-1.5 text-gray-500 hover:text-gray-800 transition-colors" title="大きく"><Icons.Plus style={{width:14,height:14}}/></button>
+                                <button onClick={() => setCompactCols(n => Math.min(16, n + 1))} className="p-1.5 text-gray-500 hover:text-gray-800 transition-colors" title="小さく"><Icons.Minus style={{width:14,height:14}}/></button>
+                                <span className="text-[10px] text-gray-400 select-none px-0.5">{compactCols}列</span>
+                                <button onClick={() => setCompactCols(n => Math.max(3, n - 1))} className="p-1.5 text-gray-500 hover:text-gray-800 transition-colors" title="大きく"><Icons.Plus style={{width:14,height:14}}/></button>
                             </div>
                         )}
                         <div className="flex bg-white rounded border border-gray-300 p-0.5">
@@ -942,7 +942,8 @@ const App = () => {
                                             検討中
                                             <span className="text-xs font-normal text-amber-500">（デッキから外したカード）</span>
                                         </h3>
-                                        <div className="grid gap-x-2 gap-y-6 md:gap-x-3 md:gap-y-8 px-1 pb-2" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${actualViewMode === 'compact' ? compactCardSize : deckCardSize}px, 1fr))` }}>
+                                        <div className={`px-1 pb-2 grid ${actualViewMode === 'compact' ? 'gap-1' : 'gap-x-2 gap-y-6 md:gap-x-3 md:gap-y-8'}`}
+                                             style={{ gridTemplateColumns: actualViewMode === 'compact' ? `repeat(${compactCols}, 1fr)` : `repeat(auto-fill, minmax(${deckCardSize}px, 1fr))` }}>
                                             {[...sortedConsiderationCards.member, ...sortedConsiderationCards.live].map((item, index) => (
                                                 <ConsiderationCardItem
                                                     key={`consider-${item.number}-${index}`}

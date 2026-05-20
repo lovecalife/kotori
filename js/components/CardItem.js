@@ -49,12 +49,12 @@ const ConsiderationCardItem = ({ item, onRemove, onAdd }) => {
 
 // コンパクトビュー用（デッキタブのみ）
 // カード画像とデッキ枚数だけを表示する小型ビュー
-const CompactCardItem = ({ item, deckCount, onSelect, cardSize = 70 }) => {
+const CompactCardItem = ({ item, deckCount, onSelect, cols = 8 }) => {
     const isLive = item._type === 'live';
-    // カードサイズに比例してバッジのフォントサイズ・パディングをスケール
-    const badgeFontSize = Math.max(10, Math.min(24, Math.round(cardSize * 0.22)));
-    const badgePadH    = Math.max(3,  Math.min(10, Math.round(cardSize * 0.07)));
-    const badgePadV    = Math.max(2,  Math.min(8,  Math.round(cardSize * 0.05)));
+    // 列数に反比例してバッジサイズをスケール（列数が少ない＝カード大きい＝バッジも大きく）
+    const badgeFontSize = Math.max(10, Math.min(22, Math.round(120 / cols)));
+    const badgePadH    = Math.max(3,  Math.min(10, Math.round(60 / cols)));
+    const badgePadV    = Math.max(2,  Math.min(7,  Math.round(40 / cols)));
     return (
         <div className="relative group cursor-pointer flex flex-col items-center z-10 hover:z-40" onClick={() => item.image && onSelect(item)}>
             <div className={`relative w-full ${isLive ? 'aspect-[16/9]' : 'aspect-[3/4]'} rounded-sm overflow-hidden bg-gray-200 transition-transform duration-300 group-hover:scale-105`}>
