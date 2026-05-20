@@ -938,9 +938,8 @@ const App = () => {
                                 {/* 検討リストセクション */}
                                 {(sortedConsiderationCards.member.length > 0 || sortedConsiderationCards.live.length > 0) && (
                                     <div>
-                                        <h3 className="text-base md:text-xl font-bold text-amber-700 border-b-2 border-amber-300 pb-1 md:pb-2 mb-3 md:mb-4 flex items-center gap-2">
-                                            検討中
-                                            <span className="text-xs font-normal text-amber-500">（デッキから外したカード）</span>
+                                        <h3 className="text-base md:text-xl font-bold text-amber-700 border-b-2 border-amber-300 pb-1 md:pb-2 mb-3 md:mb-4">
+                                            検討カード
                                         </h3>
 
                                         {/* メンバーカード */}
