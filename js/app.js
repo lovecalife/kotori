@@ -36,7 +36,7 @@ const App = () => {
     const [filterGroups, setFilterGroups] = useState(initial3State());
     const [filterCosts, setFilterCosts] = useState(initial3State());
     const [filterBladeHeart, setFilterBladeHeart] = useState(initial3State());
-    const [filterColors, setFilterColors] = useState({ Pink: '', Red: '', Yellow: '', Green: '', Blue: '', Purple: '' });
+    const [filterColors, setFilterColors] = useState({ Pink: '', Red: '', Yellow: '', Green: '', Blue: '', Purple: '', Gray: '' });
     const [filterAbilities, setFilterAbilities] = useState(initial3State());
     const [filterKeywords, setFilterKeywords] = useState(initial3State());
     const [filterBaseStats, setFilterBaseStats] = useState({ min: '', max: '' });
@@ -437,7 +437,7 @@ const App = () => {
         setFilterName('');
         setFilterContains(initial3State()); setFilterGroups(initial3State());
         setFilterCosts(initial3State()); setFilterBladeHeart(initial3State());
-        setFilterColors({ Pink: '', Red: '', Yellow: '', Green: '', Blue: '', Purple: '' });
+        setFilterColors({ Pink: '', Red: '', Yellow: '', Green: '', Blue: '', Purple: '', Gray: '' });
         setFilterAbilities(initial3State()); setFilterKeywords(initial3State());
         setFilterBaseStats({ min: '', max: '' }); setFilterMaxStats({ min: '', max: '' });
         setNumericFilters({});
@@ -499,7 +499,7 @@ const App = () => {
             if (filterGroups.exclude.size > 0 && [...filterGroups.exclude].some(x => g.includes(x))) return false;
             if (filterGroups.include.size > 0 && ![...filterGroups.include].some(x => g.includes(x))) return false;
 
-            const colorCounts = { Pink: 0, Red: 0, Yellow: 0, Green: 0, Blue: 0, Purple: 0 };
+            const colorCounts = { Pink: 0, Red: 0, Yellow: 0, Green: 0, Blue: 0, Purple: 0, Gray: 0 };
             if (item.Pink !== undefined || item.Red !== undefined) {
                 colorCounts.Pink = parseInt(item.Pink) || 0;
                 colorCounts.Red = parseInt(item.Red) || 0;
@@ -507,6 +507,7 @@ const App = () => {
                 colorCounts.Green = parseInt(item.Green) || 0;
                 colorCounts.Blue = parseInt(item.Blue) || 0;
                 colorCounts.Purple = parseInt(item.Purple) || 0;
+                colorCounts.Gray = parseInt(item.Gray) || 0;
             } else if (item.bladeHeart) {
                 const bhs = item.bladeHeart.split(/[,、\s]+/).map(s => s.trim().toLowerCase());
                 bhs.forEach(bh => {

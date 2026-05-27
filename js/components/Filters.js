@@ -75,7 +75,7 @@ const TagFilter = ({ label, options, filterState, onChange, onReset }) => {
 // カラーカウントフィルター（専用コンポーネント）
 // 各色の所持枚数条件を指定する。空欄=条件なし、0=含まない、1以上=その数以上
 const ColorCountFilter = ({ filterColors, setFilterColors, onReset }) => {
-    const colors = ['Pink', 'Red', 'Yellow', 'Green', 'Blue', 'Purple'];
+    const colors = ['Pink', 'Red', 'Yellow', 'Green', 'Blue', 'Purple', 'Gray'];
     const isActive = colors.some(c => filterColors[c] !== '');
 
     const handleChange = (color, value) => {

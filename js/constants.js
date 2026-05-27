@@ -41,6 +41,7 @@ const BH_STYLES = {
     'Blue':   { base: 'bg-blue-400 text-white hover:bg-blue-500', active: 'bg-blue-700 text-white ring-2 ring-blue-700 ring-offset-1', bg: 'bg-blue-500' },
     'Purple': { base: 'bg-purple-400 text-white hover:bg-purple-500', active: 'bg-purple-700 text-white ring-2 ring-purple-700 ring-offset-1', bg: 'bg-purple-500' },
     'None':   { base: 'bg-gray-300 text-gray-700 hover:bg-gray-400', active: 'bg-gray-600 text-white ring-2 ring-gray-600 ring-offset-1', bg: 'bg-gray-300' },
+    'Gray':   { base: 'bg-gray-400 text-white hover:bg-gray-500', active: 'bg-gray-700 text-white ring-2 ring-gray-700 ring-offset-1', bg: 'bg-gray-400' },
     'ALL':    { base: 'bg-gray-700 text-white', active: 'bg-gray-900 text-white ring-2 ring-gray-900 ring-offset-1', bg: 'bg-gray-700' },
     'Score':  { base: 'bg-cyan-500 text-white', active: 'bg-cyan-700 text-white ring-2 ring-cyan-700 ring-offset-1', bg: 'bg-cyan-500' },
     'Draw':   { base: 'bg-orange-500 text-white', active: 'bg-orange-700 text-white ring-2 ring-orange-700 ring-offset-1', bg: 'bg-orange-500' }
@@ -71,7 +72,7 @@ const COLUMN_MAP = {
         group: ['Group', 'グループ', '所属'],
         ability: ['Ability', 'アビリティ', '能力', '効果', 'スキル'],
         text: ['Text', 'テキスト', '効果テキスト', 'スキル詳細'],
-        contain: ['Contain', '収録', '収録弾'],
+        contain: ['Expansion', 'Contain', '収録', '収録弾'],
         cost: ['Cost', 'コスト'],
         blade: ['Blade', 'ブレード'],
         bladeHeart: ['BladeHeart', 'ブレードハート', 'BH'],
@@ -92,7 +93,7 @@ const COLUMN_MAP = {
         group: ['Group', 'グループ', '属性'],
         ability: ['Ability', 'アビリティ', '能力', '効果', 'スキル'],
         text: ['Text', 'テキスト', '効果テキスト', 'スキル詳細'],
-        contain: ['Contain', '収録', '収録弾'],
+        contain: ['Expansion', 'Contain', '収録', '収録弾'],
         req: ['BaseCost', 'Requirement', '要求値', 'メンタル'],
         score: ['BaseScore', 'Score', 'スコア'],
         effReq: ['EffectiveCost', 'EffectiveReq', '実質要求', '実質メンタル'],
@@ -107,6 +108,7 @@ const COLUMN_MAP = {
         Yellow: ['Yellow', 'イエロー', '黄'],
         Green: ['Green', 'グリーン', '緑'],
         Blue: ['Blue', 'ブルー', '青'],
-        Purple: ['Purple', 'パープル', '紫']
+        Purple: ['Purple', 'パープル', '紫'],
+        Gray: ['Gray', 'None', 'グレー', 'ノーン']
     }
 };
