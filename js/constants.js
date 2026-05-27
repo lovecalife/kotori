@@ -13,14 +13,7 @@ const BH_SORT_ORDER = { 'Pink': 1, 'Red': 2, 'Yellow': 3, 'Green': 4, 'Blue': 5,
 
 const STATS_OPTIONS = Array.from({length: 20}, (_, i) => i + 1);
 const MAX_STATS_OPTIONS = [...STATS_OPTIONS, '＋'];
-const GROUP_OPTIONS = ["μ's", 'A-RISE', 'Aqours', 'SaintSnow', '虹ヶ咲', 'Liella!', 'SunnyPassion', '蓮ノ空'];
-
-const CONTAIN_ORDER = [
-    'bp1', 'bp2', 'bp3', 'bp4', 'bp5',
-    'LL-pb1', 'S-pb1', 'N-pb1', 'SP-pb1',
-    'LL-sd1', 'S-sd1', 'N-sd1', 'SP-sd1',
-    'HS-sd1', 'PR'
-];
+const GROUP_OPTIONS = ["μ's", 'Aqours', '虹ヶ咲', 'Liella!', '蓮ノ空', 'A-RISE', 'SaintSnow', 'SunnyPassion'];
 
 const GROUP_STYLES = {
     "μ's":          { base: "bg-pink-400 text-white hover:bg-pink-500", active: "bg-pink-600 ring-2 ring-pink-600 ring-offset-1" },
@@ -80,6 +73,7 @@ const COLUMN_MAP = {
         maxStats: ['MaxStats', '最大ステータス', '最大値'],
         image: ['ImageID', 'Image', '画像', '画像ID'],
         noViewer: ['NoViewer', '非表示', 'NoView'],
+        sortId: ['SortID', 'SortId', 'sort_id'],
         Pink: ['Pink', 'ピンク'],
         Red: ['Red', 'レッド', '赤'],
         Yellow: ['Yellow', 'イエロー', '黄'],
@@ -103,6 +97,7 @@ const COLUMN_MAP = {
         keyword: ['Keyword', 'キーワード', '特徴'],
         efficiency: ['Efficiency', '効率', 'Eff'],
         noViewer: ['NoViewer', '非表示', 'NoView'],
+        sortId: ['SortID', 'SortId', 'sort_id'],
         Pink: ['Pink', 'ピンク'],
         Red: ['Red', 'レッド', '赤'],
         Yellow: ['Yellow', 'イエロー', '黄'],

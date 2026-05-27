@@ -461,17 +461,21 @@ const App = () => {
     }, [currentTabData]);
 
     const uniqueContains = useMemo(() => {
-        const dataContains = new Set();
-        currentTabData.forEach(d => d.contain && d.contain.split(/[,、\s]+/).forEach(a => a.trim() && dataContains.add(a.trim())));
-        const mergedOptions = new Set([...CONTAIN_ORDER, ...dataContains]);
-        return Array.from(mergedOptions).sort((a, b) => {
-            const idxA = CONTAIN_ORDER.indexOf(a);
-            const idxB = CONTAIN_ORDER.indexOf(b);
-            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-            if (idxA !== -1) return -1;
-            if (idxB !== -1) return 1;
-            return a.localeCompare(b, 'ja');
+        const sorted = [...currentTabData].sort((a, b) => {
+            const ia = parseInt(a.sortId) || Infinity;
+            const ib = parseInt(b.sortId) || Infinity;
+            return ia - ib;
         });
+        const seen = new Set();
+        const result = [];
+        sorted.forEach(d => {
+            if (!d.contain) return;
+            d.contain.split(/[,、\s]+/).forEach(v => {
+                const t = v.trim();
+                if (t && !seen.has(t)) { seen.add(t); result.push(t); }
+            });
+        });
+        return result;
     }, [currentTabData]);
 
     const filteredData = useMemo(() => {

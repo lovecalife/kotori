@@ -74,7 +74,7 @@ const TagFilter = ({ label, options, filterState, onChange, onReset }) => {
 
 // カラーカウントフィルター（専用コンポーネント）
 // 各色の所持枚数条件を指定する。空欄=条件なし、0=含まない、1以上=その数以上
-const ColorCountFilter = ({ filterColors, setFilterColors, onReset }) => {
+const ColorCountFilter = ({ filterColors, setFilterColors, onReset, label = 'Color Count' }) => {
     const colors = ['Pink', 'Red', 'Yellow', 'Green', 'Blue', 'Purple', 'Gray'];
     const isActive = colors.some(c => filterColors[c] !== '');
 
@@ -104,7 +104,7 @@ const ColorCountFilter = ({ filterColors, setFilterColors, onReset }) => {
 
     return (
         <div className="mb-4">
-            <FilterHeader label="Color Count" onReset={onReset} isActive={isActive} />
+            <FilterHeader label={label} onReset={onReset} isActive={isActive} />
             <div className="grid grid-cols-2 gap-2">
                 {colors.map(color => {
                     const style = BH_STYLES[color];
@@ -165,7 +165,7 @@ const FilterPanel = ({
     filterContains, toggleContain, setFilterContains, uniqueContains,
     resetFilters, initial3State, deckSortType, setDeckSortType
 }) => {
-    const bladeHeartOptions = activeTab === 'member' ? BH_OPTIONS_MEMBER : BH_OPTIONS_LIVE;
+    const resetColors = () => setFilterColors({ Pink: '', Red: '', Yellow: '', Green: '', Blue: '', Purple: '', Gray: '' });
 
     return (
         <div className="space-y-4">
@@ -188,9 +188,10 @@ const FilterPanel = ({
                 </div>
             ) : (
                 <>
+                    {/* キーワード検索（デスクトップのみ共通） */}
                     {!isMobile && (
                         <div className="mb-4">
-                            <FilterHeader label="Keyword Search" onReset={() => setFilterName('')} isActive={filterName !== ''} />
+                            <FilterHeader label="キーワード検索" onReset={() => setFilterName('')} isActive={filterName !== ''} />
                             <div className="relative">
                                 <input type="text" placeholder="名前・テキスト・コスト (スペースでAND検索)" value={filterName} onChange={(e) => setFilterName(e.target.value)} className="w-full pl-9 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm" />
                                 <div className="absolute left-3 top-2.5 text-gray-400"><Icons.Search /></div>
@@ -198,21 +199,14 @@ const FilterPanel = ({
                         </div>
                     )}
 
-                    {uniqueContains.length > 0 && <TagFilter label="Contain" options={uniqueContains} filterState={filterContains} onChange={toggleContain} onReset={() => setFilterContains(initial3State())} />}
-                    <ButtonGroupFilter label="Groups" options={GROUP_OPTIONS} filterState={filterGroups} onChange={toggleGroup} styles={GROUP_STYLES} defaultStyle={GROUP_STYLES["μ's"]} onReset={() => setFilterGroups(initial3State())} />
-
-                    <ColorCountFilter
-                        filterColors={filterColors}
-                        setFilterColors={setFilterColors}
-                        onReset={() => setFilterColors({ Pink: '', Red: '', Yellow: '', Green: '', Blue: '', Purple: '' })}
-                    />
-
-                    {uniqueAbilities.length > 0 && <TagFilter label="Ability" options={uniqueAbilities} filterState={filterAbilities} onChange={toggleAbility} onReset={() => setFilterAbilities(initial3State())} />}
-
+                    {/* メンバータブ */}
                     {activeTab === 'member' && (
                         <>
+                            {/* 収録 */}
+                            {uniqueContains.length > 0 && <TagFilter label="収録" options={uniqueContains} filterState={filterContains} onChange={toggleContain} onReset={() => setFilterContains(initial3State())} />}
+                            {/* コスト */}
                             <div className="mb-4">
-                                <FilterHeader label="Cost" onReset={() => setFilterCosts(initial3State())} isActive={filterCosts.include.size > 0 || filterCosts.exclude.size > 0} />
+                                <FilterHeader label="コスト" onReset={() => setFilterCosts(initial3State())} isActive={filterCosts.include.size > 0 || filterCosts.exclude.size > 0} />
                                 <div className="grid grid-cols-4 gap-2">
                                     {COST_OPTIONS.map(c => {
                                         const isIncluded = filterCosts.include.has(c);
@@ -224,24 +218,51 @@ const FilterPanel = ({
                                     })}
                                 </div>
                             </div>
-                            <DropdownRangeFilter label="Blade" minVal={numericFilters.blade?.min||''} maxVal={numericFilters.blade?.max||''} options={[0,1,2,3,4,5,6,7]} onMinChange={(v) => updateNumericFilter('blade', 'min', v)} onMaxChange={(v) => updateNumericFilter('blade', 'max', v)} onReset={() => setNumericFilters(p => ({...p, blade: {min:'',max:''}}))} />
-                            <ButtonGroupFilter label="Blade Heart" options={bladeHeartOptions} filterState={filterBladeHeart} onChange={toggleBladeHeart} styles={BH_STYLES} defaultStyle={BH_STYLES['None']} onReset={() => setFilterBladeHeart(initial3State())} />
-                            <DropdownRangeFilter label="Base Stats" minVal={filterBaseStats.min} maxVal={filterBaseStats.max} options={STATS_OPTIONS} onMinChange={(v) => setFilterBaseStats(p=>({...p,min:v}))} onMaxChange={(v) => setFilterBaseStats(p=>({...p,max:v}))} onReset={() => setFilterBaseStats({min:'',max:''})} />
-                            <DropdownRangeFilter label="Max Stats" minVal={filterMaxStats.min} maxVal={filterMaxStats.max} options={MAX_STATS_OPTIONS} onMinChange={(v) => setFilterMaxStats(p=>({...p,min:v}))} onMaxChange={(v) => setFilterMaxStats(p=>({...p,max:v}))} onReset={() => setFilterMaxStats({min:'',max:''})} />
+                            {/* タグ */}
+                            {uniqueAbilities.length > 0 && <TagFilter label="タグ" options={uniqueAbilities} filterState={filterAbilities} onChange={toggleAbility} onReset={() => setFilterAbilities(initial3State())} />}
+                            {/* キーワード */}
+                            {uniqueKeywords.length > 0 && <TagFilter label="キーワード" options={uniqueKeywords} filterState={filterKeywords} onChange={toggleKeyword} onReset={() => setFilterKeywords(initial3State())} />}
+                            {/* グループ */}
+                            <ButtonGroupFilter label="グループ" options={GROUP_OPTIONS} filterState={filterGroups} onChange={toggleGroup} styles={GROUP_STYLES} defaultStyle={GROUP_STYLES["μ's"]} onReset={() => setFilterGroups(initial3State())} />
+                            {/* ブレードハート */}
+                            <ButtonGroupFilter label="ブレードハート" options={BH_OPTIONS_MEMBER} filterState={filterBladeHeart} onChange={toggleBladeHeart} styles={BH_STYLES} defaultStyle={BH_STYLES['None']} onReset={() => setFilterBladeHeart(initial3State())} />
+                            {/* ハート数 */}
+                            <ColorCountFilter label="ハート数" filterColors={filterColors} setFilterColors={setFilterColors} onReset={resetColors} />
+                            {/* ブレード数 */}
+                            <DropdownRangeFilter label="ブレード数" minVal={numericFilters.blade?.min||''} maxVal={numericFilters.blade?.max||''} options={[0,1,2,3,4,5,6,7]} onMinChange={(v) => updateNumericFilter('blade', 'min', v)} onMaxChange={(v) => updateNumericFilter('blade', 'max', v)} onReset={() => setNumericFilters(p => ({...p, blade: {min:'',max:''}}))} />
+                            {/* 基本スタッツ */}
+                            <DropdownRangeFilter label="基本スタッツ" minVal={filterBaseStats.min} maxVal={filterBaseStats.max} options={STATS_OPTIONS} onMinChange={(v) => setFilterBaseStats(p=>({...p,min:v}))} onMaxChange={(v) => setFilterBaseStats(p=>({...p,max:v}))} onReset={() => setFilterBaseStats({min:'',max:''})} />
+                            {/* 最大スタッツ */}
+                            <DropdownRangeFilter label="最大スタッツ" minVal={filterMaxStats.min} maxVal={filterMaxStats.max} options={MAX_STATS_OPTIONS} onMinChange={(v) => setFilterMaxStats(p=>({...p,min:v}))} onMaxChange={(v) => setFilterMaxStats(p=>({...p,max:v}))} onReset={() => setFilterMaxStats({min:'',max:''})} />
                         </>
                     )}
 
+                    {/* ライブタブ */}
                     {activeTab === 'live' && (
                         <>
-                            <ButtonGroupFilter label="Blade Heart" options={bladeHeartOptions} filterState={filterBladeHeart} onChange={toggleBladeHeart} styles={BH_STYLES} defaultStyle={BH_STYLES['None']} onReset={() => setFilterBladeHeart(initial3State())} />
-                            {uniqueKeywords.length > 0 && <TagFilter label="Keyword" options={uniqueKeywords} filterState={filterKeywords} onChange={toggleKeyword} onReset={() => setFilterKeywords(initial3State())} />}
-                            <RangeFilter label="Score" minVal={numericFilters.score?.min||''} maxVal={numericFilters.score?.max||''} onMinChange={(v) => updateNumericFilter('score', 'min', v)} onMaxChange={(v) => updateNumericFilter('score', 'max', v)} onReset={() => setNumericFilters(p => ({...p, score: {min:'',max:''}}))} />
-                            <RangeFilter label="Max Score" minVal={numericFilters.maxScore?.min||''} maxVal={numericFilters.maxScore?.max||''} onMinChange={(v) => updateNumericFilter('maxScore', 'min', v)} onMaxChange={(v) => updateNumericFilter('maxScore', 'max', v)} onReset={() => setNumericFilters(p => ({...p, maxScore: {min:'',max:''}}))} />
-                            <RangeFilter label="Cost" minVal={numericFilters.req?.min||''} maxVal={numericFilters.req?.max||''} onMinChange={(v) => updateNumericFilter('req', 'min', v)} onMaxChange={(v) => updateNumericFilter('req', 'max', v)} onReset={() => setNumericFilters(p => ({...p, req: {min:'',max:''}}))} />
-                            <RangeFilter label="Effective Cost" minVal={numericFilters.effReq?.min||''} maxVal={numericFilters.effReq?.max||''} onMinChange={(v) => updateNumericFilter('effReq', 'min', v)} onMaxChange={(v) => updateNumericFilter('effReq', 'max', v)} onReset={() => setNumericFilters(p => ({...p, effReq: {min:'',max:''}}))} />
-                            <RangeFilter label="Efficiency" minVal={numericFilters.efficiency?.min||''} maxVal={numericFilters.efficiency?.max||''} onMinChange={(v) => updateNumericFilter('efficiency', 'min', v)} onMaxChange={(v) => updateNumericFilter('efficiency', 'max', v)} onReset={() => setNumericFilters(p => ({...p, efficiency: {min:'',max:''}}))} />
+                            {/* 収録 */}
+                            {uniqueContains.length > 0 && <TagFilter label="収録" options={uniqueContains} filterState={filterContains} onChange={toggleContain} onReset={() => setFilterContains(initial3State())} />}
+                            {/* ブレードハート */}
+                            <ButtonGroupFilter label="ブレードハート" options={BH_OPTIONS_LIVE} filterState={filterBladeHeart} onChange={toggleBladeHeart} styles={BH_STYLES} defaultStyle={BH_STYLES['None']} onReset={() => setFilterBladeHeart(initial3State())} />
+                            {/* キーワード */}
+                            {uniqueKeywords.length > 0 && <TagFilter label="キーワード" options={uniqueKeywords} filterState={filterKeywords} onChange={toggleKeyword} onReset={() => setFilterKeywords(initial3State())} />}
+                            {/* グループ */}
+                            <ButtonGroupFilter label="グループ" options={GROUP_OPTIONS} filterState={filterGroups} onChange={toggleGroup} styles={GROUP_STYLES} defaultStyle={GROUP_STYLES["μ's"]} onReset={() => setFilterGroups(initial3State())} />
+                            {/* ハート数 */}
+                            <ColorCountFilter label="ハート数" filterColors={filterColors} setFilterColors={setFilterColors} onReset={resetColors} />
+                            {/* スコア */}
+                            <RangeFilter label="スコア" minVal={numericFilters.score?.min||''} maxVal={numericFilters.score?.max||''} onMinChange={(v) => updateNumericFilter('score', 'min', v)} onMaxChange={(v) => updateNumericFilter('score', 'max', v)} onReset={() => setNumericFilters(p => ({...p, score: {min:'',max:''}}))} />
+                            {/* 最大スコア */}
+                            <RangeFilter label="最大スコア" minVal={numericFilters.maxScore?.min||''} maxVal={numericFilters.maxScore?.max||''} onMinChange={(v) => updateNumericFilter('maxScore', 'min', v)} onMaxChange={(v) => updateNumericFilter('maxScore', 'max', v)} onReset={() => setNumericFilters(p => ({...p, maxScore: {min:'',max:''}}))} />
+                            {/* コスト */}
+                            <RangeFilter label="コスト" minVal={numericFilters.req?.min||''} maxVal={numericFilters.req?.max||''} onMinChange={(v) => updateNumericFilter('req', 'min', v)} onMaxChange={(v) => updateNumericFilter('req', 'max', v)} onReset={() => setNumericFilters(p => ({...p, req: {min:'',max:''}}))} />
+                            {/* 実質コスト */}
+                            <RangeFilter label="実質コスト" minVal={numericFilters.effReq?.min||''} maxVal={numericFilters.effReq?.max||''} onMinChange={(v) => updateNumericFilter('effReq', 'min', v)} onMaxChange={(v) => updateNumericFilter('effReq', 'max', v)} onReset={() => setNumericFilters(p => ({...p, effReq: {min:'',max:''}}))} />
+                            {/* 効率 */}
+                            <RangeFilter label="効率" minVal={numericFilters.efficiency?.min||''} maxVal={numericFilters.efficiency?.max||''} onMinChange={(v) => updateNumericFilter('efficiency', 'min', v)} onMaxChange={(v) => updateNumericFilter('efficiency', 'max', v)} onReset={() => setNumericFilters(p => ({...p, efficiency: {min:'',max:''}}))} />
                         </>
                     )}
+
                     <button onClick={resetFilters} className="w-full py-2.5 mt-4 text-sm text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors flex items-center justify-center gap-2"><Icons.Close /> Reset All Filters</button>
                 </>
             )}
