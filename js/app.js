@@ -1,7 +1,7 @@
 // ==========================================
 // Main App
 // ==========================================
-const { useState, useEffect, useMemo } = React;
+const { useState, useEffect, useMemo, useRef } = React;
 
 const App = () => {
     const [activeTab, setActiveTab] = useState('member');
@@ -443,6 +443,37 @@ const App = () => {
         setNumericFilters({});
     };
 
+    // タブ別フィルター保存（メンバー⇔ライブ切替時にフィルターを独立保持）
+    const savedTabFilters = useRef({ member: null, live: null });
+
+    const handleTabChange = (newTab) => {
+        const prev = activeTab;
+        if ((prev === 'member' || prev === 'live') && (newTab === 'member' || newTab === 'live') && prev !== newTab) {
+            // 現在タブのフィルターを保存
+            savedTabFilters.current[prev] = {
+                filterName, filterContains, filterGroups, filterCosts, filterBladeHeart,
+                filterColors, filterAbilities, filterKeywords, filterBaseStats, filterMaxStats, numericFilters
+            };
+            // 移動先タブのフィルターを復元（初回は何もない→リセット）
+            const saved = savedTabFilters.current[newTab];
+            if (saved) {
+                setFilterName(saved.filterName);
+                setFilterContains(saved.filterContains); setFilterGroups(saved.filterGroups);
+                setFilterCosts(saved.filterCosts); setFilterBladeHeart(saved.filterBladeHeart);
+                setFilterColors(saved.filterColors);
+                setFilterAbilities(saved.filterAbilities); setFilterKeywords(saved.filterKeywords);
+                setFilterBaseStats(saved.filterBaseStats); setFilterMaxStats(saved.filterMaxStats);
+                setNumericFilters(saved.numericFilters);
+            } else {
+                resetAll();
+            }
+        }
+        setActiveTab(newTab);
+    };
+
+    // 検討カードを全てクリア
+    const clearConsideration = () => setConsideration({ member: {}, live: {} });
+
     // ==========================================
     // Derived Data
     // ==========================================
@@ -668,7 +699,7 @@ const App = () => {
     }, [filterName, filterContains, filterGroups, filterCosts, filterBladeHeart, filterColors, filterAbilities, filterKeywords, filterBaseStats, filterMaxStats, numericFilters]);
 
     const filterProps = {
-        isMobile: false, activeTab, setActiveTab,
+        isMobile: false, activeTab, setActiveTab: handleTabChange,
         filterName, setFilterName,
         filterContains, toggleContain: (v) => toggle3State(filterContains, v, setFilterContains), setFilterContains,
         filterGroups, toggleGroup: (v) => toggle3State(filterGroups, v, setFilterGroups), setFilterGroups,
@@ -698,32 +729,6 @@ const App = () => {
         </div>
     );
 
-    const renderCardList = (items) => (
-        <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200 overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 text-xs md:text-sm">
-                <thead className="bg-gray-50">
-                    <tr>
-                        <th className="px-3 py-2 text-left font-medium text-gray-500">Img</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-500">No.</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-500">Name</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-500">Group</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-500 hidden sm:table-cell">Ability</th>
-                        {activeTab === 'member'
-                            ? <><th className="px-3 py-2 text-left font-medium text-gray-500">Cost</th><th className="px-3 py-2 text-left font-medium text-gray-500">Stats</th></>
-                            : <><th className="px-3 py-2 text-left font-medium text-gray-500">Score</th><th className="px-3 py-2 text-left font-medium text-gray-500">Cost</th></>
-                        }
-                        <th className="px-3 py-2 text-right font-medium text-gray-500">Deck</th>
-                    </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                    {items.map((item, index) => (
-                        <CardItem key={`${item.number}-${index}`} item={item} deckCount={getDeckCount(item)} onAdd={addCardToDeck} onRemove={removeCardFromDeck} onSelect={setSelectedItem} abilitiesList={getAbilitiesList(item)} asGrid={false} />
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    );
-
     const renderDeckSection = (title, items, borderColor) => {
         if (items.length === 0) return null;
         const isMember = items[0]?._type === 'member';
@@ -736,35 +741,11 @@ const App = () => {
                             <CompactCardItem key={`${item.number}-${index}`} item={item} deckCount={getDeckCount(item)} onSelect={setSelectedItem} cols={compactCols} />
                         ))}
                     </div>
-                ) : actualViewMode === 'grid' ? (
+                ) : (
                     <div className="grid gap-x-2 gap-y-6 md:gap-x-3 md:gap-y-8 px-1 pb-4" style={{ gridTemplateColumns: isMember ? `repeat(auto-fill, minmax(${deckCardSize}px, 1fr))` : `repeat(auto-fill, minmax(${Math.round(deckCardSize * 1.5)}px, 1fr))` }}>
                         {items.map((item, index) => (
                             <CardItem key={`${item.number}-${index}`} item={item} deckCount={getDeckCount(item)} onAdd={addCardToDeck} onRemove={removeCardFromDeck} onSelect={setSelectedItem} abilitiesList={getAbilitiesList(item)} asGrid={true} />
                         ))}
-                    </div>
-                ) : (
-                    <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200 overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200 text-xs md:text-sm">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-3 py-2 text-left font-medium text-gray-500">Img</th>
-                                    <th className="px-3 py-2 text-left font-medium text-gray-500">No.</th>
-                                    <th className="px-3 py-2 text-left font-medium text-gray-500">Name</th>
-                                    <th className="px-3 py-2 text-left font-medium text-gray-500">Group</th>
-                                    <th className="px-3 py-2 text-left font-medium text-gray-500 hidden sm:table-cell">Ability</th>
-                                    {isMember
-                                        ? <><th className="px-3 py-2 text-left font-medium text-gray-500">Cost</th><th className="px-3 py-2 text-left font-medium text-gray-500">Stats</th></>
-                                        : <><th className="px-3 py-2 text-left font-medium text-gray-500">Score</th><th className="px-3 py-2 text-left font-medium text-gray-500">Cost</th></>
-                                    }
-                                    <th className="px-3 py-2 text-right font-medium text-gray-500">Deck</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {items.map((item, index) => (
-                                    <CardItem key={`${item.number}-${index}`} item={item} deckCount={getDeckCount(item)} onAdd={addCardToDeck} onRemove={removeCardFromDeck} onSelect={setSelectedItem} abilitiesList={getAbilitiesList(item)} asGrid={false} />
-                                ))}
-                            </tbody>
-                        </table>
                     </div>
                 )}
             </div>
@@ -790,7 +771,6 @@ const App = () => {
                 <div className="flex items-center justify-between px-4 py-3">
                     <h1 className="text-xl font-bold text-gray-800 flex items-center gap-1"><span className="text-blue-600">Card</span>List</h1>
                     <div className="flex items-center gap-3">
-                        <button onClick={() => window.location.reload()} className="p-2 text-gray-500 bg-gray-100 rounded-full"><Icons.Refresh className="w-4 h-4" /></button>
                         <button onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)} className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-bold transition-colors ${isMobileFilterOpen ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}>
                             <Icons.Filter className="w-4 h-4" /> Filter {activeFilters.length > 0 && <span className="bg-red-500 text-white text-[10px] px-1 rounded-full ml-1">{activeFilters.length}</span>}
                         </button>
@@ -799,9 +779,9 @@ const App = () => {
 
                 <div className="px-4 pb-3">
                     <div className="flex bg-gray-100 p-1 rounded-lg text-xs font-medium">
-                        <button onClick={() => setActiveTab('member')} className={`flex-1 py-1.5 rounded-md transition-colors ${activeTab === 'member' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>メンバー</button>
-                        <button onClick={() => setActiveTab('live')} className={`flex-1 py-1.5 rounded-md transition-colors ${activeTab === 'live' ? 'bg-white shadow text-pink-600' : 'text-gray-500'}`}>ライブ</button>
-                        <button onClick={() => setActiveTab('deck')} className={`flex-1 py-1.5 rounded-md transition-colors ${activeTab === 'deck' ? 'bg-gray-800 shadow text-white' : 'text-gray-500'}`}>デッキ</button>
+                        <button onClick={() => handleTabChange('member')} className={`flex-1 py-1.5 rounded-md transition-colors ${activeTab === 'member' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>メンバー</button>
+                        <button onClick={() => handleTabChange('live')} className={`flex-1 py-1.5 rounded-md transition-colors ${activeTab === 'live' ? 'bg-white shadow text-pink-600' : 'text-gray-500'}`}>ライブ</button>
+                        <button onClick={() => handleTabChange('deck')} className={`flex-1 py-1.5 rounded-md transition-colors ${activeTab === 'deck' ? 'bg-gray-800 shadow text-white' : 'text-gray-500'}`}>デッキ</button>
                     </div>
                 </div>
 
@@ -920,9 +900,7 @@ const App = () => {
                                 <button onClick={() => setViewMode('compact')} className={`p-1.5 rounded transition-all ${actualViewMode === 'compact' ? 'bg-gray-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`} title="Compact View"><Icons.Maximize /></button>
                             )}
                             <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded transition-all ${actualViewMode === 'grid' ? 'bg-gray-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`} title="Grid View"><Icons.Grid /></button>
-                            <button onClick={() => setViewMode('list')} className={`p-1.5 rounded transition-all ${actualViewMode === 'list' ? 'bg-gray-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`} title="List View"><Icons.List /></button>
                         </div>
-                        <button onClick={() => window.location.reload()} className="hidden md:flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded hover:bg-gray-50 transition text-sm"><Icons.Refresh className="w-4 h-4" /> Sync</button>
                     </div>
                 </div>
 
@@ -943,9 +921,10 @@ const App = () => {
                                 {/* 検討カードセクション */}
                                 {(sortedConsiderationCards.member.length > 0 || sortedConsiderationCards.live.length > 0) && (
                                     <div>
-                                        <h3 className="text-base md:text-xl font-bold text-amber-700 border-b-2 border-amber-300 pb-1 md:pb-2 mb-3 md:mb-4">
-                                            検討カード
-                                        </h3>
+                                        <div className="flex items-center justify-between border-b-2 border-amber-300 pb-1 md:pb-2 mb-3 md:mb-4">
+                                            <h3 className="text-base md:text-xl font-bold text-amber-700">検討カード</h3>
+                                            <button onClick={clearConsideration} className="text-xs text-amber-700 border border-amber-300 hover:bg-amber-50 px-2 py-1 rounded transition-colors flex items-center gap-1"><Icons.Close className="w-3 h-3" /> クリア</button>
+                                        </div>
                                         {/* メンバー・ライブを同一グリッドに配置。ライブはspan 2で約2倍幅 */}
                                         <div className={`px-1 pb-2 grid ${actualViewMode === 'compact' ? 'gap-1' : 'gap-x-2 gap-y-6 md:gap-x-3 md:gap-y-8'}`}
                                              style={{ gridTemplateColumns: actualViewMode === 'compact' ? `repeat(${compactCols}, 1fr)` : `repeat(auto-fill, minmax(${deckCardSize}px, 1fr))` }}>
@@ -963,10 +942,8 @@ const App = () => {
                                     </div>
                                 )}
                             </div>
-                        ) : actualViewMode === 'grid' ? (
-                            renderCardGrid(displayList)
                         ) : (
-                            renderCardList(displayList)
+                            renderCardGrid(displayList)
                         )}
 
                         {displayList.length === 0 && (

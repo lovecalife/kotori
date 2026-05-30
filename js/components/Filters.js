@@ -54,13 +54,13 @@ const ButtonGroupFilter = ({ label, options, filterState, onChange, onReset, sty
     );
 };
 
-const TagFilter = ({ label, options, filterState, onChange, onReset }) => {
+const TagFilter = ({ label, options, filterState, onChange, onReset, noCollapse = false }) => {
     if (options.length === 0) return null;
     const COLLAPSED_LIMIT = 8;
     const [expanded, setExpanded] = React.useState(false);
     const isActive = filterState.include.size > 0 || filterState.exclude.size > 0;
-    const hasMore = options.length > COLLAPSED_LIMIT;
-    const visibleOptions = expanded ? options : options.slice(0, COLLAPSED_LIMIT);
+    const hasMore = !noCollapse && options.length > COLLAPSED_LIMIT;
+    const visibleOptions = (noCollapse || expanded) ? options : options.slice(0, COLLAPSED_LIMIT);
     return (
         <div className="mb-4">
             <FilterHeader label={label} onReset={onReset} isActive={isActive} />
@@ -78,7 +78,8 @@ const TagFilter = ({ label, options, filterState, onChange, onReset }) => {
                 })}
             </div>
             {hasMore && (
-                <button onClick={() => setExpanded(e => !e)} className="mt-1.5 text-[10px] text-blue-500 hover:text-blue-700 flex items-center gap-1">
+                <button onClick={() => setExpanded(e => !e)}
+                    className="mt-2 w-full py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-md transition-colors">
                     {expanded ? '▲ 閉じる' : `▼ すべて表示（${options.length}件）`}
                 </button>
             )}
@@ -120,7 +121,7 @@ const ColorCountFilter = ({ filterColors, setFilterColors, onReset, label = 'Col
     return (
         <div className="mb-4">
             <FilterHeader label={label} onReset={onReset} isActive={isActive} />
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-2">
                 {colors.map(color => {
                     const style = BH_STYLES[color];
                     return (
@@ -218,7 +219,7 @@ const FilterPanel = ({
                     {activeTab === 'member' && (
                         <>
                             {/* 収録 */}
-                            {uniqueContains.length > 0 && <TagFilter label="収録" options={uniqueContains} filterState={filterContains} onChange={toggleContain} onReset={() => setFilterContains(initial3State())} />}
+                            {uniqueContains.length > 0 && <TagFilter label="収録" noCollapse={true} options={uniqueContains} filterState={filterContains} onChange={toggleContain} onReset={() => setFilterContains(initial3State())} />}
                             {/* コスト */}
                             <div className="mb-4">
                                 <FilterHeader label="コスト" onReset={() => setFilterCosts(initial3State())} isActive={filterCosts.include.size > 0 || filterCosts.exclude.size > 0} />
@@ -256,7 +257,7 @@ const FilterPanel = ({
                     {activeTab === 'live' && (
                         <>
                             {/* 収録 */}
-                            {uniqueContains.length > 0 && <TagFilter label="収録" options={uniqueContains} filterState={filterContains} onChange={toggleContain} onReset={() => setFilterContains(initial3State())} />}
+                            {uniqueContains.length > 0 && <TagFilter label="収録" noCollapse={true} options={uniqueContains} filterState={filterContains} onChange={toggleContain} onReset={() => setFilterContains(initial3State())} />}
                             {/* ブレードハート */}
                             <ButtonGroupFilter label="ブレードハート" options={BH_OPTIONS_LIVE} filterState={filterBladeHeart} onChange={toggleBladeHeart} styles={BH_STYLES} defaultStyle={BH_STYLES['None']} onReset={() => setFilterBladeHeart(initial3State())} />
                             {/* キーワード */}
