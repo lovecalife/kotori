@@ -44,30 +44,45 @@ const ButtonGroupFilter = ({ label, options, filterState, onChange, onReset, sty
                     let className = style.base;
                     if (isIncluded) className = style.active;
                     if (isExcluded) className = "bg-gray-800 text-gray-300 ring-2 ring-offset-2 ring-gray-800 line-through opacity-80";
-                    return <button key={opt} onClick={() => onChange(opt)} className={`px-3 py-1 rounded-full text-xs font-bold transition-all border border-transparent shadow-sm ${className}`}>{opt}</button>;
+                    const icon = isIncluded ? '✓ ' : isExcluded ? '✕ ' : '';
+                    const nextAction = isIncluded ? 'クリック: 除外' : isExcluded ? 'クリック: 解除' : 'クリック: 含む';
+                    return <button key={opt} title={nextAction} onClick={() => onChange(opt)} className={`px-3 py-1 rounded-full text-xs font-bold transition-all border border-transparent shadow-sm ${className}`}>{icon}{opt}</button>;
                 })}
             </div>
+            <p className="text-[9px] text-gray-400 mt-1 leading-tight">クリック: 含む → 再クリック: 除外 → もう一度: 解除</p>
         </div>
     );
 };
 
 const TagFilter = ({ label, options, filterState, onChange, onReset }) => {
     if (options.length === 0) return null;
+    const COLLAPSED_LIMIT = 8;
+    const [expanded, setExpanded] = React.useState(false);
     const isActive = filterState.include.size > 0 || filterState.exclude.size > 0;
+    const hasMore = options.length > COLLAPSED_LIMIT;
+    const visibleOptions = expanded ? options : options.slice(0, COLLAPSED_LIMIT);
     return (
         <div className="mb-4">
             <FilterHeader label={label} onReset={onReset} isActive={isActive} />
-            <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-1 no-scrollbar">
-                {options.map((opt, index) => {
+            <div className="flex flex-wrap gap-2">
+                {visibleOptions.map((opt, index) => {
                     const isIncluded = filterState.include.has(opt);
                     const isExcluded = filterState.exclude.has(opt);
                     const style = getTagColor(index);
                     let className = style.base;
                     if (isIncluded) className = style.active;
                     if (isExcluded) className = "bg-gray-800 text-gray-300 ring-2 ring-offset-2 ring-gray-800 line-through opacity-80";
-                    return <button key={opt} onClick={() => onChange(opt)} className={`px-3 py-1 rounded-full text-xs font-bold transition-all border border-transparent shadow-sm ${className}`}>{opt}</button>;
+                    const icon = isIncluded ? '✓ ' : isExcluded ? '✕ ' : '';
+                    const nextAction = isIncluded ? 'クリック: 除外' : isExcluded ? 'クリック: 解除' : 'クリック: 含む';
+                    return <button key={opt} title={nextAction} onClick={() => onChange(opt)} className={`px-3 py-1 rounded-full text-xs font-bold transition-all border border-transparent shadow-sm ${className}`}>{icon}{opt}</button>;
                 })}
             </div>
+            {hasMore && (
+                <button onClick={() => setExpanded(e => !e)} className="mt-1.5 text-[10px] text-blue-500 hover:text-blue-700 flex items-center gap-1">
+                    {expanded ? '▲ 閉じる' : `▼ すべて表示（${options.length}件）`}
+                </button>
+            )}
+            <p className="text-[9px] text-gray-400 mt-1 leading-tight">クリック: 含む → 再クリック: 除外 → もう一度: 解除</p>
         </div>
     );
 };
@@ -114,12 +129,12 @@ const ColorCountFilter = ({ filterColors, setFilterColors, onReset, label = 'Col
                                 <span className={`w-3 h-3 rounded-full flex-shrink-0 ${style.bg}`}></span>
                                 <span className="text-[10px] font-bold text-gray-600 w-8 flex-shrink-0 truncate">{color}</span>
                             </div>
-                            <div className="flex items-center bg-gray-50 rounded border border-gray-200 h-6">
+                            <div className="flex items-center bg-gray-50 rounded border border-gray-200 h-8">
                                 <button
                                     onClick={() => handleDecrement(color)}
-                                    className="w-5 flex items-center justify-center text-gray-500 hover:text-gray-800 hover:bg-gray-200 h-full rounded-l transition-colors"
+                                    className="w-7 flex items-center justify-center text-gray-500 hover:text-gray-800 hover:bg-gray-200 h-full rounded-l transition-colors"
                                 >
-                                    <Icons.Minus style={{width: 10, height: 10}} />
+                                    <Icons.Minus style={{width: 12, height: 12}} />
                                 </button>
                                 <input
                                     type="number"
@@ -130,13 +145,13 @@ const ColorCountFilter = ({ filterColors, setFilterColors, onReset, label = 'Col
                                         const v = e.target.value;
                                         if (v === '' || parseInt(v) >= 0) handleChange(color, v);
                                     }}
-                                    className="w-6 text-center text-[11px] outline-none bg-transparent font-bold text-gray-700 hide-spin"
+                                    className="w-8 text-center text-xs outline-none bg-transparent font-bold text-gray-700 hide-spin"
                                 />
                                 <button
                                     onClick={() => handleIncrement(color)}
-                                    className="w-5 flex items-center justify-center text-gray-500 hover:text-gray-800 hover:bg-gray-200 h-full rounded-r transition-colors"
+                                    className="w-7 flex items-center justify-center text-gray-500 hover:text-gray-800 hover:bg-gray-200 h-full rounded-r transition-colors"
                                 >
-                                    <Icons.Plus style={{width: 10, height: 10}} />
+                                    <Icons.Plus style={{width: 12, height: 12}} />
                                 </button>
                             </div>
                         </div>
