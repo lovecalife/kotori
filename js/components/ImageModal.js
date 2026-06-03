@@ -14,24 +14,66 @@ const ImageModal = ({ selectedItem, onClose, sourceList, deckCount, onAdd, onRem
 
     const isLive = selectedItem._type === 'live';
 
+    // 下半分拡大モード
+    const [showBottomHalf, setShowBottomHalf] = React.useState(false);
+
+    const handleImageError = (e) => {
+        if (!e.target.dataset.triedFallback) {
+            e.target.dataset.triedFallback = "true";
+            e.target.src = getFallbackUrl(selectedItem.image);
+        } else {
+            e.target.src = 'https://placehold.co/400x600?text=No+Image';
+        }
+    };
+
     return (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 p-4 sm:p-8" onClick={() => onClose(null)}>
             <div className="flex flex-col items-center w-full h-full max-w-6xl">
 
-                <div className="flex-1 min-h-0 w-full flex items-center justify-center mb-4 sm:mb-8">
-                    <SafeImage
-                        src={getImageUrl(selectedItem.image)}
-                        alt={selectedItem.name}
-                        className="max-w-full max-h-full object-contain rounded-lg shadow-2xl bg-white/5"
-                        onError={(e) => {
-                            if (!e.target.dataset.triedFallback) {
-                                e.target.dataset.triedFallback = "true";
-                                e.target.src = getFallbackUrl(selectedItem.image);
-                            } else {
-                                e.target.src = 'https://placehold.co/400x600?text=No+Image';
-                            }
-                        }}
-                    />
+                <div className="flex-1 min-h-0 w-full flex items-center justify-center mb-2">
+                    {showBottomHalf ? (
+                        // 下半分拡大: アスペクト比を元の半分にしたコンテナに画像をbottomアンカーで配置
+                        // → 上半分がoverflow:hiddenでクリップされ、下半分が2倍スケールに見える
+                        <div
+                            className="relative overflow-hidden rounded-lg shadow-2xl bg-white/5"
+                            style={{
+                                aspectRatio: isLive ? '32/9' : '3/2',
+                                maxHeight: '100%',
+                                width: '100%',
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <img
+                                src={getImageUrl(selectedItem.image)}
+                                alt={selectedItem.name}
+                                style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: 'auto' }}
+                                onError={handleImageError}
+                            />
+                        </div>
+                    ) : (
+                        <SafeImage
+                            src={getImageUrl(selectedItem.image)}
+                            alt={selectedItem.name}
+                            className="max-w-full max-h-full object-contain rounded-lg shadow-2xl bg-white/5"
+                            onError={handleImageError}
+                        />
+                    )}
+                </div>
+
+                {/* 下半分拡大トグルボタン */}
+                <div className="flex-shrink-0 mb-3" onClick={(e) => e.stopPropagation()}>
+                    <button
+                        onClick={() => setShowBottomHalf(b => !b)}
+                        className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${
+                            showBottomHalf
+                                ? 'bg-blue-500 text-white border-blue-400 shadow-lg shadow-blue-900/40'
+                                : 'bg-white/10 text-white/70 border-white/20 hover:bg-white/20 hover:text-white'
+                        }`}
+                        title={showBottomHalf ? 'カード全体を表示' : '下半分を拡大してテキストを読む'}
+                    >
+                        <Icons.Maximize style={{width:13, height:13}} />
+                        {showBottomHalf ? '全体表示' : 'テキスト拡大'}
+                    </button>
                 </div>
 
                 <div className="flex-shrink-0 w-full flex flex-col items-center">
