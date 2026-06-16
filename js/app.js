@@ -325,10 +325,16 @@ const App = () => {
         } catch(e) {}
     };
 
+    const getExportKey = (card) => {
+        if (!card.rarity) return card.number;
+        const firstRarity = card.rarity.split(/[,、\s]+/)[0].trim();
+        return firstRarity ? card.number + '-' + firstRarity : card.number;
+    };
+
     const handleExportFile = () => {
         const simpleDeck = { member: {}, live: {} };
-        Object.keys(deck.member).forEach(k => simpleDeck.member[k] = deck.member[k].count);
-        Object.keys(deck.live).forEach(k => simpleDeck.live[k] = deck.live[k].count);
+        Object.values(deck.member).forEach(({ card, count }) => { simpleDeck.member[getExportKey(card)] = count; });
+        Object.values(deck.live).forEach(({ card, count }) => { simpleDeck.live[getExportKey(card)] = count; });
         if (deckNameInput.trim()) simpleDeck.name = deckNameInput.trim();
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(simpleDeck, null, 2));
         const a = document.createElement('a');
@@ -340,6 +346,33 @@ const App = () => {
         showToast('ファイルとしてダウンロードしました');
     };
 
+    const findCardByExportKey = (type, key) => {
+        let card = cardData[type].find(c => c.number === key);
+        if (!card) {
+            const baseNum = key.replace(/-[^-]+$/, '');
+            card = cardData[type].find(c => c.number === baseNum);
+        }
+        return card;
+    };
+
+    const applyImportedDeck = (prevDeck, parsed) => {
+        const newDeck = { member: { ...prevDeck.member }, live: { ...prevDeck.live } };
+        const addCards = (type, dict) => {
+            if (!dict) return;
+            Object.entries(dict).forEach(([num, count]) => {
+                const card = findCardByExportKey(type, num);
+                if (card) {
+                    const currentCount = newDeck[type][card.number]?.count || 0;
+                    const finalCount = Math.min(currentCount + (parseInt(count, 10) || 0), 4);
+                    if (finalCount > 0) newDeck[type][card.number] = { card, count: finalCount };
+                }
+            });
+        };
+        addCards('member', parsed.member);
+        addCards('live', parsed.live);
+        return newDeck;
+    };
+
     const handleImportFile = (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -348,23 +381,7 @@ const App = () => {
             try {
                 const parsed = JSON.parse(event.target.result);
                 if (!parsed.member && !parsed.live) throw new Error();
-                setDeck(prevDeck => {
-                    const newDeck = { member: { ...prevDeck.member }, live: { ...prevDeck.live } };
-                    const addCards = (type, dict) => {
-                        if (!dict) return;
-                        Object.entries(dict).forEach(([num, count]) => {
-                            const card = cardData[type].find(c => c.number === num);
-                            if (card) {
-                                const currentCount = newDeck[type][num]?.count || 0;
-                                const finalCount = Math.min(currentCount + (parseInt(count, 10) || 0), 4);
-                                if (finalCount > 0) newDeck[type][num] = { card, count: finalCount };
-                            }
-                        });
-                    };
-                    addCards('member', parsed.member);
-                    addCards('live', parsed.live);
-                    return newDeck;
-                });
+                setDeck(prevDeck => applyImportedDeck(prevDeck, parsed));
                 if (parsed.name) setDeckNameInput(parsed.name);
                 setSelectedDeckId('');
                 showToast('ファイルからデッキに追加しました');
@@ -378,8 +395,8 @@ const App = () => {
 
     const handleExportText = () => {
         const simpleDeck = { member: {}, live: {} };
-        Object.keys(deck.member).forEach(k => simpleDeck.member[k] = deck.member[k].count);
-        Object.keys(deck.live).forEach(k => simpleDeck.live[k] = deck.live[k].count);
+        Object.values(deck.member).forEach(({ card, count }) => { simpleDeck.member[getExportKey(card)] = count; });
+        Object.values(deck.live).forEach(({ card, count }) => { simpleDeck.live[getExportKey(card)] = count; });
         setIoText(JSON.stringify(simpleDeck));
         showToast('テキストデータを出力しました');
     };
@@ -388,23 +405,7 @@ const App = () => {
         try {
             const parsed = JSON.parse(ioText);
             if (!parsed.member && !parsed.live) throw new Error();
-            setDeck(prevDeck => {
-                const newDeck = { member: { ...prevDeck.member }, live: { ...prevDeck.live } };
-                const addCards = (type, dict) => {
-                    if (!dict) return;
-                    Object.entries(dict).forEach(([num, count]) => {
-                        const card = cardData[type].find(c => c.number === num);
-                        if (card) {
-                            const currentCount = newDeck[type][num]?.count || 0;
-                            const finalCount = Math.min(currentCount + (parseInt(count, 10) || 0), 4);
-                            if (finalCount > 0) newDeck[type][num] = { card, count: finalCount };
-                        }
-                    });
-                };
-                addCards('member', parsed.member);
-                addCards('live', parsed.live);
-                return newDeck;
-            });
+            setDeck(prevDeck => applyImportedDeck(prevDeck, parsed));
             setSelectedDeckId(''); setDeckNameInput(''); setIoText('');
             showToast('テキストデータからデッキに追加しました');
         } catch(e) {
