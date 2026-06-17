@@ -413,6 +413,25 @@ const App = () => {
         }
     };
 
+    const handleExportToDecklog = () => {
+        const simpleDeck = { member: {}, live: {} };
+        Object.values(deck.member).forEach(({ card, count }) => { simpleDeck.member[getExportKey(card)] = count; });
+        Object.values(deck.live).forEach(({ card, count }) => { simpleDeck.live[getExportKey(card)] = count; });
+        const json = JSON.stringify(simpleDeck);
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'https://decklog-importer.onrender.com/';
+        form.target = '_blank';
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'json';
+        input.value = json;
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+    };
+
     const copyToClipboard = () => {
         if (!ioText) return;
         navigator.clipboard.writeText(ioText)
@@ -848,6 +867,7 @@ const App = () => {
                         onExportText={handleExportText}
                         onImportText={handleImportText}
                         onCopyToClipboard={copyToClipboard}
+                        onExportToDecklog={handleExportToDecklog}
                     />
                 )}
 
