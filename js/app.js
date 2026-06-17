@@ -235,9 +235,18 @@ const App = () => {
 
     const deckStats = useMemo(() => {
         const costs = {};
-        const bhs = { Pink: 0, Red: 0, Yellow: 0, Green: 0, Blue: 0, Purple: 0, None: 0 };
+        const bhs = { Pink: 0, Red: 0, Yellow: 0, Green: 0, Blue: 0, Purple: 0, None: 0, ALL: 0, Score: 0, Draw: 0 };
         let memberTotal = 0;
         let liveTotal = 0;
+
+        const countBH = (bladeHeart, count, includeNone) => {
+            const bhList = bladeHeart ? bladeHeart.split(/[,、\s]+/).map(s => s.trim()).filter(Boolean) : [];
+            if (includeNone && bhList.length === 0) { bhs['None'] += count; return; }
+            bhList.forEach(bh => {
+                const key = Object.keys(bhs).find(k => k.toLowerCase() === bh.toLowerCase());
+                if (key) bhs[key] += count;
+            });
+        };
 
         const processItem = (d, type) => {
             const count = d.count;
@@ -245,14 +254,10 @@ const App = () => {
                 memberTotal += count;
                 const costVal = parseInt(d.card.cost);
                 if (!isNaN(costVal)) costs[costVal] = (costs[costVal] || 0) + count;
-                const bhList = d.card.bladeHeart ? d.card.bladeHeart.split(/[,、\s]+/).map(s => s.trim()) : ['None'];
-                if (bhList.length === 0 || (bhList.length === 1 && bhList[0] === '')) bhList[0] = 'None';
-                bhList.forEach(bh => {
-                    const key = Object.keys(bhs).find(k => k.toLowerCase() === bh.toLowerCase());
-                    if (key) bhs[key] += count;
-                });
+                countBH(d.card.bladeHeart, count, true);
             } else {
                 liveTotal += count;
+                countBH(d.card.bladeHeart, count, false);
             }
         };
 

@@ -146,6 +146,11 @@ const DeckStatsBar = ({ deckStats, onClearDeck }) => (
                         <span className="text-[10px] font-bold text-gray-700">{deckStats.bhs['None']}</span>
                     </div>
                 )}
+                {['ALL', 'Score', 'Draw'].map(type => {
+                    const count = deckStats.bhs[type] || 0;
+                    if (count === 0) return null;
+                    return <span key={type} className="text-[10px] font-bold text-gray-600 bg-gray-100 px-1 rounded">{type}:{count}</span>;
+                })}
                 {Object.keys(deckStats.bhs).every(k => deckStats.bhs[k] === 0) && <span className="text-[10px] text-gray-400">-</span>}
             </div>
         </div>
