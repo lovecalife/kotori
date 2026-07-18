@@ -258,7 +258,16 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
         });
         const liveTotal = HEART_COLORS_LIVE.reduce((s, c) => s + liveHearts[c], 0);
         const memberTotal = HEART_COLORS_MEMBER.reduce((s, c) => s + memberHearts[c], 0);
-        return { liveHearts, memberHearts, liveScore, bladeTotal, liveTotal, memberTotal, memberPlusBlade: memberTotal + bladeTotal, missingTotal: liveTotal - memberTotal };
+        // 足りないハート: 色ごとの不足のみ表示（＋表記なし）。余剰分は無色(Gray)要求から差し引く。
+        const missingByColor = {};
+        let surplus = 0;
+        HEART_COLORS_MEMBER.forEach(c => {
+            const diff = liveHearts[c] - memberHearts[c];
+            missingByColor[c] = Math.max(0, diff);
+            if (diff < 0) surplus += -diff;
+        });
+        const missingGray = Math.max(0, liveHearts['Gray'] - surplus);
+        return { liveHearts, memberHearts, liveScore, bladeTotal, liveTotal, memberTotal, memberPlusBlade: memberTotal + bladeTotal, missingByColor, missingGray };
     }, [liveSlots, memberSlots]);
 
     // スロットへ格納するヘルパー（型一致時のみ）
@@ -312,11 +321,10 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
                 {/* 足りないハート（最上部・横並び） */}
                 <div className="bg-white border border-gray-300 rounded-lg p-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
                     <span className="text-xs font-bold text-gray-700 mr-1">足りないハート</span>
-                    {HEART_COLORS_MEMBER.map(c => {
-                        const diff = stats.liveHearts[c] - stats.memberHearts[c];
-                        return <HeartChip key={c} color={c} value={diff > 0 ? diff : `+${-diff}`} highlight={diff > 0 ? 'text-red-600' : 'text-green-600'} />;
-                    })}
-                    <HeartChip color="Gray" value={stats.liveHearts['Gray']} highlight={stats.liveHearts['Gray'] > 0 ? 'text-red-600' : 'text-green-600'} />
+                    {HEART_COLORS_MEMBER.map(c => (
+                        <HeartChip key={c} color={c} value={stats.missingByColor[c]} highlight={stats.missingByColor[c] > 0 ? 'text-red-600' : 'text-green-600'} />
+                    ))}
+                    <HeartChip color="Gray" value={stats.missingGray} highlight={stats.missingGray > 0 ? 'text-red-600' : 'text-green-600'} />
                     <span className="mx-1 h-4 w-px bg-gray-200"></span>
                     <span className="text-base font-bold text-indigo-600">ブレード:{stats.bladeTotal}</span>
                 </div>
