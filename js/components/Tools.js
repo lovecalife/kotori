@@ -292,7 +292,11 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
             surplus += surplusByColor[c];
         });
         const missingGray = Math.max(0, effLive['Gray'] - surplus);
-        return { liveHearts, memberHearts, liveScore, bladeTotal, liveTotal, memberTotal, effBlade, allAdj: memberAdj.ALL, missingByColor, surplusByColor, missingGray };
+        // 許容 = 総スタッツ（補正込みメンバーハート合計+ALL+補正込みブレード）− 補正込みライブハート合計
+        const effMemberTotal = HEART_COLORS_MEMBER.reduce((s, c) => s + effMember[c], 0) + memberAdj.ALL;
+        const effLiveTotal = HEART_COLORS_LIVE.reduce((s, c) => s + effLive[c], 0);
+        const margin = effMemberTotal + effBlade - effLiveTotal;
+        return { liveHearts, memberHearts, liveScore, bladeTotal, liveTotal, memberTotal, effBlade, allAdj: memberAdj.ALL, missingByColor, surplusByColor, missingGray, margin };
     }, [liveSlots, memberSlots, liveAdj, memberAdj]);
 
     // スロットへ格納するヘルパー（型一致時のみ）
@@ -368,15 +372,14 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
                             {HEART_COLORS_MEMBER.map(c => (
                                 <div key={c} className="flex justify-center"><HeartChip color={c} value={stats.memberHearts[c]} /></div>
                             ))}
-                            <span></span>
+                            <span className="text-sm font-bold text-purple-600 px-1 whitespace-nowrap text-center">ALL 0</span>
                             <span className="text-sm font-bold text-indigo-600 px-1 whitespace-nowrap">ブレード {stats.bladeTotal}</span>
                             <span className="text-sm font-bold text-gray-700 px-1 whitespace-nowrap">ハート合計 {stats.memberTotal}</span>
                             <span className="text-[10px] font-bold text-gray-400 pr-1 whitespace-nowrap">メンバーカード補正</span>
                             {HEART_COLORS_MEMBER.map(c => (
                                 <div key={`adj-${c}`} className="flex justify-center"><AdjStepper value={memberAdj[c]} onChange={setMemberAdjKey(c)} /></div>
                             ))}
-                            <div className="flex items-center justify-center gap-1">
-                                <span className="text-[10px] font-bold text-purple-500">ALL</span>
+                            <div className="flex justify-center">
                                 <AdjStepper value={memberAdj.ALL} onChange={setMemberAdjKey('ALL')} />
                             </div>
                             <div className="flex items-center justify-center gap-1">
@@ -404,6 +407,10 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
                             )}
                             <span className="mx-1 h-4 w-px bg-gray-200"></span>
                             <span className="text-base font-bold text-indigo-600">ブレード:{stats.effBlade}</span>
+                            <span
+                                className={`text-base font-bold ${stats.margin < 0 ? 'text-red-600' : 'text-green-600'}`}
+                                title="総スタッツ（補正込みメンバーハート合計＋ALL＋ブレード）− 補正込みライブハート合計"
+                            >許容:{stats.margin}</span>
                         </div>
                     </div>
                 </div>
