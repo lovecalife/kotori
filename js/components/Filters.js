@@ -190,10 +190,16 @@ const FilterPanel = ({
                     <button onClick={() => setActiveTab('member')} className={`flex-1 py-2 rounded-md transition-colors ${activeTab === 'member' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>メンバー</button>
                     <button onClick={() => setActiveTab('live')} className={`flex-1 py-2 rounded-md transition-colors ${activeTab === 'live' ? 'bg-white shadow text-pink-600' : 'text-gray-500'}`}>ライブ</button>
                     <button onClick={() => setActiveTab('deck')} className={`flex-1 py-2 rounded-md transition-colors ${activeTab === 'deck' ? 'bg-gray-800 shadow text-white' : 'text-gray-500'}`}>デッキ</button>
+                    <button onClick={() => setActiveTab('tools')} className={`flex-1 py-2 rounded-md transition-colors ${activeTab === 'tools' ? 'bg-gray-800 shadow text-white' : 'text-gray-500'}`}>ツール</button>
                 </div>
             )}
 
-            {activeTab === 'deck' ? (
+            {activeTab === 'tools' ? (
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <FilterHeader label="ツール" />
+                    <p className="text-xs text-gray-500 mt-2">※ 保存済みデッキの比較などのツールを利用できます。右側のツールを選択してください。</p>
+                </div>
+            ) : activeTab === 'deck' ? (
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                     <FilterHeader label="Deck Sort Order" />
                     <select value={deckSortType} onChange={e => setDeckSortType(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-gray-800 bg-white">

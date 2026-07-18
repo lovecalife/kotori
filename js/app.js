@@ -502,7 +502,7 @@ const App = () => {
     // ==========================================
     // Derived Data
     // ==========================================
-    const currentTabData = activeTab === 'deck' ? [] : cardData[activeTab];
+    const currentTabData = (activeTab === 'member' || activeTab === 'live') ? cardData[activeTab] : [];
 
     const uniqueAbilities = useMemo(() => {
         const s = new Set();
@@ -687,6 +687,8 @@ const App = () => {
 
     const displayList = activeTab === 'deck' ? [...sortedDeckCards.member, ...sortedDeckCards.live] : sortedData;
     const actualViewMode = (activeTab !== 'deck' && viewMode === 'compact') ? 'grid' : viewMode;
+    // メンバー/ライブ閲覧タブか（フィルター・検索・ソートUIの表示条件）
+    const isBrowsing = activeTab === 'member' || activeTab === 'live';
 
     const activeFilters = useMemo(() => {
         const list = [];
@@ -796,9 +798,11 @@ const App = () => {
                 <div className="flex items-center justify-between px-4 py-3">
                     <h1 className="text-xl font-bold text-gray-800 flex items-center gap-1"><span className="text-blue-600">Card</span>List</h1>
                     <div className="flex items-center gap-3">
-                        <button onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)} className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-bold transition-colors ${isMobileFilterOpen ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}>
-                            <Icons.Filter className="w-4 h-4" /> Filter {activeFilters.length > 0 && <span className="bg-red-500 text-white text-[10px] px-1 rounded-full ml-1">{activeFilters.length}</span>}
-                        </button>
+                        {isBrowsing && (
+                            <button onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)} className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-bold transition-colors ${isMobileFilterOpen ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}>
+                                <Icons.Filter className="w-4 h-4" /> Filter {activeFilters.length > 0 && <span className="bg-red-500 text-white text-[10px] px-1 rounded-full ml-1">{activeFilters.length}</span>}
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -807,10 +811,11 @@ const App = () => {
                         <button onClick={() => handleTabChange('member')} className={`flex-1 py-1.5 rounded-md transition-colors ${activeTab === 'member' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>メンバー</button>
                         <button onClick={() => handleTabChange('live')} className={`flex-1 py-1.5 rounded-md transition-colors ${activeTab === 'live' ? 'bg-white shadow text-pink-600' : 'text-gray-500'}`}>ライブ</button>
                         <button onClick={() => handleTabChange('deck')} className={`flex-1 py-1.5 rounded-md transition-colors ${activeTab === 'deck' ? 'bg-gray-800 shadow text-white' : 'text-gray-500'}`}>デッキ</button>
+                        <button onClick={() => handleTabChange('tools')} className={`flex-1 py-1.5 rounded-md transition-colors ${activeTab === 'tools' ? 'bg-gray-800 shadow text-white' : 'text-gray-500'}`}>ツール</button>
                     </div>
                 </div>
 
-                {activeTab !== 'deck' && (
+                {isBrowsing && (
                     <div className="px-4 pb-3">
                         <div className="relative shadow-sm">
                             <input
@@ -830,13 +835,13 @@ const App = () => {
                     </div>
                 )}
 
-                {!isMobileFilterOpen && activeFilters.length > 0 && activeTab !== 'deck' && (
+                {!isMobileFilterOpen && activeFilters.length > 0 && isBrowsing && (
                     <div className="px-4 pb-3 flex gap-2 overflow-x-auto no-scrollbar">
                         {activeFilters.map(f => <ActiveFilterBadge key={f.id} label={f.label} onRemove={f.fn} isExclude={f.isExclude} />)}
                         <button onClick={resetAll} className="text-xs text-red-500 underline whitespace-nowrap ml-1">Clear All</button>
                     </div>
                 )}
-                {isMobileFilterOpen && (
+                {isMobileFilterOpen && isBrowsing && (
                     <div className="border-t border-gray-100 bg-white px-4 py-4 max-h-[70vh] overflow-y-auto shadow-lg"><FilterPanel {...filterProps} isMobile={true} /></div>
                 )}
             </div>
@@ -845,7 +850,7 @@ const App = () => {
             <aside className="hidden md:flex w-80 bg-white border-r border-gray-200 p-6 flex-col h-screen sticky top-0 overflow-y-auto flex-shrink-0">
                 <div className="flex items-center justify-between mb-6">
                     <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2"><span className="text-blue-600">Card</span>List</h1>
-                    {activeTab !== 'deck' && <button onClick={resetAll} className="text-xs flex items-center gap-1 text-gray-500 hover:text-red-600 border border-gray-200 hover:border-red-200 px-2 py-1 rounded transition-colors"><Icons.Close className="w-3 h-3" /> Reset</button>}
+                    {isBrowsing && <button onClick={resetAll} className="text-xs flex items-center gap-1 text-gray-500 hover:text-red-600 border border-gray-200 hover:border-red-200 px-2 py-1 rounded transition-colors"><Icons.Close className="w-3 h-3" /> Reset</button>}
                 </div>
                 <FilterPanel {...filterProps} />
             </aside>
@@ -853,6 +858,10 @@ const App = () => {
             {/* メインコンテンツ */}
             <div className="flex-1 p-4 md:p-6 bg-gray-50 min-h-screen">
 
+              {activeTab === 'tools' ? (
+                <ToolsPanel savedDecks={savedDecks} cardData={cardData} onSelectCard={setSelectedItem} />
+              ) : (
+                <>
                 {activeTab === 'deck' && (
                     <DeckManagerPanel
                         isDeckManagerOpen={isDeckManagerOpen}
@@ -980,6 +989,8 @@ const App = () => {
                         )}
                     </>
                 )}
+                </>
+              )}
             </div>
 
             {/* フルスクリーン画像モーダル */}
