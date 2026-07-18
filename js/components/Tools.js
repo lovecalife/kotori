@@ -173,6 +173,19 @@ const HeartChip = ({ color, value, highlight }) => (
     </span>
 );
 
+// 補正用ステッパー（[−] 値 [＋]）
+const AdjStepper = ({ value, onChange }) => (
+    <span className="inline-flex items-center gap-0.5 bg-gray-50 border border-gray-200 rounded px-0.5">
+        <button onClick={() => onChange(value - 1)} className="p-0.5 text-gray-400 hover:text-gray-700 transition-colors" title="−1">
+            <Icons.Minus style={{ width: 11, height: 11 }} />
+        </button>
+        <span className={`text-xs font-bold min-w-[1.25rem] text-center ${value !== 0 ? 'text-amber-600' : 'text-gray-400'}`}>{value}</span>
+        <button onClick={() => onChange(value + 1)} className="p-0.5 text-gray-400 hover:text-gray-700 transition-colors" title="＋1">
+            <Icons.Plus style={{ width: 11, height: 11 }} />
+        </button>
+    </span>
+);
+
 // スロット（カード配置枠・タップ配置）
 const HeartSlot = ({ card, type, onClear, isHeld, onTap, width }) => {
     const isLive = type === 'live';
@@ -220,6 +233,12 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
     const [memberSlots, setMemberSlots] = React.useState([null, null, null]);
     const [heldCard, setHeldCard] = React.useState(null); // { card, type }
     const [cardSize, setCardSize] = React.useState(92); // メンバー基準幅(px)
+    // 手動補正（スキル等による増減を計算へ反映する）
+    const zeroAdj = (keys) => { const o = {}; keys.forEach(k => o[k] = 0); return o; };
+    const [liveAdj, setLiveAdj] = React.useState(() => zeroAdj(HEART_COLORS_LIVE));
+    const [memberAdj, setMemberAdj] = React.useState(() => zeroAdj([...HEART_COLORS_MEMBER, 'ALL', 'Blade']));
+    const setLiveAdjKey = (key) => (v) => setLiveAdj(prev => ({ ...prev, [key]: v }));
+    const setMemberAdjKey = (key) => (v) => setMemberAdj(prev => ({ ...prev, [key]: v }));
 
     const memberW = cardSize;
     const liveW = Math.round(cardSize * 1.55);
@@ -258,17 +277,23 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
         });
         const liveTotal = HEART_COLORS_LIVE.reduce((s, c) => s + liveHearts[c], 0);
         const memberTotal = HEART_COLORS_MEMBER.reduce((s, c) => s + memberHearts[c], 0);
-        // 足りないハート: 色ごとの不足のみ表示（＋表記なし）。余剰分は無色(Gray)要求から差し引く。
+        // 実効値（手動補正込み・0未満は0に丸め）。行表示は素の値、足りないハート計算は実効値を使う。
+        const effLive = {}; HEART_COLORS_LIVE.forEach(c => effLive[c] = Math.max(0, liveHearts[c] + liveAdj[c]));
+        const effMember = {}; HEART_COLORS_MEMBER.forEach(c => effMember[c] = Math.max(0, memberHearts[c] + memberAdj[c]));
+        const effBlade = bladeTotal + memberAdj.Blade;
+        // 足りないハート: 色ごとの不足＋カッコ書きで余剰量を表示。余剰合計は無色(Gray)要求から差し引く。
         const missingByColor = {};
+        const surplusByColor = {};
         let surplus = 0;
         HEART_COLORS_MEMBER.forEach(c => {
-            const diff = liveHearts[c] - memberHearts[c];
+            const diff = effLive[c] - effMember[c];
             missingByColor[c] = Math.max(0, diff);
-            if (diff < 0) surplus += -diff;
+            surplusByColor[c] = Math.max(0, -diff);
+            surplus += surplusByColor[c];
         });
-        const missingGray = Math.max(0, liveHearts['Gray'] - surplus);
-        return { liveHearts, memberHearts, liveScore, bladeTotal, liveTotal, memberTotal, memberPlusBlade: memberTotal + bladeTotal, missingByColor, missingGray };
-    }, [liveSlots, memberSlots]);
+        const missingGray = Math.max(0, effLive['Gray'] - surplus);
+        return { liveHearts, memberHearts, liveScore, bladeTotal, liveTotal, memberTotal, effBlade, allAdj: memberAdj.ALL, missingByColor, surplusByColor, missingGray };
+    }, [liveSlots, memberSlots, liveAdj, memberAdj]);
 
     // スロットへ格納するヘルパー（型一致時のみ）
     const placeCard = (setSlots, slotType, index, payload) => {
@@ -318,26 +343,74 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
 
             {/* ボード */}
             <div className="bg-rose-50/40 border border-rose-200 rounded-xl p-3 sm:p-4 space-y-4">
-                {/* 足りないハート（最上部・横並び） */}
-                <div className="bg-white border border-gray-300 rounded-lg p-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                    <span className="text-xs font-bold text-gray-700 mr-1">足りないハート</span>
-                    {HEART_COLORS_MEMBER.map(c => (
-                        <HeartChip key={c} color={c} value={stats.missingByColor[c]} highlight={stats.missingByColor[c] > 0 ? 'text-red-600' : 'text-green-600'} />
-                    ))}
-                    <HeartChip color="Gray" value={stats.missingGray} highlight={stats.missingGray > 0 ? 'text-red-600' : 'text-green-600'} />
-                    <span className="mx-1 h-4 w-px bg-gray-200"></span>
-                    <span className="text-base font-bold text-indigo-600">ブレード:{stats.bladeTotal}</span>
+                {/* 集計ブロック（1ブロックに集約：ライブ／補正／メンバー／補正／足りないハート） */}
+                <div className="bg-white border border-gray-300 rounded-lg p-2.5 overflow-x-auto">
+                    <div className="min-w-max space-y-2">
+                        {/* ライブカード＋補正（列を揃えるためgrid 2行） */}
+                        <div className="grid items-center gap-x-2 gap-y-1" style={{ gridTemplateColumns: 'auto repeat(7, minmax(44px, auto)) auto auto' }}>
+                            <span className="text-xs font-bold text-rose-600 pr-1">ライブカード</span>
+                            {HEART_COLORS_LIVE.map(c => (
+                                <div key={c} className="flex justify-center"><HeartChip color={c} value={stats.liveHearts[c]} /></div>
+                            ))}
+                            <span className="text-sm font-bold text-gray-700 px-1 whitespace-nowrap">ハート合計 {stats.liveTotal}</span>
+                            <span className="text-sm font-bold text-pink-600 px-1 whitespace-nowrap">スコア {stats.liveScore}</span>
+                            <span className="text-[10px] font-bold text-gray-400 pr-1 whitespace-nowrap">ライブカード補正</span>
+                            {HEART_COLORS_LIVE.map(c => (
+                                <div key={`adj-${c}`} className="flex justify-center"><AdjStepper value={liveAdj[c]} onChange={setLiveAdjKey(c)} /></div>
+                            ))}
+                            <span></span>
+                            <span></span>
+                        </div>
+
+                        {/* メンバー＋補正（6色＋ALL＋ブレード＋合計） */}
+                        <div className="grid items-center gap-x-2 gap-y-1" style={{ gridTemplateColumns: 'auto repeat(6, minmax(44px, auto)) auto auto auto' }}>
+                            <span className="text-xs font-bold text-blue-600 pr-1">メンバー</span>
+                            {HEART_COLORS_MEMBER.map(c => (
+                                <div key={c} className="flex justify-center"><HeartChip color={c} value={stats.memberHearts[c]} /></div>
+                            ))}
+                            <span></span>
+                            <span className="text-sm font-bold text-indigo-600 px-1 whitespace-nowrap">ブレード {stats.bladeTotal}</span>
+                            <span className="text-sm font-bold text-gray-700 px-1 whitespace-nowrap">ハート合計 {stats.memberTotal}</span>
+                            <span className="text-[10px] font-bold text-gray-400 pr-1 whitespace-nowrap">メンバーカード補正</span>
+                            {HEART_COLORS_MEMBER.map(c => (
+                                <div key={`adj-${c}`} className="flex justify-center"><AdjStepper value={memberAdj[c]} onChange={setMemberAdjKey(c)} /></div>
+                            ))}
+                            <div className="flex items-center justify-center gap-1">
+                                <span className="text-[10px] font-bold text-purple-500">ALL</span>
+                                <AdjStepper value={memberAdj.ALL} onChange={setMemberAdjKey('ALL')} />
+                            </div>
+                            <div className="flex items-center justify-center gap-1">
+                                <span className="text-[10px] font-bold text-indigo-500">ブレード</span>
+                                <AdjStepper value={memberAdj.Blade} onChange={setMemberAdjKey('Blade')} />
+                            </div>
+                            <span></span>
+                        </div>
+
+                        {/* 足りないハート（補正込みで計算） */}
+                        <div className="border-t border-gray-200 pt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                            <span className="text-xs font-bold text-gray-700 mr-1">足りないハート</span>
+                            {HEART_COLORS_MEMBER.map(c => (
+                                <span key={c} className="inline-flex items-center gap-1">
+                                    <span className={`w-3.5 h-3.5 rounded-full ${(BH_STYLES[c] || BH_STYLES['None']).bg}`}></span>
+                                    <span className={`text-sm font-bold ${stats.missingByColor[c] > 0 ? 'text-red-600' : 'text-green-600'}`}>{stats.missingByColor[c]}</span>
+                                    {stats.surplusByColor[c] > 0 && (
+                                        <span className="text-xs font-bold text-green-600">(+{stats.surplusByColor[c]})</span>
+                                    )}
+                                </span>
+                            ))}
+                            <HeartChip color="Gray" value={stats.missingGray} highlight={stats.missingGray > 0 ? 'text-red-600' : 'text-green-600'} />
+                            {stats.allAdj !== 0 && (
+                                <span className="text-sm font-bold text-purple-600">(+ALL {stats.allAdj})</span>
+                            )}
+                            <span className="mx-1 h-4 w-px bg-gray-200"></span>
+                            <span className="text-base font-bold text-indigo-600">ブレード:{stats.effBlade}</span>
+                        </div>
+                    </div>
                 </div>
 
                 {/* ライブ置き場（集計対象） */}
                 <div>
                     <div className="text-xs font-bold text-rose-600 mb-1">ライブカード置き場（集計対象・最大3）</div>
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mb-2">
-                        {HEART_COLORS_LIVE.map(c => <HeartChip key={c} color={c} value={stats.liveHearts[c]} />)}
-                        <span className="mx-1 h-4 w-px bg-gray-200"></span>
-                        <span className="text-sm font-bold text-gray-700">ハート合計:{stats.liveTotal}</span>
-                        <span className="text-sm font-bold text-pink-600">スコア:{stats.liveScore}</span>
-                    </div>
                     <div className="flex gap-2">
                         {liveSlots.map((card, i) => (
                             <HeartSlot key={i} card={card} type="live" width={liveW}
@@ -352,13 +425,6 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
                 {/* メンバーエリア（集計対象） */}
                 <div>
                     <div className="text-xs font-bold text-blue-600 mb-1">メンバーエリア（集計対象・最大3）</div>
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mb-2">
-                        {HEART_COLORS_MEMBER.map(c => <HeartChip key={c} color={c} value={stats.memberHearts[c]} />)}
-                        <span className="mx-1 h-4 w-px bg-gray-200"></span>
-                        <span className="text-base font-bold text-indigo-600">ブレード:{stats.bladeTotal}</span>
-                        <span className="text-base font-bold text-gray-700">ハート合計:{stats.memberTotal}</span>
-                        <span className="text-base font-bold text-blue-600">総スタッツ:{stats.memberPlusBlade}</span>
-                    </div>
                     <div className="flex gap-2">
                         {memberSlots.map((card, i) => (
                             <HeartSlot key={i} card={card} type="member" width={liveW}
