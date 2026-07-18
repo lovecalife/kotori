@@ -318,8 +318,7 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
                     })}
                     <HeartChip color="Gray" value={stats.liveHearts['Gray']} highlight={stats.liveHearts['Gray'] > 0 ? 'text-red-600' : 'text-green-600'} />
                     <span className="mx-1 h-4 w-px bg-gray-200"></span>
-                    <span className="text-xs text-gray-500">総合計</span>
-                    <span className={`text-base font-bold ${stats.missingTotal > 0 ? 'text-red-600' : 'text-green-600'}`}>{stats.missingTotal > 0 ? stats.missingTotal : `+${-stats.missingTotal}`}</span>
+                    <span className="text-base font-bold text-indigo-600">ブレード:{stats.bladeTotal}</span>
                 </div>
 
                 {/* ライブ置き場（集計対象） */}
@@ -327,7 +326,9 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
                     <div className="text-xs font-bold text-rose-600 mb-1">ライブカード置き場（集計対象・最大3）</div>
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mb-2">
                         {HEART_COLORS_LIVE.map(c => <HeartChip key={c} color={c} value={stats.liveHearts[c]} />)}
-                        <span className="text-xs text-gray-400">スコア:{stats.liveScore}</span>
+                        <span className="mx-1 h-4 w-px bg-gray-200"></span>
+                        <span className="text-sm font-bold text-gray-700">ハート合計:{stats.liveTotal}</span>
+                        <span className="text-sm font-bold text-pink-600">スコア:{stats.liveScore}</span>
                     </div>
                     <div className="flex gap-2">
                         {liveSlots.map((card, i) => (
@@ -345,13 +346,14 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
                     <div className="text-xs font-bold text-blue-600 mb-1">メンバーエリア（集計対象・最大3）</div>
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mb-2">
                         {HEART_COLORS_MEMBER.map(c => <HeartChip key={c} color={c} value={stats.memberHearts[c]} />)}
-                        <span className="text-xs text-indigo-500 font-bold">ブレード:{stats.bladeTotal}</span>
-                        <span className="text-xs text-gray-400">ハート合計:{stats.memberTotal}</span>
-                        <span className="text-xs text-blue-600 font-bold">ハート+ブレード:{stats.memberPlusBlade}</span>
+                        <span className="mx-1 h-4 w-px bg-gray-200"></span>
+                        <span className="text-base font-bold text-indigo-600">ブレード:{stats.bladeTotal}</span>
+                        <span className="text-base font-bold text-gray-700">ハート合計:{stats.memberTotal}</span>
+                        <span className="text-base font-bold text-blue-600">総スタッツ:{stats.memberPlusBlade}</span>
                     </div>
                     <div className="flex gap-2">
                         {memberSlots.map((card, i) => (
-                            <HeartSlot key={i} card={card} type="member" width={memberW}
+                            <HeartSlot key={i} card={card} type="member" width={liveW}
                                 onClear={() => clearSlot(setMemberSlots, i)}
                                 isHeld={!!heldCard && heldCard.type === 'member'}
                                 onTap={() => placeCard(setMemberSlots, 'member', i, heldCard)}
