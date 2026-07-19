@@ -386,11 +386,13 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
             surplus += surplusByColor[c];
         });
         const missingGray = Math.max(0, effLive['Gray'] - surplus);
+        // 不足数 = 各色の不足＋Gray不足の合計（赤字表示分の合計）
+        const missingTotal = HEART_COLORS_MEMBER.reduce((s, c) => s + missingByColor[c], 0) + missingGray;
         // 許容 = 総スタッツ（補正込みメンバーハート合計+ALL+補正込みブレード）− 補正込みライブハート合計
         const effMemberTotal = HEART_COLORS_MEMBER.reduce((s, c) => s + effMember[c], 0) + memberAdj.ALL;
         const effLiveTotal = HEART_COLORS_LIVE.reduce((s, c) => s + effLive[c], 0);
         const margin = effMemberTotal + effBlade - effLiveTotal;
-        return { liveHearts, memberHearts, liveScore, bladeTotal, liveTotal, memberTotal, effBlade, allAdj: memberAdj.ALL, missingByColor, surplusByColor, missingGray, effMemberTotal, effLiveTotal, margin };
+        return { liveHearts, memberHearts, liveScore, bladeTotal, liveTotal, memberTotal, effBlade, allAdj: memberAdj.ALL, missingByColor, surplusByColor, missingGray, missingTotal, effMemberTotal, effLiveTotal, margin };
     }, [liveSlots, memberSlots, liveAdj, memberAdj]);
 
     // スロットへ格納するヘルパー（型一致時のみ）
@@ -489,10 +491,10 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
                             <span></span>
                         </div>
 
-                        {/* 足りないハート（補正込みで計算） */}
+                        {/* 要求（足りないハート・補正込みで計算） */}
                         <div className="border-t border-gray-200 pt-2">
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                            <span className="text-xs font-bold text-gray-700 mr-1">足りないハート</span>
+                            <span className="text-xs font-bold text-gray-700 mr-1">要求</span>
                             {HEART_COLORS_MEMBER.map(c => (
                                 <span key={c} className="inline-flex items-center gap-1">
                                     <span className={`w-3.5 h-3.5 rounded-full ${(BH_STYLES[c] || BH_STYLES['None']).bg}`}></span>
@@ -506,6 +508,10 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
                             {stats.allAdj !== 0 && (
                                 <span className="text-sm font-bold text-purple-600">(+ALL {stats.allAdj})</span>
                             )}
+                            <span className="text-sm font-bold text-gray-700 whitespace-nowrap">
+                                不足数：<span className={stats.missingTotal > 0 ? 'text-red-600' : 'text-green-600'}>{stats.missingTotal}</span>
+                            </span>
+                            <span className="text-sm font-bold text-indigo-600 whitespace-nowrap">ブレード：{stats.effBlade}</span>
                         </div>
                         <div className="mt-1.5 text-sm font-bold text-gray-700 whitespace-nowrap" title="総スタッツ（補正込みメンバーハート合計＋ALL＋ブレード）− 補正込みライブハート合計">
                             総スタッツ：{stats.effMemberTotal + stats.effBlade}
