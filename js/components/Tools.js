@@ -296,7 +296,7 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
         const effMemberTotal = HEART_COLORS_MEMBER.reduce((s, c) => s + effMember[c], 0) + memberAdj.ALL;
         const effLiveTotal = HEART_COLORS_LIVE.reduce((s, c) => s + effLive[c], 0);
         const margin = effMemberTotal + effBlade - effLiveTotal;
-        return { liveHearts, memberHearts, liveScore, bladeTotal, liveTotal, memberTotal, effBlade, allAdj: memberAdj.ALL, missingByColor, surplusByColor, missingGray, margin };
+        return { liveHearts, memberHearts, liveScore, bladeTotal, liveTotal, memberTotal, effBlade, allAdj: memberAdj.ALL, missingByColor, surplusByColor, missingGray, effMemberTotal, effLiveTotal, margin };
     }, [liveSlots, memberSlots, liveAdj, memberAdj]);
 
     // スロットへ格納するヘルパー（型一致時のみ）
@@ -350,39 +350,40 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
                 {/* 集計ブロック（1ブロックに集約：ライブ／補正／メンバー／補正／足りないハート） */}
                 <div className="bg-white border border-gray-300 rounded-lg p-2.5 overflow-x-auto">
                     <div className="min-w-max space-y-2">
-                        {/* ライブカード＋補正（列を揃えるためgrid 2行） */}
+                        {/* ライブ／メンバー＋各補正（1つのgridで列を完全に揃える）
+                            列: ラベル | Pink..Purple | Gray/ALL | 合計/ブレード | スコア/合計 */}
                         <div className="grid items-center gap-x-2 gap-y-1" style={{ gridTemplateColumns: 'auto repeat(7, minmax(44px, auto)) auto auto' }}>
+                            {/* ライブカード */}
                             <span className="text-xs font-bold text-rose-600 pr-1">ライブカード</span>
                             {HEART_COLORS_LIVE.map(c => (
                                 <div key={c} className="flex justify-center"><HeartChip color={c} value={stats.liveHearts[c]} /></div>
                             ))}
                             <span className="text-sm font-bold text-gray-700 px-1 whitespace-nowrap">ハート合計 {stats.liveTotal}</span>
                             <span className="text-sm font-bold text-pink-600 px-1 whitespace-nowrap">スコア {stats.liveScore}</span>
+                            {/* ライブカード補正 */}
                             <span className="text-[10px] font-bold text-gray-400 pr-1 whitespace-nowrap">ライブカード補正</span>
                             {HEART_COLORS_LIVE.map(c => (
-                                <div key={`adj-${c}`} className="flex justify-center"><AdjStepper value={liveAdj[c]} onChange={setLiveAdjKey(c)} /></div>
+                                <div key={`ladj-${c}`} className="flex justify-center"><AdjStepper value={liveAdj[c]} onChange={setLiveAdjKey(c)} /></div>
                             ))}
                             <span></span>
                             <span></span>
-                        </div>
-
-                        {/* メンバー＋補正（6色＋ALL＋ブレード＋合計） */}
-                        <div className="grid items-center gap-x-2 gap-y-1" style={{ gridTemplateColumns: 'auto repeat(6, minmax(44px, auto)) auto auto auto' }}>
+                            {/* メンバー */}
                             <span className="text-xs font-bold text-blue-600 pr-1">メンバー</span>
                             {HEART_COLORS_MEMBER.map(c => (
-                                <div key={c} className="flex justify-center"><HeartChip color={c} value={stats.memberHearts[c]} /></div>
+                                <div key={`m-${c}`} className="flex justify-center"><HeartChip color={c} value={stats.memberHearts[c]} /></div>
                             ))}
                             <span className="text-sm font-bold text-purple-600 px-1 whitespace-nowrap text-center">ALL 0</span>
                             <span className="text-sm font-bold text-indigo-600 px-1 whitespace-nowrap">ブレード {stats.bladeTotal}</span>
                             <span className="text-sm font-bold text-gray-700 px-1 whitespace-nowrap">ハート合計 {stats.memberTotal}</span>
+                            {/* メンバーカード補正 */}
                             <span className="text-[10px] font-bold text-gray-400 pr-1 whitespace-nowrap">メンバーカード補正</span>
                             {HEART_COLORS_MEMBER.map(c => (
-                                <div key={`adj-${c}`} className="flex justify-center"><AdjStepper value={memberAdj[c]} onChange={setMemberAdjKey(c)} /></div>
+                                <div key={`madj-${c}`} className="flex justify-center"><AdjStepper value={memberAdj[c]} onChange={setMemberAdjKey(c)} /></div>
                             ))}
                             <div className="flex justify-center">
                                 <AdjStepper value={memberAdj.ALL} onChange={setMemberAdjKey('ALL')} />
                             </div>
-                            <div className="flex items-center justify-center gap-1">
+                            <div className="flex items-center gap-1 px-1">
                                 <span className="text-[10px] font-bold text-indigo-500">ブレード</span>
                                 <AdjStepper value={memberAdj.Blade} onChange={setMemberAdjKey('Blade')} />
                             </div>
@@ -406,11 +407,12 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
                                 <span className="text-sm font-bold text-purple-600">(+ALL {stats.allAdj})</span>
                             )}
                             <span className="mx-1 h-4 w-px bg-gray-200"></span>
-                            <span className="text-base font-bold text-indigo-600">ブレード:{stats.effBlade}</span>
-                            <span
-                                className={`text-base font-bold ${stats.margin < 0 ? 'text-red-600' : 'text-green-600'}`}
-                                title="総スタッツ（補正込みメンバーハート合計＋ALL＋ブレード）− 補正込みライブハート合計"
-                            >許容:{stats.margin}</span>
+                            <span className="text-sm font-bold text-gray-700 whitespace-nowrap" title="総スタッツ（補正込みメンバーハート合計＋ALL＋ブレード）− 補正込みライブハート合計">
+                                総スタッツ：{stats.effMemberTotal + stats.effBlade}
+                                <span className="text-xs font-bold text-gray-500">（H：{stats.effMemberTotal} + B：{stats.effBlade}）</span>
+                                {' ー ライブ：'}{stats.effLiveTotal}{' ＝ '}
+                                <span className={stats.margin < 0 ? 'text-red-600' : 'text-green-600'}>許容：{stats.margin}</span>
+                            </span>
                         </div>
                     </div>
                 </div>
