@@ -455,7 +455,10 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
                             <span className="text-sm font-bold text-gray-700 px-1 whitespace-nowrap">H合計 {stats.liveTotal}</span>
                             <span className="text-sm font-bold text-pink-600 px-1 whitespace-nowrap">スコア {stats.liveScore}</span>
                             {/* ライブ補正 */}
-                            <span className="text-[10px] font-bold text-gray-400 pr-1 whitespace-nowrap">補正</span>
+                            <span className="flex items-center gap-1 pr-1 whitespace-nowrap">
+                                <span className="text-[10px] font-bold text-gray-400">補正</span>
+                                <button onClick={() => setLiveAdj(zeroAdj(HEART_COLORS_LIVE))} title="ライブ補正をリセット" className="w-4 h-4 flex items-center justify-center text-[9px] font-bold text-gray-400 border border-gray-300 rounded hover:bg-gray-100 hover:text-gray-700 transition-colors">R</button>
+                            </span>
                             {HEART_COLORS_LIVE.map(c => (
                                 <div key={`ladj-${c}`} className="flex justify-center"><AdjStepper value={liveAdj[c]} onChange={setLiveAdjKey(c)} /></div>
                             ))}
@@ -470,7 +473,10 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
                             <span className="text-sm font-bold text-indigo-600 px-1 whitespace-nowrap">ブレード {stats.bladeTotal}</span>
                             <span className="text-sm font-bold text-gray-700 px-1 whitespace-nowrap">H合計 {stats.memberTotal}</span>
                             {/* メンバー補正 */}
-                            <span className="text-[10px] font-bold text-gray-400 pr-1 whitespace-nowrap">補正</span>
+                            <span className="flex items-center gap-1 pr-1 whitespace-nowrap">
+                                <span className="text-[10px] font-bold text-gray-400">補正</span>
+                                <button onClick={() => setMemberAdj(zeroAdj([...HEART_COLORS_MEMBER, 'ALL', 'Blade']))} title="メンバー補正をリセット" className="w-4 h-4 flex items-center justify-center text-[9px] font-bold text-gray-400 border border-gray-300 rounded hover:bg-gray-100 hover:text-gray-700 transition-colors">R</button>
+                            </span>
                             {HEART_COLORS_MEMBER.map(c => (
                                 <div key={`madj-${c}`} className="flex justify-center"><AdjStepper value={memberAdj[c]} onChange={setMemberAdjKey(c)} /></div>
                             ))}
