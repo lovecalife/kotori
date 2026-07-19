@@ -2,12 +2,28 @@
 // Tools Panel（各種ツール）
 // ==========================================
 
+// デッキタブのコスト順ソートと同順（cost/req昇順 → ブレードハート順 → 番号順）
+const compareByCost = (a, b) => {
+    const getBhVal = (card) => {
+        const bhStr = card.bladeHeart ? card.bladeHeart.split(/[,、\s]+/)[0].trim() : 'None';
+        const key = Object.keys(BH_SORT_ORDER).find(k => k.toLowerCase() === bhStr.toLowerCase());
+        return BH_SORT_ORDER[key] || 8;
+    };
+    const costA = parseInt(a.cost || a.req) || 0;
+    const costB = parseInt(b.cost || b.req) || 0;
+    if (costA !== costB) return costA - costB;
+    const bhA = getBhVal(a), bhB = getBhVal(b);
+    if (bhA !== bhB) return bhA - bhB;
+    return (a.number || '').localeCompare(b.number || '');
+};
+
 // デッキ比較ツール
 // 保存済みデッキ2つを選び、「デッキAのみ / 共通 / デッキBのみ」に振り分けて表示する
 const DeckCompareTool = ({ savedDecks, cardData, onSelectCard }) => {
     const deckEntries = Object.entries(savedDecks);
     const [idA, setIdA] = React.useState('');
     const [idB, setIdB] = React.useState('');
+    const [cardSize, setCardSize] = React.useState(100); // カード幅(px)基準
 
     const swap = () => { setIdA(idB); setIdB(idA); };
 
@@ -45,12 +61,8 @@ const DeckCompareTool = ({ savedDecks, cardData, onSelectCard }) => {
             });
         });
 
-        // 各エリア内を sortId 昇順で整列
-        const sortArea = (arr) => arr.sort((x, y) => {
-            const ix = parseInt(x.card.sortId) || Infinity;
-            const iy = parseInt(y.card.sortId) || Infinity;
-            return ix - iy;
-        });
+        // 各エリア内をデッキタブのコスト順と同順で整列
+        const sortArea = (arr) => arr.sort((x, y) => compareByCost(x.card, y.card));
         ['onlyA', 'common', 'onlyB'].forEach(area => {
             sortArea(result[area].member);
             sortArea(result[area].live);
@@ -92,7 +104,7 @@ const DeckCompareTool = ({ savedDecks, cardData, onSelectCard }) => {
                             {area.member.length > 0 && (
                                 <div>
                                     <div className="text-[10px] font-bold text-blue-500 mb-1">メンバー</div>
-                                    <div className="grid gap-1" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+                                    <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${cardSize}px, 1fr))` }}>
                                         {area.member.map((e, i) => (
                                             <CompactCardItem key={`m-${e.card.number}-${i}`} item={e.card} deckCount={e.count} onSelect={onSelectCard} cols={4} />
                                         ))}
@@ -102,7 +114,7 @@ const DeckCompareTool = ({ savedDecks, cardData, onSelectCard }) => {
                             {area.live.length > 0 && (
                                 <div>
                                     <div className="text-[10px] font-bold text-pink-500 mb-1">ライブ</div>
-                                    <div className="grid gap-1" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+                                    <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${Math.round(cardSize * 1.5)}px, 1fr))` }}>
                                         {area.live.map((e, i) => (
                                             <CompactCardItem key={`l-${e.card.number}-${i}`} item={e.card} deckCount={e.count} onSelect={onSelectCard} cols={3} />
                                         ))}
@@ -141,16 +153,25 @@ const DeckCompareTool = ({ savedDecks, cardData, onSelectCard }) => {
                 </div>
             </div>
 
-            {/* 比較結果 */}
+            {/* 比較結果（1段目: 共通 / 2段目: デッキA・デッキB） */}
             {!comparison ? (
                 <div className="text-center text-gray-400 text-sm py-10">
                     比較する2つのデッキを選択してください。
                 </div>
             ) : (
-                <div className="flex flex-col lg:flex-row gap-3">
-                    {renderArea('onlyA', `デッキAのみ（${comparison.nameA}）`, 'bg-blue-50 text-blue-700', comparison.totals.onlyA)}
+                <div className="space-y-3">
+                    <div className="flex items-center justify-end">
+                        <div className="flex items-center bg-white border border-gray-300 rounded px-1" title="カードサイズ調整">
+                            <button onClick={() => setCardSize(s => Math.max(60, s - 16))} className="p-1.5 text-gray-500 hover:text-gray-800 transition-colors" title="小さく"><Icons.Minus style={{ width: 14, height: 14 }} /></button>
+                            <span className="text-[10px] text-gray-400 select-none px-0.5">SIZE</span>
+                            <button onClick={() => setCardSize(s => Math.min(180, s + 16))} className="p-1.5 text-gray-500 hover:text-gray-800 transition-colors" title="大きく"><Icons.Plus style={{ width: 14, height: 14 }} /></button>
+                        </div>
+                    </div>
                     {renderArea('common', '共通', 'bg-gray-100 text-gray-700', comparison.totals.common)}
-                    {renderArea('onlyB', `デッキBのみ（${comparison.nameB}）`, 'bg-pink-50 text-pink-700', comparison.totals.onlyB)}
+                    <div className="flex flex-col lg:flex-row gap-3">
+                        {renderArea('onlyA', `デッキAのみ（${comparison.nameA}）`, 'bg-blue-50 text-blue-700', comparison.totals.onlyA)}
+                        {renderArea('onlyB', `デッキBのみ（${comparison.nameB}）`, 'bg-pink-50 text-pink-700', comparison.totals.onlyB)}
+                    </div>
                 </div>
             )}
         </div>
@@ -247,12 +268,6 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
     const palette = React.useMemo(() => {
         const deck = savedDecks[deckId];
         if (!deck) return { member: [], live: [] };
-        // デッキタブのコスト順ソートと同順（cost/req昇順 → ブレードハート順 → 番号順）
-        const getBhVal = (card) => {
-            const bhStr = card.bladeHeart ? card.bladeHeart.split(/[,、\s]+/)[0].trim() : 'None';
-            const key = Object.keys(BH_SORT_ORDER).find(k => k.toLowerCase() === bhStr.toLowerCase());
-            return BH_SORT_ORDER[key] || 8;
-        };
         const build = (type) => {
             const dict = deck[type] || {};
             const arr = [];
@@ -260,15 +275,8 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
                 const card = cardData[type].find(c => c.number === num);
                 if (card) arr.push({ card, count });
             });
-            arr.sort((x, y) => {
-                const a = x.card, b = y.card;
-                const costA = parseInt(a.cost || a.req) || 0;
-                const costB = parseInt(b.cost || b.req) || 0;
-                if (costA !== costB) return costA - costB;
-                const bhA = getBhVal(a), bhB = getBhVal(b);
-                if (bhA !== bhB) return bhA - bhB;
-                return (a.number || '').localeCompare(b.number || '');
-            });
+            // デッキタブのコスト順ソートと同順
+            arr.sort((x, y) => compareByCost(x.card, y.card));
             return arr;
         };
         return { member: build('member'), live: build('live') };
