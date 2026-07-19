@@ -17,6 +17,50 @@ const compareByCost = (a, b) => {
     return (a.number || '').localeCompare(b.number || '');
 };
 
+// コスト配分・ブレードハート配分の小型表示（デッキタブの統計バーと同じ集計）
+const DeckDistRows = ({ dist }) => (
+    <div className="mt-1 space-y-0.5">
+        <div className="flex flex-wrap items-center gap-1">
+            <span className="text-[9px] font-bold text-gray-400 mr-0.5">コスト</span>
+            {Object.keys(dist.costs).length === 0
+                ? <span className="text-[10px] text-gray-400">-</span>
+                : Object.keys(dist.costs).sort((a, b) => Number(a) - Number(b)).map(cost => (
+                    <span key={cost} className="flex items-center gap-0.5">
+                        <span className="w-3.5 h-3.5 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-[8px] font-bold">{cost}</span>
+                        <span className="text-[10px] font-bold text-gray-700">{dist.costs[cost]}</span>
+                    </span>
+                ))
+            }
+        </div>
+        <div className="flex flex-wrap items-center gap-1">
+            <span className="text-[9px] font-bold text-gray-400 mr-0.5">BH</span>
+            {Object.keys(BH_SORT_ORDER).filter(k => k !== 'None').map(color => {
+                const count = dist.bhs[color] || 0;
+                if (count === 0) return null;
+                const style = BH_STYLES[color] || BH_STYLES['None'];
+                return (
+                    <span key={color} className="flex items-center gap-0.5">
+                        <span className={`w-3.5 h-3.5 rounded-full ${style.bg}`}></span>
+                        <span className="text-[10px] font-bold text-gray-700">{count}</span>
+                    </span>
+                );
+            })}
+            {dist.bhs['None'] > 0 && (
+                <span className="flex items-center gap-0.5">
+                    <span className="w-3.5 h-3.5 rounded-full bg-gray-300"></span>
+                    <span className="text-[10px] font-bold text-gray-700">{dist.bhs['None']}</span>
+                </span>
+            )}
+            {['ALL', 'Score', 'Draw'].map(type => {
+                const count = dist.bhs[type] || 0;
+                if (count === 0) return null;
+                return <span key={type} className="text-[10px] font-bold text-gray-600 bg-gray-100 px-1 rounded">{type}:{count}</span>;
+            })}
+            {Object.keys(dist.bhs).every(k => dist.bhs[k] === 0) && <span className="text-[10px] text-gray-400">-</span>}
+        </div>
+    </div>
+);
+
 // デッキ比較ツール
 // 保存済みデッキ2つを選び、「デッキAのみ / 共通 / デッキBのみ」に振り分けて表示する
 const DeckCompareTool = ({ savedDecks, cardData, onSelectCard }) => {
@@ -68,7 +112,34 @@ const DeckCompareTool = ({ savedDecks, cardData, onSelectCard }) => {
             sortArea(result[area].live);
         });
 
-        return { result, totals, nameA: A.name, nameB: B.name };
+        // 共通カードも含めたフルデッキのコスト配分・BH配分（デッキタブの統計と同じ集計）
+        const calcDist = (deckObj) => {
+            const costs = {};
+            const bhs = { Pink: 0, Red: 0, Yellow: 0, Green: 0, Blue: 0, Purple: 0, None: 0, ALL: 0, Score: 0, Draw: 0 };
+            const countBH = (bladeHeart, count, includeNone) => {
+                const bhList = bladeHeart ? bladeHeart.split(/[,、\s]+/).map(s => s.trim()).filter(Boolean) : [];
+                if (includeNone && bhList.length === 0) { bhs['None'] += count; return; }
+                bhList.forEach(bh => {
+                    const key = Object.keys(bhs).find(k => k.toLowerCase() === bh.toLowerCase());
+                    if (key) bhs[key] += count;
+                });
+            };
+            Object.entries(deckObj.member || {}).forEach(([num, count]) => {
+                const card = cardData.member.find(c => c.number === num);
+                if (!card) return;
+                const costVal = parseInt(card.cost);
+                if (!isNaN(costVal)) costs[costVal] = (costs[costVal] || 0) + count;
+                countBH(card.bladeHeart, count, true);
+            });
+            Object.entries(deckObj.live || {}).forEach(([num, count]) => {
+                const card = cardData.live.find(c => c.number === num);
+                if (!card) return;
+                countBH(card.bladeHeart, count, false);
+            });
+            return { costs, bhs };
+        };
+
+        return { result, totals, nameA: A.name, nameB: B.name, distA: calcDist(A), distB: calcDist(B) };
     }, [idA, idB, savedDecks, cardData]);
 
     if (deckEntries.length < 2) {
@@ -80,8 +151,8 @@ const DeckCompareTool = ({ savedDecks, cardData, onSelectCard }) => {
         );
     }
 
-    // 1エリアの描画
-    const renderArea = (areaKey, title, headerColor, totals) => {
+    // 1エリアの描画（dist を渡すと共通含むフルデッキの配分を表示）
+    const renderArea = (areaKey, title, headerColor, totals, dist) => {
         const area = comparison.result[areaKey];
         const memberTotal = totals.member;
         const liveTotal = totals.live;
@@ -95,6 +166,7 @@ const DeckCompareTool = ({ savedDecks, cardData, onSelectCard }) => {
                         <span className="mx-1">/</span>
                         ライブ計 <span className="font-bold text-gray-700">{liveTotal}</span>
                     </div>
+                    {dist && <DeckDistRows dist={dist} />}
                 </div>
                 <div className="p-2 space-y-3">
                     {isEmpty ? (
@@ -169,8 +241,8 @@ const DeckCompareTool = ({ savedDecks, cardData, onSelectCard }) => {
                     </div>
                     {renderArea('common', '共通', 'bg-gray-100 text-gray-700', comparison.totals.common)}
                     <div className="flex flex-col lg:flex-row gap-3">
-                        {renderArea('onlyA', `デッキAのみ（${comparison.nameA}）`, 'bg-blue-50 text-blue-700', comparison.totals.onlyA)}
-                        {renderArea('onlyB', `デッキBのみ（${comparison.nameB}）`, 'bg-pink-50 text-pink-700', comparison.totals.onlyB)}
+                        {renderArea('onlyA', `デッキAのみ（${comparison.nameA}）`, 'bg-blue-50 text-blue-700', comparison.totals.onlyA, comparison.distA)}
+                        {renderArea('onlyB', `デッキBのみ（${comparison.nameB}）`, 'bg-pink-50 text-pink-700', comparison.totals.onlyB, comparison.distB)}
                     </div>
                 </div>
             )}
