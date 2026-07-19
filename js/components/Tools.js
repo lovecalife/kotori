@@ -176,12 +176,12 @@ const HeartChip = ({ color, value, highlight }) => (
 // 補正用ステッパー（[−] 値 [＋]）
 const AdjStepper = ({ value, onChange }) => (
     <span className="inline-flex items-center gap-0.5 bg-gray-50 border border-gray-200 rounded px-0.5">
-        <button onClick={() => onChange(value - 1)} className="p-0.5 text-gray-400 hover:text-gray-700 transition-colors" title="−1">
-            <Icons.Minus style={{ width: 11, height: 11 }} />
+        <button onClick={() => onChange(value - 1)} className="p-1 text-gray-400 hover:text-gray-700 transition-colors" title="−1">
+            <Icons.Minus style={{ width: 14, height: 14 }} />
         </button>
-        <span className={`text-xs font-bold min-w-[1.25rem] text-center ${value !== 0 ? 'text-amber-600' : 'text-gray-400'}`}>{value}</span>
-        <button onClick={() => onChange(value + 1)} className="p-0.5 text-gray-400 hover:text-gray-700 transition-colors" title="＋1">
-            <Icons.Plus style={{ width: 11, height: 11 }} />
+        <span className={`text-sm font-bold min-w-[1.25rem] text-center ${value !== 0 ? 'text-amber-600' : 'text-gray-400'}`}>{value}</span>
+        <button onClick={() => onChange(value + 1)} className="p-1 text-gray-400 hover:text-gray-700 transition-colors" title="＋1">
+            <Icons.Plus style={{ width: 14, height: 14 }} />
         </button>
     </span>
 );
@@ -247,6 +247,12 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
     const palette = React.useMemo(() => {
         const deck = savedDecks[deckId];
         if (!deck) return { member: [], live: [] };
+        // デッキタブのコスト順ソートと同順（cost/req昇順 → ブレードハート順 → 番号順）
+        const getBhVal = (card) => {
+            const bhStr = card.bladeHeart ? card.bladeHeart.split(/[,、\s]+/)[0].trim() : 'None';
+            const key = Object.keys(BH_SORT_ORDER).find(k => k.toLowerCase() === bhStr.toLowerCase());
+            return BH_SORT_ORDER[key] || 8;
+        };
         const build = (type) => {
             const dict = deck[type] || {};
             const arr = [];
@@ -254,7 +260,15 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
                 const card = cardData[type].find(c => c.number === num);
                 if (card) arr.push({ card, count });
             });
-            arr.sort((a, b) => (parseInt(a.card.sortId) || Infinity) - (parseInt(b.card.sortId) || Infinity));
+            arr.sort((x, y) => {
+                const a = x.card, b = y.card;
+                const costA = parseInt(a.cost || a.req) || 0;
+                const costB = parseInt(b.cost || b.req) || 0;
+                if (costA !== costB) return costA - costB;
+                const bhA = getBhVal(a), bhB = getBhVal(b);
+                if (bhA !== bhB) return bhA - bhB;
+                return (a.number || '').localeCompare(b.number || '');
+            });
             return arr;
         };
         return { member: build('member'), live: build('live') };
@@ -353,15 +367,15 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
                         {/* ライブ／メンバー＋各補正（1つのgridで列を完全に揃える）
                             列: ラベル | Pink..Purple | Gray/ALL | 合計/ブレード | スコア/合計 */}
                         <div className="grid items-center gap-x-2 gap-y-1" style={{ gridTemplateColumns: 'auto repeat(7, minmax(44px, auto)) auto auto' }}>
-                            {/* ライブカード */}
-                            <span className="text-xs font-bold text-rose-600 pr-1">ライブカード</span>
+                            {/* ライブ */}
+                            <span className="text-xs font-bold text-rose-600 pr-1">ライブ</span>
                             {HEART_COLORS_LIVE.map(c => (
                                 <div key={c} className="flex justify-center"><HeartChip color={c} value={stats.liveHearts[c]} /></div>
                             ))}
-                            <span className="text-sm font-bold text-gray-700 px-1 whitespace-nowrap">ハート合計 {stats.liveTotal}</span>
+                            <span className="text-sm font-bold text-gray-700 px-1 whitespace-nowrap">H合計 {stats.liveTotal}</span>
                             <span className="text-sm font-bold text-pink-600 px-1 whitespace-nowrap">スコア {stats.liveScore}</span>
-                            {/* ライブカード補正 */}
-                            <span className="text-[10px] font-bold text-gray-400 pr-1 whitespace-nowrap">ライブカード補正</span>
+                            {/* ライブ補正 */}
+                            <span className="text-[10px] font-bold text-gray-400 pr-1 whitespace-nowrap">補正</span>
                             {HEART_COLORS_LIVE.map(c => (
                                 <div key={`ladj-${c}`} className="flex justify-center"><AdjStepper value={liveAdj[c]} onChange={setLiveAdjKey(c)} /></div>
                             ))}
@@ -374,24 +388,24 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
                             ))}
                             <span className="text-sm font-bold text-purple-600 px-1 whitespace-nowrap text-center">ALL 0</span>
                             <span className="text-sm font-bold text-indigo-600 px-1 whitespace-nowrap">ブレード {stats.bladeTotal}</span>
-                            <span className="text-sm font-bold text-gray-700 px-1 whitespace-nowrap">ハート合計 {stats.memberTotal}</span>
-                            {/* メンバーカード補正 */}
-                            <span className="text-[10px] font-bold text-gray-400 pr-1 whitespace-nowrap">メンバーカード補正</span>
+                            <span className="text-sm font-bold text-gray-700 px-1 whitespace-nowrap">H合計 {stats.memberTotal}</span>
+                            {/* メンバー補正 */}
+                            <span className="text-[10px] font-bold text-gray-400 pr-1 whitespace-nowrap">補正</span>
                             {HEART_COLORS_MEMBER.map(c => (
                                 <div key={`madj-${c}`} className="flex justify-center"><AdjStepper value={memberAdj[c]} onChange={setMemberAdjKey(c)} /></div>
                             ))}
                             <div className="flex justify-center">
                                 <AdjStepper value={memberAdj.ALL} onChange={setMemberAdjKey('ALL')} />
                             </div>
-                            <div className="flex items-center gap-1 px-1">
-                                <span className="text-[10px] font-bold text-indigo-500">ブレード</span>
+                            <div className="flex px-1">
                                 <AdjStepper value={memberAdj.Blade} onChange={setMemberAdjKey('Blade')} />
                             </div>
                             <span></span>
                         </div>
 
                         {/* 足りないハート（補正込みで計算） */}
-                        <div className="border-t border-gray-200 pt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                        <div className="border-t border-gray-200 pt-2">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
                             <span className="text-xs font-bold text-gray-700 mr-1">足りないハート</span>
                             {HEART_COLORS_MEMBER.map(c => (
                                 <span key={c} className="inline-flex items-center gap-1">
@@ -406,13 +420,13 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
                             {stats.allAdj !== 0 && (
                                 <span className="text-sm font-bold text-purple-600">(+ALL {stats.allAdj})</span>
                             )}
-                            <span className="mx-1 h-4 w-px bg-gray-200"></span>
-                            <span className="text-sm font-bold text-gray-700 whitespace-nowrap" title="総スタッツ（補正込みメンバーハート合計＋ALL＋ブレード）− 補正込みライブハート合計">
-                                総スタッツ：{stats.effMemberTotal + stats.effBlade}
-                                <span className="text-xs font-bold text-gray-500">（H：{stats.effMemberTotal} + B：{stats.effBlade}）</span>
-                                {' ー ライブ：'}{stats.effLiveTotal}{' ＝ '}
-                                <span className={stats.margin < 0 ? 'text-red-600' : 'text-green-600'}>許容：{stats.margin}</span>
-                            </span>
+                        </div>
+                        <div className="mt-1.5 text-sm font-bold text-gray-700 whitespace-nowrap" title="総スタッツ（補正込みメンバーハート合計＋ALL＋ブレード）− 補正込みライブハート合計">
+                            総スタッツ：{stats.effMemberTotal + stats.effBlade}
+                            <span className="text-xs font-bold text-gray-500">（H：{stats.effMemberTotal} + B：{stats.effBlade}）</span>
+                            {' ー ライブ：'}{stats.effLiveTotal}{' ＝ '}
+                            <span className={stats.margin < 0 ? 'text-red-600' : 'text-green-600'}>許容：{stats.margin}</span>
+                        </div>
                         </div>
                     </div>
                 </div>
