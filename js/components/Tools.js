@@ -386,8 +386,8 @@ const HeartCalcTool = ({ savedDecks, cardData, onSelectCard }) => {
             surplus += surplusByColor[c];
         });
         const missingGray = Math.max(0, effLive['Gray'] - surplus);
-        // 不足数 = 各色の不足＋Gray不足の合計（赤字表示分の合計）
-        const missingTotal = HEART_COLORS_MEMBER.reduce((s, c) => s + missingByColor[c], 0) + missingGray;
+        // 不足数 = 各色の不足＋Gray不足の合計（赤字表示分の合計）からALL補正を差し引く（0未満にはしない）
+        const missingTotal = Math.max(0, HEART_COLORS_MEMBER.reduce((s, c) => s + missingByColor[c], 0) + missingGray - memberAdj.ALL);
         // 許容 = 総スタッツ（補正込みメンバーハート合計+ALL+補正込みブレード）− 補正込みライブハート合計
         const effMemberTotal = HEART_COLORS_MEMBER.reduce((s, c) => s + effMember[c], 0) + memberAdj.ALL;
         const effLiveTotal = HEART_COLORS_LIVE.reduce((s, c) => s + effLive[c], 0);
