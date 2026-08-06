@@ -7,7 +7,7 @@ const GID_LIVE = '1118651569';
 
 const COST_OPTIONS = [2, 4, 5, 7, 8, 9, 10, 11, 13, 15, 17, 20, 22].sort((a,b) => a-b);
 const BH_OPTIONS_MEMBER = ['Pink', 'Red', 'Yellow', 'Green', 'Blue', 'Purple', 'None'];
-const BH_OPTIONS_LIVE = ['Pink', 'Red', 'Yellow', 'Green', 'Blue', 'Purple', 'ALL', 'Score', 'Draw'];
+const BH_OPTIONS_LIVE = ['Pink', 'Red', 'Yellow', 'Green', 'Blue', 'Purple', 'ALL', 'Score', 'Draw', 'DoubleGray'];
 
 const BH_SORT_ORDER = { 'Pink': 1, 'Red': 2, 'Yellow': 3, 'Green': 4, 'Blue': 5, 'Purple': 6, 'None': 7 };
 
@@ -37,7 +37,8 @@ const BH_STYLES = {
     'Gray':   { base: 'bg-gray-400 text-white hover:bg-gray-500', active: 'bg-gray-700 text-white ring-2 ring-gray-700 ring-offset-1', bg: 'bg-gray-400' },
     'ALL':    { base: 'bg-gray-700 text-white', active: 'bg-gray-900 text-white ring-2 ring-gray-900 ring-offset-1', bg: 'bg-gray-700' },
     'Score':  { base: 'bg-cyan-500 text-white', active: 'bg-cyan-700 text-white ring-2 ring-cyan-700 ring-offset-1', bg: 'bg-cyan-500' },
-    'Draw':   { base: 'bg-orange-500 text-white', active: 'bg-orange-700 text-white ring-2 ring-orange-700 ring-offset-1', bg: 'bg-orange-500' }
+    'Draw':   { base: 'bg-orange-500 text-white', active: 'bg-orange-700 text-white ring-2 ring-orange-700 ring-offset-1', bg: 'bg-orange-500' },
+    'DoubleGray': { base: 'bg-slate-500 text-white hover:bg-slate-600', active: 'bg-slate-800 text-white ring-2 ring-slate-800 ring-offset-1', bg: 'bg-slate-500' }
 };
 
 const TAG_COLORS = [

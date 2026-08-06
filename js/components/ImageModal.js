@@ -2,6 +2,13 @@
 // Image Modal (フルスクリーン画像表示)
 // ==========================================
 
+// 効果テキストを読みやすく改行整形する
+// (シートのテキストは複数の効果が1行に連結されているため、［〜］や注釈カッコの手前で改行する)
+const formatCardText = (text) => {
+    if (!text || !text.trim()) return 'テキスト情報がありません';
+    return text.replace(/[ 　]+(?=[［(（])/g, '\n').trim();
+};
+
 // カードをクリックしたときに表示されるフルスクリーンモーダル
 // 前後ナビゲーション・デッキ操作が可能
 const ImageModal = ({ selectedItem, onClose, sourceList, deckCount, onAdd, onRemove }) => {
@@ -14,8 +21,8 @@ const ImageModal = ({ selectedItem, onClose, sourceList, deckCount, onAdd, onRem
 
     const isLive = selectedItem._type === 'live';
 
-    // 下半分拡大モード
-    const [showBottomHalf, setShowBottomHalf] = React.useState(false);
+    // テキスト表示モード
+    const [showText, setShowText] = React.useState(false);
 
     const handleImageError = (e) => {
         if (!e.target.dataset.triedFallback) {
@@ -31,48 +38,36 @@ const ImageModal = ({ selectedItem, onClose, sourceList, deckCount, onAdd, onRem
             <div className="flex flex-col items-center w-full h-full max-w-6xl">
 
                 <div className="flex-1 min-h-0 w-full flex items-center justify-center mb-2">
-                    {showBottomHalf ? (
-                        // 下半分拡大: アスペクト比を元の半分にしたコンテナに画像をbottomアンカーで配置
-                        // → 上半分がoverflow:hiddenでクリップされ、下半分が2倍スケールに見える
-                        <div
-                            className="relative overflow-hidden rounded-lg shadow-2xl bg-white/5"
-                            style={{
-                                aspectRatio: isLive ? '32/9' : '3/2',
-                                maxHeight: '100%',
-                                width: '100%',
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <img
-                                src={getImageUrl(selectedItem.image)}
-                                alt={selectedItem.name}
-                                style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: 'auto' }}
-                                onError={handleImageError}
-                            />
-                        </div>
-                    ) : (
+                    {/* 画像実寸に合わせてテキストを重ねるため relative ラッパーで包む */}
+                    {/* min-w/min-h は画像が未読込・読込失敗でもテキストが潰れないための保険 */}
+                    <div className="relative flex items-center justify-center max-w-full max-h-full min-w-[240px] min-h-[80px]" onClick={(e) => e.stopPropagation()}>
                         <SafeImage
                             src={getImageUrl(selectedItem.image)}
                             alt={selectedItem.name}
                             className="max-w-full max-h-full object-contain rounded-lg shadow-2xl bg-white/5"
                             onError={handleImageError}
                         />
-                    )}
+                        {showText && (
+                            <div className="absolute inset-x-0 bottom-0 max-h-[70%] overflow-y-auto bg-black/85 backdrop-blur-sm rounded-b-lg px-4 py-3 text-white text-sm sm:text-base leading-relaxed whitespace-pre-wrap text-left">
+                                {formatCardText(selectedItem.text)}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
-                {/* 下半分拡大トグルボタン */}
+                {/* テキスト表示トグルボタン */}
                 <div className="flex-shrink-0 mb-3" onClick={(e) => e.stopPropagation()}>
                     <button
-                        onClick={() => setShowBottomHalf(b => !b)}
+                        onClick={() => setShowText(v => !v)}
                         className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${
-                            showBottomHalf
+                            showText
                                 ? 'bg-blue-500 text-white border-blue-400 shadow-lg shadow-blue-900/40'
                                 : 'bg-white/10 text-white/70 border-white/20 hover:bg-white/20 hover:text-white'
                         }`}
-                        title={showBottomHalf ? 'カード全体を表示' : '下半分を拡大してテキストを読む'}
+                        title={showText ? 'カード画像だけを表示' : 'カードの効果テキストを表示'}
                     >
-                        <Icons.Maximize style={{width:13, height:13}} />
-                        {showBottomHalf ? '全体表示' : 'テキスト拡大'}
+                        <Icons.List style={{width:13, height:13}} />
+                        {showText ? 'テキストを隠す' : 'テキストを表示'}
                     </button>
                 </div>
 
