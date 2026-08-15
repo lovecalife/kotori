@@ -589,6 +589,10 @@ const App = () => {
             if (filterAbilities.exclude.size > 0 && [...filterAbilities.exclude].some(x => a.includes(x))) return false;
             if (filterAbilities.include.size > 0 && ![...filterAbilities.include].some(x => a.includes(x))) return false;
 
+            const kw = item.keyword ? item.keyword.split(/[,、\s]+/).map(s => s.trim()) : [];
+            if (filterKeywords.exclude.size > 0 && [...filterKeywords.exclude].some(x => kw.includes(x))) return false;
+            if (filterKeywords.include.size > 0 && ![...filterKeywords.include].some(x => kw.includes(x))) return false;
+
             if (activeTab === 'member') {
                 const costVal = parseInt(item.cost);
                 if (filterCosts.exclude.size > 0 && filterCosts.exclude.has(costVal)) return false;
@@ -609,10 +613,6 @@ const App = () => {
             }
 
             if (activeTab === 'live') {
-                const k = item.keyword ? item.keyword.split(/[,、\s]+/).map(s => s.trim()) : [];
-                if (filterKeywords.exclude.size > 0 && [...filterKeywords.exclude].some(x => k.includes(x))) return false;
-                if (filterKeywords.include.size > 0 && ![...filterKeywords.include].some(x => k.includes(x))) return false;
-
                 const cardBHs = item.bladeHeart ? item.bladeHeart.split(/[,、\s]+/).map(s => s.trim().toLowerCase()) : [];
                 const hasBHLive = (targetBH) => targetBH === 'None' ? cardBHs.length === 0 : cardBHs.includes(targetBH.toLowerCase());
                 if (filterBladeHeart.exclude.size > 0 && [...filterBladeHeart.exclude].some(hasBHLive)) return false;
