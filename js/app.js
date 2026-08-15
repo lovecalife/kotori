@@ -1,7 +1,68 @@
 // ==========================================
 // Main App
 // ==========================================
-const { useState, useEffect, useMemo, useRef } = React;
+const { useState, useEffect, useMemo } = React;
+
+// ==========================================
+// タブ別フィルター（member / live をそれぞれ独立して保持・永続化）
+// ==========================================
+const TAB_FILTERS_STORAGE_KEY = 'card_viewer_tab_filters';
+// include/exclude の Set を持つ項目（保存時は配列に変換する）
+const SET_FILTER_KEYS = ['filterContains', 'filterGroups', 'filterCosts', 'filterBladeHeart', 'filterAbilities', 'filterKeywords'];
+
+const emptyFilterState = () => ({
+    filterName: '',
+    filterContains: { include: new Set(), exclude: new Set() },
+    filterGroups: { include: new Set(), exclude: new Set() },
+    filterCosts: { include: new Set(), exclude: new Set() },
+    filterBladeHeart: { include: new Set(), exclude: new Set() },
+    filterColors: { Pink: '', Red: '', Yellow: '', Green: '', Blue: '', Purple: '', Gray: '' },
+    filterAbilities: { include: new Set(), exclude: new Set() },
+    filterKeywords: { include: new Set(), exclude: new Set() },
+    filterBaseStats: { min: '', max: '' },
+    filterMaxStats: { min: '', max: '' },
+    numericFilters: {}
+});
+
+const serializeFilterState = (state) => {
+    const out = { ...state };
+    SET_FILTER_KEYS.forEach(k => {
+        out[k] = { include: [...state[k].include], exclude: [...state[k].exclude] };
+    });
+    return out;
+};
+
+const deserializeFilterState = (raw) => {
+    const base = emptyFilterState();
+    if (!raw || typeof raw !== 'object') return base;
+    const out = { ...base, ...raw };
+    SET_FILTER_KEYS.forEach(k => {
+        const v = raw[k];
+        out[k] = {
+            include: new Set(Array.isArray(v?.include) ? v.include : []),
+            exclude: new Set(Array.isArray(v?.exclude) ? v.exclude : [])
+        };
+    });
+    out.filterColors = { ...base.filterColors, ...(raw.filterColors || {}) };
+    out.filterBaseStats = { ...base.filterBaseStats, ...(raw.filterBaseStats || {}) };
+    out.filterMaxStats = { ...base.filterMaxStats, ...(raw.filterMaxStats || {}) };
+    out.numericFilters = (raw.numericFilters && typeof raw.numericFilters === 'object') ? raw.numericFilters : {};
+    out.filterName = typeof raw.filterName === 'string' ? raw.filterName : '';
+    return out;
+};
+
+const loadTabFilters = () => {
+    try {
+        const saved = localStorage.getItem(TAB_FILTERS_STORAGE_KEY);
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            return { member: deserializeFilterState(parsed.member), live: deserializeFilterState(parsed.live) };
+        }
+    } catch (e) {
+        console.error("Failed to load tab filters", e);
+    }
+    return { member: emptyFilterState(), live: emptyFilterState() };
+};
 
 const App = () => {
     const [activeTab, setActiveTab] = useState('member');
@@ -31,17 +92,46 @@ const App = () => {
 
     const initial3State = () => ({ include: new Set(), exclude: new Set() });
 
-    const [filterName, setFilterName] = useState('');
-    const [filterContains, setFilterContains] = useState(initial3State());
-    const [filterGroups, setFilterGroups] = useState(initial3State());
-    const [filterCosts, setFilterCosts] = useState(initial3State());
-    const [filterBladeHeart, setFilterBladeHeart] = useState(initial3State());
-    const [filterColors, setFilterColors] = useState({ Pink: '', Red: '', Yellow: '', Green: '', Blue: '', Purple: '', Gray: '' });
-    const [filterAbilities, setFilterAbilities] = useState(initial3State());
-    const [filterKeywords, setFilterKeywords] = useState(initial3State());
-    const [filterBaseStats, setFilterBaseStats] = useState({ min: '', max: '' });
-    const [filterMaxStats, setFilterMaxStats] = useState({ min: '', max: '' });
-    const [numericFilters, setNumericFilters] = useState({});
+    const [tabFilters, setTabFilters] = useState(loadTabFilters);
+
+    // ==========================================
+    // Filter State（メンバー/ライブでそれぞれ独立して保持）
+    // ==========================================
+    const filterKey = (activeTab === 'live') ? 'live' : 'member';
+    const filters = tabFilters[filterKey];
+    const {
+        filterName, filterContains, filterGroups, filterCosts, filterBladeHeart,
+        filterColors, filterAbilities, filterKeywords, filterBaseStats, filterMaxStats, numericFilters
+    } = filters;
+
+    // 各フィルター項目のセッター。現在のタブのスライスのみを更新する
+    const filterSetters = useMemo(() => {
+        const make = (key) => (valueOrFn) => setTabFilters(prev => {
+            const current = prev[filterKey];
+            const next = typeof valueOrFn === 'function' ? valueOrFn(current[key]) : valueOrFn;
+            if (next === current[key]) return prev;
+            return { ...prev, [filterKey]: { ...current, [key]: next } };
+        });
+        return {
+            setFilterName: make('filterName'),
+            setFilterContains: make('filterContains'),
+            setFilterGroups: make('filterGroups'),
+            setFilterCosts: make('filterCosts'),
+            setFilterBladeHeart: make('filterBladeHeart'),
+            setFilterColors: make('filterColors'),
+            setFilterAbilities: make('filterAbilities'),
+            setFilterKeywords: make('filterKeywords'),
+            setFilterBaseStats: make('filterBaseStats'),
+            setFilterMaxStats: make('filterMaxStats'),
+            setNumericFilters: make('numericFilters')
+        };
+    }, [filterKey]);
+
+    const {
+        setFilterName, setFilterContains, setFilterGroups, setFilterCosts, setFilterBladeHeart,
+        setFilterColors, setFilterAbilities, setFilterKeywords, setFilterBaseStats, setFilterMaxStats, setNumericFilters
+    } = filterSetters;
+
     const [sortConfig, setSortConfig] = useState({ key: 'cost', direction: 'asc' });
 
     // ローカルストレージから保存デッキを復元
@@ -151,6 +241,18 @@ const App = () => {
     useEffect(() => {
         try { localStorage.setItem('card_viewer_compact_cols', String(compactCols)); } catch(e) {}
     }, [compactCols]);
+
+    // タブ別フィルター変更時に保存
+    useEffect(() => {
+        try {
+            localStorage.setItem(TAB_FILTERS_STORAGE_KEY, JSON.stringify({
+                member: serializeFilterState(tabFilters.member),
+                live: serializeFilterState(tabFilters.live)
+            }));
+        } catch(e) {
+            console.error("Failed to save tab filters", e);
+        }
+    }, [tabFilters]);
 
     // タブ切り替え時にソート設定をリセット
     useEffect(() => {
@@ -458,43 +560,10 @@ const App = () => {
 
     const updateNumFilter = (key, type, val) => setNumericFilters(p => ({ ...p, [key]: { ...p[key], [type]: val } }));
 
-    const resetAll = () => {
-        setFilterName('');
-        setFilterContains(initial3State()); setFilterGroups(initial3State());
-        setFilterCosts(initial3State()); setFilterBladeHeart(initial3State());
-        setFilterColors({ Pink: '', Red: '', Yellow: '', Green: '', Blue: '', Purple: '', Gray: '' });
-        setFilterAbilities(initial3State()); setFilterKeywords(initial3State());
-        setFilterBaseStats({ min: '', max: '' }); setFilterMaxStats({ min: '', max: '' });
-        setNumericFilters({});
-    };
+    // 現在のタブのフィルターのみをリセット（もう一方のタブの条件は保持）
+    const resetAll = () => setTabFilters(prev => ({ ...prev, [filterKey]: emptyFilterState() }));
 
-    // タブ別フィルター保存（メンバー⇔ライブ切替時にフィルターを独立保持）
-    const savedTabFilters = useRef({ member: null, live: null });
-
-    const handleTabChange = (newTab) => {
-        const prev = activeTab;
-        if ((prev === 'member' || prev === 'live') && (newTab === 'member' || newTab === 'live') && prev !== newTab) {
-            // 現在タブのフィルターを保存
-            savedTabFilters.current[prev] = {
-                filterName, filterContains, filterGroups, filterCosts, filterBladeHeart,
-                filterColors, filterAbilities, filterKeywords, filterBaseStats, filterMaxStats, numericFilters
-            };
-            // 移動先タブのフィルターを復元（初回は何もない→リセット）
-            const saved = savedTabFilters.current[newTab];
-            if (saved) {
-                setFilterName(saved.filterName);
-                setFilterContains(saved.filterContains); setFilterGroups(saved.filterGroups);
-                setFilterCosts(saved.filterCosts); setFilterBladeHeart(saved.filterBladeHeart);
-                setFilterColors(saved.filterColors);
-                setFilterAbilities(saved.filterAbilities); setFilterKeywords(saved.filterKeywords);
-                setFilterBaseStats(saved.filterBaseStats); setFilterMaxStats(saved.filterMaxStats);
-                setNumericFilters(saved.numericFilters);
-            } else {
-                resetAll();
-            }
-        }
-        setActiveTab(newTab);
-    };
+    const handleTabChange = (newTab) => setActiveTab(newTab);
 
     // 検討カードを全てクリア
     const clearConsideration = () => setConsideration({ member: {}, live: {} });

@@ -1,4 +1,4 @@
-$port = 3333
+$port = if ($env:PORT) { $env:PORT } else { 3333 }
 $root = Split-Path $PSScriptRoot -Parent
 
 $mimeTypes = @{
