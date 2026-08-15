@@ -65,6 +65,7 @@ const COLUMN_MAP = {
         name: ['Name', '名前', 'カード名'],
         group: ['Group', 'グループ', '所属'],
         ability: ['Ability', 'アビリティ', '能力', '効果', 'スキル'],
+        keyword: ['Keyword', 'キーワード', '特徴'],
         text: ['Text', 'テキスト', '効果テキスト', 'スキル詳細'],
         contain: ['Expansion', 'Contain', '収録', '収録弾'],
         cost: ['Cost', 'コスト'],
