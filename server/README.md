@@ -27,12 +27,17 @@ KOTRI のデッキ同期 API（Cloudflare Workers + D1）。
 // レスポンス
 {
   "serverTime": 1735689700000,     // 次回の since に使う
-  "changes": [ /* updated_at > since のレコード */ ]
+  "changes": [ /* server_updated_at >= since のレコード */ ]
 }
 ```
 
 `changes` は既存レコードより `updatedAt` が新しい場合のみ反映される（LWW）。
 古い更新は黙って無視され、エラーにはならない。
+
+差分取得のカーソルは、クライアント時刻の `updated_at` ではなくサーバが書いた時刻
+（`server_updated_at`）を使う。`updated_at` で絞ると、端末Bがオフライン中に作った
+（＝古い `updated_at` を持つ）デッキをあとからサーバへ上げたとき、既に同期済みの
+端末Aが二度と取得できなくなるため。`updated_at` は競合解決だけに使う。
 
 ### エラー
 

@@ -58,3 +58,6 @@ out/
 
 # Wrangler（ローカル D1 の実体・ビルドキャッシュ）
 .wrangler/
+
+# ローカル実行のログ
+server/*.log

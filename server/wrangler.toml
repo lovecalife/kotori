@@ -27,7 +27,8 @@ migrations_dir = "migrations"
 
 # ---- ローカル開発（wrangler dev）----
 [env.dev.vars]
-ALLOWED_ORIGINS = "http://localhost:3333"
+# 2端末での同期をローカルで試すため、別オリジン扱いになる 127.0.0.1 も許可する
+ALLOWED_ORIGINS = "http://localhost:3333,http://localhost:3334"
 
 [[env.dev.d1_databases]]
 binding = "DB"

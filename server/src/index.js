@@ -197,25 +197,30 @@ const handleSync = async (request, env, origin) => {
             return json({ error: 'deck_limit_exceeded', limit: MAX_DECKS_PER_KEY }, 409, origin);
         }
 
-        // 既存より新しいものだけ上書きする（古い更新は無視。エラーにはしない）
+        // 既存より新しいものだけ上書きする（古い更新は無視。エラーにはしない）。
+        // 新旧の判定はクライアント時刻の updated_at、差分取得のカーソルは
+        // サーバ時刻の server_updated_at と、役割を分けている
         const upsert = db.prepare(
-            `INSERT INTO decks (key_hash, deck_id, payload, updated_at, deleted)
-             VALUES (?, ?, ?, ?, ?)
+            `INSERT INTO decks (key_hash, deck_id, payload, updated_at, server_updated_at, deleted)
+             VALUES (?, ?, ?, ?, ?, ?)
              ON CONFLICT(key_hash, deck_id) DO UPDATE SET
-               payload    = excluded.payload,
-               updated_at = excluded.updated_at,
-               deleted    = excluded.deleted
+               payload           = excluded.payload,
+               updated_at        = excluded.updated_at,
+               server_updated_at = excluded.server_updated_at,
+               deleted           = excluded.deleted
              WHERE excluded.updated_at > decks.updated_at`
         );
         await db.batch(changes.map(c =>
-            upsert.bind(keyHash, c.deckId, c.payload, c.updatedAt, c.deleted)
+            upsert.bind(keyHash, c.deckId, c.payload, c.updatedAt, serverTime, c.deleted)
         ));
     }
 
+    // >= にしているのは、直前の同期と同じミリ秒に書かれた行を取りこぼさないため。
+    // 重複して返る分は LWW で無害に潰れる
     const rows = await db
         .prepare(`SELECT deck_id, payload, updated_at, deleted
-                  FROM decks WHERE key_hash = ? AND updated_at > ?
-                  ORDER BY updated_at ASC`)
+                  FROM decks WHERE key_hash = ? AND server_updated_at >= ?
+                  ORDER BY server_updated_at ASC`)
         .bind(keyHash, since)
         .all();
 

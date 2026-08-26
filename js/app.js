@@ -1,7 +1,7 @@
 // ==========================================
 // Main App
 // ==========================================
-const { useState, useEffect, useMemo } = React;
+const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
 // ==========================================
 // タブ別フィルター（member / live をそれぞれ独立して保持・永続化）
@@ -84,7 +84,16 @@ const App = () => {
     });
 
     const [isDeckManagerOpen, setIsDeckManagerOpen] = useState(false);
-    const [savedDecks, setSavedDecks] = useState({});
+    const [isSyncPanelOpen, setIsSyncPanelOpen] = useState(false);
+    const [syncKey, setSyncKey] = useState(loadSyncKey);
+    const [lastSyncedAt, setLastSyncedAt] = useState(loadLastSyncedAt);
+    const [syncStatus, setSyncStatus] = useState('idle');
+    const [syncError, setSyncError] = useState('');
+    const [keyInput, setKeyInput] = useState('');
+    // 初回レンダー前に読み込む。effect で後から入れると、起動時の同期が
+    // 空のデッキ一覧で走って何も push しないまま lastSyncedAt だけ進み、
+    // オフライン中に保存したデッキが二度と送られなくなる
+    const [savedDecks, setSavedDecks] = useState(loadSavedDecks);
     const [selectedDeckId, setSelectedDeckId] = useState('');
     const [deckNameInput, setDeckNameInput] = useState('');
     const [ioText, setIoText] = useState('');
@@ -133,11 +142,6 @@ const App = () => {
     } = filterSetters;
 
     const [sortConfig, setSortConfig] = useState({ key: 'cost', direction: 'asc' });
-
-    // ローカルストレージから保存デッキを復元（必要なら新スキーマへ移行される）
-    useEffect(() => {
-        setSavedDecks(loadSavedDecks());
-    }, []);
 
     // 選択用の一覧。墓標（削除済み）は出さない
     const activeDecks = useMemo(() => visibleDecks(savedDecks), [savedDecks]);
@@ -389,8 +393,10 @@ const App = () => {
         else { setSelectedDeckId(id); setDeckNameInput(activeDecks[id]?.name || ''); }
     };
 
-    // 保存デッキ一覧を更新して永続化する。書き込みに失敗した場合は state も戻さない
-    const commitSavedDecks = (nextDecks, { onSuccess, failMessage } = {}) => {
+    // 保存デッキ一覧を更新して永続化する。書き込みに失敗した場合は state も戻さない。
+    // sync: false は同期処理自身からの呼び出し。ここで再度スケジュールすると
+    // 取り込み → 保存 → 同期 と無駄に往復するため抑止する
+    const commitSavedDecks = (nextDecks, { onSuccess, failMessage, sync = true } = {}) => {
         try {
             persistSavedDecks(nextDecks);
         } catch (e) {
@@ -398,8 +404,10 @@ const App = () => {
             showToast(failMessage || '保存に失敗しました(容量制限等)');
             return false;
         }
+        savedDecksRef.current = nextDecks;
         setSavedDecks(nextDecks);
         if (onSuccess) onSuccess();
+        if (sync) scheduleSync();
         return true;
     };
 
@@ -469,6 +477,143 @@ const App = () => {
             });
         };
         reader.readAsText(file);
+    };
+
+    // ==========================================
+    // Sync
+    // localStorage を「正」、サーバを「ミラー」として扱う。
+    // 失敗してもユーザー操作は止めず、lastSyncedAt を進めないことで次回に持ち越す
+    // ==========================================
+
+    // 非同期処理の途中でも最新の値を読めるようにする
+    const savedDecksRef = useRef(savedDecks);
+    const lastSyncedAtRef = useRef(lastSyncedAt);
+    const syncKeyRef = useRef(syncKey);
+    useEffect(() => { savedDecksRef.current = savedDecks; }, [savedDecks]);
+    useEffect(() => { lastSyncedAtRef.current = lastSyncedAt; }, [lastSyncedAt]);
+    useEffect(() => { syncKeyRef.current = syncKey; }, [syncKey]);
+
+    const syncInFlightRef = useRef(false);
+    const syncDebounceRef = useRef(null);
+    const syncEnabled = !!SYNC_API_BASE;
+
+    const performSync = async ({ silent = true } = {}) => {
+        const key = syncKeyRef.current;
+        if (!key || !syncEnabled) return;
+        // 連打やデバウンスの重なりで多重に走らせない
+        if (syncInFlightRef.current) return;
+        syncInFlightRef.current = true;
+        setSyncStatus('syncing');
+        setSyncError('');
+        try {
+            const keyHash = await syncKeyToHash(key);
+            const since = lastSyncedAtRef.current;
+            const { serverTime, incoming, pushedIds } = await runSync({
+                apiBase: SYNC_API_BASE,
+                keyHash,
+                since,
+                decks: savedDecksRef.current
+            });
+
+            if (incoming.length > 0) {
+                const { decks, applied } = mergeDeckRecords(savedDecksRef.current, incoming);
+                // 取り込みを保存できなかったなら lastSyncedAt を進めてはいけない。
+                // 進めると次回その差分が二度と降ってこなくなる
+                if (applied > 0 && !commitSavedDecks(decks, { sync: false, failMessage: '同期データの保存に失敗しました(容量制限等)' })) {
+                    throw new SyncError('storage_error', 0);
+                }
+                if (applied > 0 && !silent) showToast(`${applied}件のデッキを取り込みました`);
+            }
+
+            // 通信中にローカルで保存されたデッキは changes に入っていない。
+            // そのまま serverTime まで進めると、その変更は updatedAt < serverTime
+            // なので次回以降の差分から永久に外れてしまう。送り漏らしたものの
+            // 手前で止めることで、次回の同期で拾い直せるようにする
+            const unpushed = Object.values(savedDecksRef.current)
+                .filter(d => d.updatedAt > since && !pushedIds.has(d.deckId));
+            const nextSince = unpushed.length > 0
+                ? Math.min(...unpushed.map(d => d.updatedAt)) - 1
+                : serverTime;
+
+            lastSyncedAtRef.current = nextSince;
+            setLastSyncedAt(nextSince);
+            saveLastSyncedAt(nextSince);
+            if (unpushed.length > 0) scheduleSync();
+            setSyncStatus('ok');
+            if (!silent && incoming.length === 0) showToast('同期しました');
+        } catch (err) {
+            // エラーコードのみ残す。payload やキーはログに出さない
+            console.error('sync failed:', err && err.code);
+            setSyncStatus('error');
+            const msg = syncErrorMessage(err);
+            setSyncError(msg);
+            if (!silent) showToast(msg);
+        } finally {
+            syncInFlightRef.current = false;
+        }
+    };
+
+    // 毎レンダーで最新の関数に差し替える。effect 側から古いクロージャを
+    // 呼んでしまうのを避けるため
+    const performSyncRef = useRef(performSync);
+    performSyncRef.current = performSync;
+
+    // デッキ保存のたびに叩かないよう数秒まとめる
+    const scheduleSync = () => {
+        if (!syncKeyRef.current || !syncEnabled) return;
+        if (syncDebounceRef.current) clearTimeout(syncDebounceRef.current);
+        syncDebounceRef.current = setTimeout(() => { performSyncRef.current({ silent: true }); }, 3000);
+    };
+
+    // 起動時（シンクキー設定済みの場合）
+    useEffect(() => {
+        if (syncKeyRef.current && syncEnabled) performSyncRef.current({ silent: true });
+        return () => { if (syncDebounceRef.current) clearTimeout(syncDebounceRef.current); };
+    }, []);
+
+    // キーを切り替えたら差分の基準は無効になるので 0 に戻す。
+    // 結果として全ローカルデッキが push され、サーバの全デッキが降ってくる（＝統合）
+    const applySyncKey = (normalized) => {
+        saveSyncKey(normalized);
+        syncKeyRef.current = normalized;
+        setSyncKey(normalized);
+        lastSyncedAtRef.current = 0;
+        setLastSyncedAt(0);
+        saveLastSyncedAt(0);
+        performSyncRef.current({ silent: false });
+    };
+
+    const handleIssueSyncKey = () => {
+        const normalized = normalizeSyncKey(generateSyncKey());
+        applySyncKey(normalized);
+        setKeyInput('');
+        showToast('シンクキーを発行しました');
+    };
+
+    const handleConnectSyncKey = () => {
+        const normalized = normalizeSyncKey(keyInput);
+        if (!normalized) { showToast('シンクキーの形式が正しくありません'); return; }
+        applySyncKey(normalized);
+        setKeyInput('');
+    };
+
+    const handleDisconnectSync = () => {
+        if (!confirm('この端末から同期を解除しますか？\nサーバ上のデッキと他の端末のデッキは残ります。')) return;
+        clearSyncKey();
+        syncKeyRef.current = null;
+        setSyncKey(null);
+        lastSyncedAtRef.current = 0;
+        setLastSyncedAt(0);
+        setSyncStatus('idle');
+        setSyncError('');
+        showToast('同期を解除しました');
+    };
+
+    const handleCopySyncKey = () => {
+        if (!syncKey) return;
+        navigator.clipboard.writeText(displaySyncKey(syncKey))
+            .then(() => showToast('シンクキーをコピーしました'))
+            .catch(() => showToast('コピーに失敗しました'));
     };
 
     const getExportKey = (card) => {
@@ -970,6 +1115,24 @@ const App = () => {
                 <ToolsPanel savedDecks={activeDecks} cardData={cardData} onSelectCard={setSelectedItem} />
               ) : (
                 <>
+                {activeTab === 'deck' && syncEnabled && (
+                    <SyncPanel
+                        isOpen={isSyncPanelOpen}
+                        setIsOpen={setIsSyncPanelOpen}
+                        syncKey={syncKey ? displaySyncKey(syncKey) : null}
+                        lastSyncedAt={lastSyncedAt}
+                        syncStatus={syncStatus}
+                        syncError={syncError}
+                        keyInput={keyInput}
+                        setKeyInput={setKeyInput}
+                        onIssueKey={handleIssueSyncKey}
+                        onConnect={handleConnectSyncKey}
+                        onDisconnect={handleDisconnectSync}
+                        onSyncNow={() => performSyncRef.current({ silent: false })}
+                        onCopyKey={handleCopySyncKey}
+                    />
+                )}
+
                 {activeTab === 'deck' && (
                     <DeckManagerPanel
                         isDeckManagerOpen={isDeckManagerOpen}

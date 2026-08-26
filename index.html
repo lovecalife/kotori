@@ -15,6 +15,9 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
+    <!-- QR コード生成（シンクキーをスマホへ渡す用） -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+
     <!-- PapaParse for CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
@@ -61,6 +64,9 @@
     <!-- 1.5 保存デッキのストア（永続化・スキーマ移行・バックアップ入出力） -->
     <script src="js/deckStore.js"></script>
 
+    <!-- 1.6 同期層（シンクキーの発行・ハッシュ化・/sync との通信） -->
+    <script src="js/sync.js"></script>
+
     <!-- 2. アイコン -->
     <script type="text/babel" src="js/icons.js"></script>
 
@@ -78,6 +84,9 @@
 
     <!-- 7. フルスクリーン画像モーダル -->
     <script type="text/babel" src="js/components/ImageModal.js"></script>
+
+    <!-- 7.5 同期設定パネル -->
+    <script type="text/babel" src="js/components/SyncPanel.js"></script>
 
     <!-- 8. ツールパネル（デッキ比較等） -->
     <script type="text/babel" src="js/components/Tools.js"></script>
