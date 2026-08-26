@@ -55,3 +55,6 @@ out/
 .env
 .env.local
 .env.*.local
+
+# Wrangler（ローカル D1 の実体・ビルドキャッシュ）
+.wrangler/

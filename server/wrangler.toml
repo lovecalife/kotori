@@ -1,0 +1,36 @@
+name = "kotori-sync"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+# CORS 許可オリジン（カンマ区切り）。ワイルドカードは使わない。
+# KOTRI は GitHub Pages の https://lovecalife.github.io/kotori/ で公開されている。
+# オリジンにパスは含まれないので https://lovecalife.github.io が正しい値。
+[vars]
+ALLOWED_ORIGINS = "https://lovecalife.github.io"
+
+# 本番用 D1。database_id は `wrangler d1 create kotori-sync` の出力で置き換えること
+[[d1_databases]]
+binding = "DB"
+database_name = "kotori-sync"
+database_id = "REPLACE_WITH_PRODUCTION_DATABASE_ID"
+migrations_dir = "migrations"
+
+# ---- プレビュー環境（本番とは別の D1 を使う）----
+[env.preview.vars]
+ALLOWED_ORIGINS = "https://lovecalife.github.io,http://localhost:3333"
+
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "kotori-sync-preview"
+database_id = "REPLACE_WITH_PREVIEW_DATABASE_ID"
+migrations_dir = "migrations"
+
+# ---- ローカル開発（wrangler dev）----
+[env.dev.vars]
+ALLOWED_ORIGINS = "http://localhost:3333"
+
+[[env.dev.d1_databases]]
+binding = "DB"
+database_name = "kotori-sync-preview"
+database_id = "REPLACE_WITH_PREVIEW_DATABASE_ID"
+migrations_dir = "migrations"
