@@ -11,7 +11,8 @@ const DeckManagerPanel = ({
     onSelectSavedDeck, onSaveDeck, onLoadDeck, onDeleteDeck,
     onExportFile, onImportFile,
     onExportText, onImportText, onCopyToClipboard,
-    onExportToDecklog
+    onExportToDecklog,
+    onBackupExport, onBackupImport
 }) => (
     <div className="mb-6 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
         <div
@@ -67,6 +68,26 @@ const DeckManagerPanel = ({
                             <button onClick={onSaveDeck} className={`px-4 py-2 text-white rounded text-sm font-bold whitespace-nowrap shadow-sm transition-colors ${selectedDeckId ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-green-600 hover:bg-green-700'}`}>
                                 {selectedDeckId ? '上書き保存' : '新規保存'}
                             </button>
+                        </div>
+
+                        {/* 端末に保存したデッキ全件のバックアップ。
+                            端末のデータはブラウザのキャッシュ削除で消えるため、退避手段を用意しておく */}
+                        <div className="pt-3 border-t border-gray-100">
+                            <div className="text-xs text-gray-500 mb-1.5">
+                                保存済みデッキ（{Object.keys(savedDecks).length}件）をまとめてバックアップ：
+                            </div>
+                            <div className="flex gap-2">
+                                <button onClick={onBackupExport} className="flex-1 py-1.5 bg-white border border-gray-300 rounded text-xs hover:bg-gray-50 font-medium transition-colors shadow-sm flex items-center justify-center gap-1.5">
+                                    <Icons.Download className="w-3.5 h-3.5" />全件バックアップ
+                                </button>
+                                <label className="flex-1 py-1.5 bg-white border border-gray-300 rounded text-xs hover:bg-gray-50 font-medium transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
+                                    <Icons.Upload className="w-3.5 h-3.5" />バックアップから復元
+                                    <input type="file" accept=".json" className="hidden" onChange={onBackupImport} />
+                                </label>
+                            </div>
+                            <div className="text-[10px] text-gray-400 mt-1.5">
+                                復元は同名のデッキを上書きせず、更新日時が新しい方を残します。
+                            </div>
                         </div>
                     </div>
 

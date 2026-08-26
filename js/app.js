@@ -134,15 +134,13 @@ const App = () => {
 
     const [sortConfig, setSortConfig] = useState({ key: 'cost', direction: 'asc' });
 
-    // ローカルストレージから保存デッキを復元
+    // ローカルストレージから保存デッキを復元（必要なら新スキーマへ移行される）
     useEffect(() => {
-        try {
-            const saved = localStorage.getItem('card_viewer_saved_decks');
-            if (saved) setSavedDecks(JSON.parse(saved));
-        } catch (e) {
-            console.error("Failed to load saved decks", e);
-        }
+        setSavedDecks(loadSavedDecks());
     }, []);
+
+    // 選択用の一覧。墓標（削除済み）は出さない
+    const activeDecks = useMemo(() => visibleDecks(savedDecks), [savedDecks]);
 
     // スプレッドシートからカードデータを取得し、オートセーブデッキを復元
     useEffect(() => {
@@ -388,7 +386,21 @@ const App = () => {
 
     const handleSelectSavedDeck = (id) => {
         if (!id) { setSelectedDeckId(''); setDeckNameInput(''); }
-        else { setSelectedDeckId(id); setDeckNameInput(savedDecks[id]?.name || ''); }
+        else { setSelectedDeckId(id); setDeckNameInput(activeDecks[id]?.name || ''); }
+    };
+
+    // 保存デッキ一覧を更新して永続化する。書き込みに失敗した場合は state も戻さない
+    const commitSavedDecks = (nextDecks, { onSuccess, failMessage } = {}) => {
+        try {
+            persistSavedDecks(nextDecks);
+        } catch (e) {
+            console.error('Failed to persist saved decks', e);
+            showToast(failMessage || '保存に失敗しました(容量制限等)');
+            return false;
+        }
+        setSavedDecks(nextDecks);
+        if (onSuccess) onSuccess();
+        return true;
     };
 
     const handleSaveDeck = () => {
@@ -397,39 +409,66 @@ const App = () => {
             const now = new Date();
             name = `${now.getFullYear()}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getDate().toString().padStart(2,'0')} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
         }
-        const simpleDeck = { name, member: {}, live: {} };
-        Object.keys(deck.member).forEach(k => simpleDeck.member[k] = deck.member[k].count);
-        Object.keys(deck.live).forEach(k => simpleDeck.live[k] = deck.live[k].count);
-        const id = selectedDeckId || Date.now().toString();
-        const newSavedDecks = { ...savedDecks, [id]: simpleDeck };
-        setSavedDecks(newSavedDecks);
-        try {
-            localStorage.setItem('card_viewer_saved_decks', JSON.stringify(newSavedDecks));
-            setSelectedDeckId(id);
-            setDeckNameInput(name);
-            showToast('デッキを保存しました');
-        } catch(e) {
-            showToast('保存に失敗しました(容量制限等)');
-        }
+        const id = selectedDeckId || generateDeckId();
+        const record = { deckId: id, name, member: {}, live: {}, updatedAt: Date.now(), deleted: false };
+        Object.keys(deck.member).forEach(k => record.member[k] = deck.member[k].count);
+        Object.keys(deck.live).forEach(k => record.live[k] = deck.live[k].count);
+        commitSavedDecks({ ...savedDecks, [id]: record }, {
+            onSuccess: () => {
+                setSelectedDeckId(id);
+                setDeckNameInput(name);
+                showToast('デッキを保存しました');
+            }
+        });
     };
 
     const handleLoadDeck = () => {
-        if (!selectedDeckId || !savedDecks[selectedDeckId]) return;
-        setDeck(rebuildDeck(savedDecks[selectedDeckId]));
-        showToast(`「${savedDecks[selectedDeckId].name}」を読み込みました`);
+        const target = activeDecks[selectedDeckId];
+        if (!target) return;
+        setDeck(rebuildDeck(target));
+        showToast(`「${target.name}」を読み込みました`);
     };
 
     const handleDeleteDeck = () => {
-        if (!selectedDeckId) return;
+        const target = activeDecks[selectedDeckId];
+        if (!target) return;
         if (!confirm('このデッキを削除しますか？')) return;
-        const newSavedDecks = { ...savedDecks };
-        delete newSavedDecks[selectedDeckId];
-        setSavedDecks(newSavedDecks);
-        try {
-            localStorage.setItem('card_viewer_saved_decks', JSON.stringify(newSavedDecks));
-            setSelectedDeckId(''); setDeckNameInput('');
-            showToast('デッキを削除しました');
-        } catch(e) {}
+        // 物理削除せず墓標を残す。消さないと他端末から同期で復活してしまう
+        const tombstone = { ...target, member: {}, live: {}, updatedAt: Date.now(), deleted: true };
+        commitSavedDecks({ ...savedDecks, [selectedDeckId]: tombstone }, {
+            onSuccess: () => {
+                setSelectedDeckId(''); setDeckNameInput('');
+                showToast('デッキを削除しました');
+            },
+            failMessage: '削除に失敗しました'
+        });
+    };
+
+    // 保存デッキ全件を JSON バックアップとして書き出す
+    const handleBackupExport = () => {
+        const backup = buildDeckBackup(savedDecks);
+        if (backup.decks.length === 0) { showToast('保存されたデッキがありません'); return; }
+        downloadJson(backupFilename(), backup);
+        showToast(`${backup.decks.length}件のデッキをバックアップしました`);
+    };
+
+    // バックアップを取り込む。既存デッキは deckId 単位で新しい方を残す（LWW）
+    const handleBackupImport = (e) => {
+        const file = e.target.files[0];
+        e.target.value = '';
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const incoming = parseDeckBackup(event.target.result);
+            if (!incoming) { showToast('バックアップファイルの形式が不正です'); return; }
+            const { decks, applied } = mergeDeckRecords(savedDecks, incoming);
+            if (applied === 0) { showToast('取り込む新しいデッキはありませんでした'); return; }
+            commitSavedDecks(decks, {
+                onSuccess: () => showToast(`${applied}件のデッキを復元しました`),
+                failMessage: '復元に失敗しました(容量制限等)'
+            });
+        };
+        reader.readAsText(file);
     };
 
     const getExportKey = (card) => {
@@ -928,14 +967,14 @@ const App = () => {
             <div className="flex-1 p-4 md:p-6 bg-gray-50 min-h-screen">
 
               {activeTab === 'tools' ? (
-                <ToolsPanel savedDecks={savedDecks} cardData={cardData} onSelectCard={setSelectedItem} />
+                <ToolsPanel savedDecks={activeDecks} cardData={cardData} onSelectCard={setSelectedItem} />
               ) : (
                 <>
                 {activeTab === 'deck' && (
                     <DeckManagerPanel
                         isDeckManagerOpen={isDeckManagerOpen}
                         setIsDeckManagerOpen={setIsDeckManagerOpen}
-                        savedDecks={savedDecks}
+                        savedDecks={activeDecks}
                         selectedDeckId={selectedDeckId}
                         deckNameInput={deckNameInput}
                         ioText={ioText}
@@ -951,6 +990,8 @@ const App = () => {
                         onImportText={handleImportText}
                         onCopyToClipboard={copyToClipboard}
                         onExportToDecklog={handleExportToDecklog}
+                        onBackupExport={handleBackupExport}
+                        onBackupImport={handleBackupImport}
                     />
                 )}
 
