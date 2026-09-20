@@ -25,12 +25,10 @@ $RECYCLE.BIN/
 *~
 
 # =====================
-# Claude Code
+# Claude Code のローカルデータ（開発・起動には使用しない）
 # =====================
-# ローカル固有の設定（個人環境のみ）
-.claude/settings.local.json
-# ワークツリー（一時的な作業ディレクトリ）
-.claude/worktrees/
+.claude/
+CLAUDE.md
 
 # =====================
 # Node.js（将来的な導入に備えて）
