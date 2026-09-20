@@ -11,6 +11,7 @@ const TAB_FILTERS_STORAGE_KEY = 'card_viewer_tab_filters';
 const SET_FILTER_KEYS = ['filterContains', 'filterGroups', 'filterUnits', 'filterCosts', 'filterBladeHeart', 'filterAbilities', 'filterKeywords'];
 const normalizeUnitName = (unit) => unit === 'みらくらぱーく！' ? 'みらくらぱーく!' : unit;
 const splitUnitNames = (value) => value ? value.split(/[,、\r\n]+/).map(unit => normalizeUnitName(unit.trim())).filter(Boolean) : [];
+const hasUnit = (units, unit) => unit === 'None' ? units.length === 0 : units.includes(unit);
 
 const emptyFilterState = () => ({
     filterName: '',
@@ -778,10 +779,11 @@ const App = () => {
     }, [currentTabData]);
 
     const uniqueUnits = useMemo(() => {
+        if (currentTabData.length === 0) return [];
         const units = new Set();
         currentTabData.forEach(item => splitUnitNames(item.unit).forEach(unit => units.add(unit)));
-        const otherUnits = [...units].filter(unit => !UNIT_OPTIONS.includes(unit)).sort((a, b) => a.localeCompare(b, 'ja'));
-        return [...UNIT_OPTIONS.filter(unit => units.has(unit)), ...otherUnits];
+        const otherUnits = [...units].filter(unit => unit !== 'None' && !UNIT_OPTIONS.includes(unit)).sort((a, b) => a.localeCompare(b, 'ja'));
+        return [...UNIT_OPTIONS.filter(unit => units.has(unit)), ...otherUnits, 'None'];
     }, [currentTabData]);
 
     const uniqueContains = useMemo(() => {
@@ -828,8 +830,8 @@ const App = () => {
             if (filterGroups.include.size > 0 && ![...filterGroups.include].some(x => g.includes(x))) return false;
 
             const units = splitUnitNames(item.unit);
-            if (filterUnits.exclude.size > 0 && [...filterUnits.exclude].some(x => units.includes(x))) return false;
-            if (filterUnits.include.size > 0 && ![...filterUnits.include].some(x => units.includes(x))) return false;
+            if (filterUnits.exclude.size > 0 && [...filterUnits.exclude].some(x => hasUnit(units, x))) return false;
+            if (filterUnits.include.size > 0 && ![...filterUnits.include].some(x => hasUnit(units, x))) return false;
 
             const colorCounts = { Pink: 0, Red: 0, Yellow: 0, Green: 0, Blue: 0, Purple: 0, Gray: 0 };
             if (item.Pink !== undefined || item.Red !== undefined) {
