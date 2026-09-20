@@ -22,6 +22,12 @@ const BH_SORT_ORDER = { 'Pink': 1, 'Red': 2, 'Yellow': 3, 'Green': 4, 'Blue': 5,
 const STATS_OPTIONS = Array.from({length: 20}, (_, i) => i + 1);
 const MAX_STATS_OPTIONS = [...STATS_OPTIONS, '＋'];
 const GROUP_OPTIONS = ["μ's", 'Aqours', '虹ヶ咲', 'Liella!', '蓮ノ空', 'A-RISE', 'SaintSnow', 'SunnyPassion'];
+const UNIT_OPTIONS = [
+    'Printemps', 'BiBi', 'lilywhite', 'CYaRon！', 'GuiltyKiss', 'AZALEA',
+    'A・ZU・NA', 'DiverDiva', 'QU4RTZ', 'R3BIRTH', 'CatChu!', 'KALEIDOSCORE',
+    '5yncri5e!', 'スリーズブーケ', 'DOLLCHESTRA', 'みらくらぱーく!',
+    'EdelNote', 'A-RISE', 'SaintSnow', 'SunnyPassion'
+];
 
 const GROUP_STYLES = {
     "μ's":          { base: "bg-pink-400 text-white hover:bg-pink-500", active: "bg-pink-600 ring-2 ring-pink-600 ring-offset-1" },
@@ -72,6 +78,7 @@ const COLUMN_MAP = {
         number: ['Number', 'No', 'No.', '番号', 'ID'],
         name: ['Name', '名前', 'カード名'],
         group: ['Group', 'グループ', '所属'],
+        unit: ['Unit', 'unit', 'ユニット'],
         ability: ['Ability', 'アビリティ', '能力', '効果', 'スキル'],
         keyword: ['Keyword', 'キーワード', '特徴'],
         text: ['Text', 'テキスト', '効果テキスト', 'スキル詳細'],
@@ -96,6 +103,7 @@ const COLUMN_MAP = {
         number: ['Number', 'No', 'No.', '番号', 'ID'],
         name: ['Name', '名前', '楽曲名'],
         group: ['Group', 'グループ', '属性'],
+        unit: ['Unit', 'unit', 'ユニット'],
         ability: ['Ability', 'アビリティ', '能力', '効果', 'スキル'],
         text: ['Text', 'テキスト', '効果テキスト', 'スキル詳細'],
         contain: ['Expansion', 'Contain', '収録', '収録弾'],

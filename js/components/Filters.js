@@ -170,6 +170,7 @@ const FilterPanel = ({
     isMobile, activeTab, setActiveTab,
     filterName, setFilterName,
     filterGroups, toggleGroup, setFilterGroups,
+    filterUnits, toggleUnit, setFilterUnits, uniqueUnits,
     filterAbilities, toggleAbility, setFilterAbilities,
     filterCosts, toggleCost, setFilterCosts,
     numericFilters, updateNumericFilter, setNumericFilters,
@@ -246,6 +247,8 @@ const FilterPanel = ({
                             {uniqueKeywords.length > 0 && <TagFilter label="キーワード" options={uniqueKeywords} filterState={filterKeywords} onChange={toggleKeyword} onReset={() => setFilterKeywords(initial3State())} />}
                             {/* グループ */}
                             <ButtonGroupFilter label="グループ" options={GROUP_OPTIONS} filterState={filterGroups} onChange={toggleGroup} styles={GROUP_STYLES} defaultStyle={GROUP_STYLES["μ's"]} onReset={() => setFilterGroups(initial3State())} />
+                            {/* ユニット */}
+                            <TagFilter label="ユニット" options={uniqueUnits} filterState={filterUnits} onChange={toggleUnit} onReset={() => setFilterUnits(initial3State())} />
                             {/* ブレードハート */}
                             <ButtonGroupFilter label="ブレードハート" options={BH_OPTIONS_MEMBER} filterState={filterBladeHeart} onChange={toggleBladeHeart} styles={BH_STYLES} defaultStyle={BH_STYLES['None']} onReset={() => setFilterBladeHeart(initial3State())} />
                             {/* ハート数 */}
@@ -270,6 +273,8 @@ const FilterPanel = ({
                             {uniqueKeywords.length > 0 && <TagFilter label="キーワード" options={uniqueKeywords} filterState={filterKeywords} onChange={toggleKeyword} onReset={() => setFilterKeywords(initial3State())} />}
                             {/* グループ */}
                             <ButtonGroupFilter label="グループ" options={GROUP_OPTIONS} filterState={filterGroups} onChange={toggleGroup} styles={GROUP_STYLES} defaultStyle={GROUP_STYLES["μ's"]} onReset={() => setFilterGroups(initial3State())} />
+                            {/* ユニット */}
+                            <TagFilter label="ユニット" options={uniqueUnits} filterState={filterUnits} onChange={toggleUnit} onReset={() => setFilterUnits(initial3State())} />
                             {/* ハート数 */}
                             <ColorCountFilter label="ハート数" filterColors={filterColors} setFilterColors={setFilterColors} onReset={resetColors} />
                             {/* スコア */}

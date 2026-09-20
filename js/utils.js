@@ -36,7 +36,9 @@ const normalizeData = (rawData, type) => {
         const normalized = {};
         Object.keys(map).forEach(key => {
             const foundHeader = map[key].find(h => row[h] !== undefined);
-            normalized[key] = foundHeader ? row[foundHeader] : '';
+            // 両シートのユニットは G 列。列名が異なる場合も列位置で読み取る。
+            const unitHeader = key === 'unit' ? Object.keys(row)[6] : undefined;
+            normalized[key] = foundHeader !== undefined ? row[foundHeader] : (unitHeader !== undefined ? row[unitHeader] : '');
         });
         normalized._type = type;
         return normalized;

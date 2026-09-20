@@ -8,12 +8,15 @@ const { useState, useEffect, useMemo, useRef, useCallback } = React;
 // ==========================================
 const TAB_FILTERS_STORAGE_KEY = 'card_viewer_tab_filters';
 // include/exclude の Set を持つ項目（保存時は配列に変換する）
-const SET_FILTER_KEYS = ['filterContains', 'filterGroups', 'filterCosts', 'filterBladeHeart', 'filterAbilities', 'filterKeywords'];
+const SET_FILTER_KEYS = ['filterContains', 'filterGroups', 'filterUnits', 'filterCosts', 'filterBladeHeart', 'filterAbilities', 'filterKeywords'];
+const normalizeUnitName = (unit) => unit === 'みらくらぱーく！' ? 'みらくらぱーく!' : unit;
+const splitUnitNames = (value) => value ? value.split(/[,、\r\n]+/).map(unit => normalizeUnitName(unit.trim())).filter(Boolean) : [];
 
 const emptyFilterState = () => ({
     filterName: '',
     filterContains: { include: new Set(), exclude: new Set() },
     filterGroups: { include: new Set(), exclude: new Set() },
+    filterUnits: { include: new Set(), exclude: new Set() },
     filterCosts: { include: new Set(), exclude: new Set() },
     filterBladeHeart: { include: new Set(), exclude: new Set() },
     filterColors: { Pink: '', Red: '', Yellow: '', Green: '', Blue: '', Purple: '', Gray: '' },
@@ -43,6 +46,10 @@ const deserializeFilterState = (raw) => {
             exclude: new Set(Array.isArray(v?.exclude) ? v.exclude : [])
         };
     });
+    // 旧フィルターに全角「！」で保存されていても同じユニットとして扱う。
+    out.filterUnits.include = new Set([...out.filterUnits.include].map(normalizeUnitName));
+    out.filterUnits.exclude = new Set([...out.filterUnits.exclude].map(normalizeUnitName));
+    out.filterUnits.exclude.forEach(unit => out.filterUnits.include.delete(unit));
     out.filterColors = { ...base.filterColors, ...(raw.filterColors || {}) };
     out.filterBaseStats = { ...base.filterBaseStats, ...(raw.filterBaseStats || {}) };
     out.filterMaxStats = { ...base.filterMaxStats, ...(raw.filterMaxStats || {}) };
@@ -109,7 +116,7 @@ const App = () => {
     const filterKey = (activeTab === 'live') ? 'live' : 'member';
     const filters = tabFilters[filterKey];
     const {
-        filterName, filterContains, filterGroups, filterCosts, filterBladeHeart,
+        filterName, filterContains, filterGroups, filterUnits, filterCosts, filterBladeHeart,
         filterColors, filterAbilities, filterKeywords, filterBaseStats, filterMaxStats, numericFilters
     } = filters;
 
@@ -125,6 +132,7 @@ const App = () => {
             setFilterName: make('filterName'),
             setFilterContains: make('filterContains'),
             setFilterGroups: make('filterGroups'),
+            setFilterUnits: make('filterUnits'),
             setFilterCosts: make('filterCosts'),
             setFilterBladeHeart: make('filterBladeHeart'),
             setFilterColors: make('filterColors'),
@@ -137,7 +145,7 @@ const App = () => {
     }, [filterKey]);
 
     const {
-        setFilterName, setFilterContains, setFilterGroups, setFilterCosts, setFilterBladeHeart,
+        setFilterName, setFilterContains, setFilterGroups, setFilterUnits, setFilterCosts, setFilterBladeHeart,
         setFilterColors, setFilterAbilities, setFilterKeywords, setFilterBaseStats, setFilterMaxStats, setNumericFilters
     } = filterSetters;
 
@@ -769,6 +777,13 @@ const App = () => {
         return Array.from(s).sort();
     }, [currentTabData]);
 
+    const uniqueUnits = useMemo(() => {
+        const units = new Set();
+        currentTabData.forEach(item => splitUnitNames(item.unit).forEach(unit => units.add(unit)));
+        const otherUnits = [...units].filter(unit => !UNIT_OPTIONS.includes(unit)).sort((a, b) => a.localeCompare(b, 'ja'));
+        return [...UNIT_OPTIONS.filter(unit => units.has(unit)), ...otherUnits];
+    }, [currentTabData]);
+
     const uniqueContains = useMemo(() => {
         const sorted = [...currentTabData].sort((a, b) => {
             const ia = parseInt(a.sortId) || Infinity;
@@ -811,6 +826,10 @@ const App = () => {
             const g = item.group ? item.group.split(',').map(s => s.trim()) : [];
             if (filterGroups.exclude.size > 0 && [...filterGroups.exclude].some(x => g.includes(x))) return false;
             if (filterGroups.include.size > 0 && ![...filterGroups.include].some(x => g.includes(x))) return false;
+
+            const units = splitUnitNames(item.unit);
+            if (filterUnits.exclude.size > 0 && [...filterUnits.exclude].some(x => units.includes(x))) return false;
+            if (filterUnits.include.size > 0 && ![...filterUnits.include].some(x => units.includes(x))) return false;
 
             const colorCounts = { Pink: 0, Red: 0, Yellow: 0, Green: 0, Blue: 0, Purple: 0, Gray: 0 };
             if (item.Pink !== undefined || item.Red !== undefined) {
@@ -879,7 +898,7 @@ const App = () => {
             }
             return true;
         });
-    }, [currentTabData, filterName, filterContains, filterGroups, filterCosts, filterBladeHeart, filterColors, filterAbilities, filterKeywords, filterBaseStats, filterMaxStats, numericFilters, activeTab]);
+    }, [currentTabData, filterName, filterContains, filterGroups, filterUnits, filterCosts, filterBladeHeart, filterColors, filterAbilities, filterKeywords, filterBaseStats, filterMaxStats, numericFilters, activeTab]);
 
     const sortedData = useMemo(() => {
         let items = [...filteredData];
@@ -954,6 +973,7 @@ const App = () => {
 
         add3StateFilters(filterContains, 'ct', 'Contain', setFilterContains);
         add3StateFilters(filterGroups, 'g', 'Group', setFilterGroups);
+        add3StateFilters(filterUnits, 'u', 'ユニット', setFilterUnits);
         add3StateFilters(filterAbilities, 'a', 'Ability', setFilterAbilities);
         add3StateFilters(filterKeywords, 'k', 'Keyword', setFilterKeywords);
         add3StateFilters(filterCosts, 'c', 'Cost', setFilterCosts);
@@ -976,13 +996,14 @@ const App = () => {
         Object.entries(numericFilters).forEach(([k, v]) => { if (v.min || v.max) list.push({ id: k, label: `${k}: ${v.min||'0'}~${v.max||'∞'}`, fn: () => { updateNumFilter(k, 'min', ''); updateNumFilter(k, 'max', ''); }, isExclude: false }); });
 
         return list;
-    }, [filterName, filterContains, filterGroups, filterCosts, filterBladeHeart, filterColors, filterAbilities, filterKeywords, filterBaseStats, filterMaxStats, numericFilters]);
+    }, [filterName, filterContains, filterGroups, filterUnits, filterCosts, filterBladeHeart, filterColors, filterAbilities, filterKeywords, filterBaseStats, filterMaxStats, numericFilters]);
 
     const filterProps = {
         isMobile: false, activeTab, setActiveTab: handleTabChange,
         filterName, setFilterName,
         filterContains, toggleContain: (v) => toggle3State(filterContains, v, setFilterContains), setFilterContains,
         filterGroups, toggleGroup: (v) => toggle3State(filterGroups, v, setFilterGroups), setFilterGroups,
+        filterUnits, toggleUnit: (v) => toggle3State(filterUnits, v, setFilterUnits), setFilterUnits,
         filterAbilities, toggleAbility: (v) => toggle3State(filterAbilities, v, setFilterAbilities), setFilterAbilities,
         filterKeywords, toggleKeyword: (v) => toggle3State(filterKeywords, v, setFilterKeywords), setFilterKeywords,
         filterCosts, toggleCost: (v) => toggle3State(filterCosts, v, setFilterCosts), setFilterCosts,
@@ -990,7 +1011,7 @@ const App = () => {
         filterColors, setFilterColors,
         filterBaseStats, setFilterBaseStats, filterMaxStats, setFilterMaxStats,
         numericFilters, updateNumericFilter: updateNumFilter, setNumericFilters,
-        uniqueAbilities, uniqueKeywords, uniqueContains, resetFilters: resetAll, initial3State,
+        uniqueAbilities, uniqueKeywords, uniqueContains, uniqueUnits, resetFilters: resetAll, initial3State,
         deckSortType, setDeckSortType
     };
 
