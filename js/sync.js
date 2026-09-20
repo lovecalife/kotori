@@ -111,7 +111,8 @@ const saveLastSyncedAt = (t) => {
 const deckToPayload = (deck) => JSON.stringify({
     name: deck.name,
     member: deck.member,
-    live: deck.live
+    live: deck.live,
+    favorites: deck.favorites
 });
 
 // サーバから来た1件をローカルのデッキレコード形へ。壊れていたら null
@@ -122,7 +123,7 @@ const changeToDeckRecord = (change) => {
     let parsed;
     try { parsed = JSON.parse(change.payload); } catch (e) { return null; }
     if (!parsed || typeof parsed !== 'object') return null;
-    return { ...base, name: parsed.name, member: parsed.member, live: parsed.live };
+    return { ...base, name: parsed.name, member: parsed.member, live: parsed.live, favorites: parsed.favorites };
 };
 
 // ------------------------------------------

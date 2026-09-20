@@ -72,6 +72,14 @@ const loadTabFilters = () => {
     return { member: emptyFilterState(), live: emptyFilterState() };
 };
 
+const mergeFavoriteCards = (current, incoming) => {
+    const next = normalizeFavoriteCards(incoming);
+    return {
+        member: [...new Set([...current.member, ...next.member])],
+        live: [...new Set([...current.live, ...next.live])]
+    };
+};
+
 const App = () => {
     const [activeTab, setActiveTab] = useState('member');
     const [viewMode, setViewMode] = useState('grid');
@@ -83,7 +91,10 @@ const App = () => {
 
     const [deck, setDeck] = useState({ member: {}, live: {} });
     const [deckSortType, setDeckSortType] = useState('cost');
-    const [consideration, setConsideration] = useState({ member: {}, live: {} });
+    const [favorites, setFavorites] = useState({ member: [], live: [] });
+    const [showFavorites, setShowFavorites] = useState(() => {
+        try { return localStorage.getItem('card_viewer_show_favorites') !== 'false'; } catch(e) { return true; }
+    });
     const [deckCardSize, setDeckCardSize] = useState(() => {
         try { return parseInt(localStorage.getItem('card_viewer_deck_card_size')) || 140; } catch(e) { return 140; }
     });
@@ -166,6 +177,8 @@ const App = () => {
                 const normLiv = normalizeData(livRaw, 'live');
                 setCardData({ member: normMem, live: normLiv });
 
+                let restoredFavorites = { member: [], live: [] };
+
                 try {
                     const autosaveStr = localStorage.getItem('card_viewer_autosave_deck');
                     if (autosaveStr) {
@@ -181,31 +194,22 @@ const App = () => {
                         addCards('member', parsedAutosave.member, normMem);
                         addCards('live', parsedAutosave.live, normLiv);
                         setDeck(newDeck);
+                        restoredFavorites = normalizeFavoriteCards(parsedAutosave.favorites);
                     }
                 } catch (e) {
                     console.error("Failed to load autosave deck", e);
                 }
 
-                // 検討リストの復元
+                // 旧検討リストを編集中デッキのお気に入りへ一度だけ移行する。
                 try {
                     const considerStr = localStorage.getItem('card_viewer_consideration');
                     if (considerStr) {
-                        const parsed = JSON.parse(considerStr);
-                        const newConsideration = { member: {}, live: {} };
-                        const addConsider = (type, nums, sourceData) => {
-                            if (!nums) return;
-                            nums.forEach(num => {
-                                const card = sourceData.find(c => c.number === num);
-                                if (card) newConsideration[type][num] = card;
-                            });
-                        };
-                        addConsider('member', parsed.member, normMem);
-                        addConsider('live', parsed.live, normLiv);
-                        setConsideration(newConsideration);
+                        restoredFavorites = mergeFavoriteCards(restoredFavorites, JSON.parse(considerStr));
                     }
                 } catch (e) {
-                    console.error("Failed to load consideration", e);
+                    console.error("Failed to migrate consideration", e);
                 }
+                setFavorites(restoredFavorites);
             } catch (err) {
                 console.error(err);
                 setError(err.message);
@@ -219,29 +223,17 @@ const App = () => {
     // デッキ変更時にオートセーブ
     useEffect(() => {
         if (loading) return;
-        const simpleDeck = { member: {}, live: {} };
+        const simpleDeck = { member: {}, live: {}, favorites };
         Object.keys(deck.member).forEach(k => simpleDeck.member[k] = deck.member[k].count);
         Object.keys(deck.live).forEach(k => simpleDeck.live[k] = deck.live[k].count);
         try {
             localStorage.setItem('card_viewer_autosave_deck', JSON.stringify(simpleDeck));
+            // 新形式の保存が成功してから旧リストを消す。再読み込み時の再移行を防ぐ。
+            localStorage.removeItem('card_viewer_consideration');
         } catch(e) {
             console.error("Failed to autosave deck", e);
         }
-    }, [deck, loading]);
-
-    // 検討リスト変更時にオートセーブ
-    useEffect(() => {
-        if (loading) return;
-        const simpleConsider = {
-            member: Object.keys(consideration.member),
-            live: Object.keys(consideration.live)
-        };
-        try {
-            localStorage.setItem('card_viewer_consideration', JSON.stringify(simpleConsider));
-        } catch(e) {
-            console.error("Failed to autosave consideration", e);
-        }
-    }, [consideration, loading]);
+    }, [deck, favorites, loading]);
 
     // deckCardSize 変更時に保存
     useEffect(() => {
@@ -252,6 +244,10 @@ const App = () => {
     useEffect(() => {
         try { localStorage.setItem('card_viewer_compact_cols', String(compactCols)); } catch(e) {}
     }, [compactCols]);
+
+    useEffect(() => {
+        try { localStorage.setItem('card_viewer_show_favorites', String(showFavorites)); } catch(e) {}
+    }, [showFavorites]);
 
     // タブ別フィルター変更時に保存
     useEffect(() => {
@@ -291,14 +287,6 @@ const App = () => {
             if (currentCount >= 4) return prev;
             return { ...prev, [type]: { ...prev[type], [item.number]: { card: item, count: currentCount + 1 } } };
         });
-        // 検討リストにある場合は削除
-        if (consideration[type]?.[item.number]) {
-            setConsideration(prev => {
-                const next = { ...prev, [type]: { ...prev[type] } };
-                delete next[type][item.number];
-                return next;
-            });
-        }
     };
 
     const removeCardFromDeck = (e, item) => {
@@ -315,12 +303,12 @@ const App = () => {
             return { ...prev, [type]: nextTypeDeck };
         });
 
-        // 枚数が0になったら検討リストへ（まだ未登録の場合のみ）
-        if (currentCount === 1 && !consideration[type][item.number]) {
-            setConsideration(prev => ({
+        // 最後の1枚を外したカードはお気に入り（旧検討カード）に登録する。
+        if (currentCount === 1) {
+            setFavorites(prev => prev[type].includes(item.number) ? prev : {
                 ...prev,
-                [type]: { ...prev[type], [item.number]: item }
-            }));
+                [type]: [...prev[type], item.number]
+            });
         }
     };
 
@@ -329,13 +317,17 @@ const App = () => {
         return deck[item._type][item.number]?.count || 0;
     };
 
-    const removeFromConsideration = (item) => {
-        const type = item._type;
-        if (!type) return;
-        setConsideration(prev => {
-            const next = { ...prev, [type]: { ...prev[type] } };
-            delete next[type][item.number];
-            return next;
+    const isFavorite = (item) => Boolean(item?._type && favorites[item._type]?.includes(item.number));
+
+    const toggleFavorite = (e, item) => {
+        if (e) e.stopPropagation();
+        const type = item?._type;
+        if (!type || !item.number) return;
+        setFavorites(prev => {
+            const list = prev[type];
+            return { ...prev, [type]: list.includes(item.number)
+                ? list.filter(num => num !== item.number)
+                : [...list, item.number] };
         });
     };
 
@@ -427,7 +419,7 @@ const App = () => {
             name = `${now.getFullYear()}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getDate().toString().padStart(2,'0')} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
         }
         const id = selectedDeckId || generateDeckId();
-        const record = { deckId: id, name, member: {}, live: {}, updatedAt: Date.now(), deleted: false };
+        const record = { deckId: id, name, member: {}, live: {}, favorites: normalizeFavoriteCards(favorites), updatedAt: Date.now(), deleted: false };
         Object.keys(deck.member).forEach(k => record.member[k] = deck.member[k].count);
         Object.keys(deck.live).forEach(k => record.live[k] = deck.live[k].count);
         commitSavedDecks({ ...savedDecks, [id]: record }, {
@@ -443,6 +435,7 @@ const App = () => {
         const target = activeDecks[selectedDeckId];
         if (!target) return;
         setDeck(rebuildDeck(target));
+        setFavorites(normalizeFavoriteCards(target.favorites));
         showToast(`「${target.name}」を読み込みました`);
     };
 
@@ -451,7 +444,7 @@ const App = () => {
         if (!target) return;
         if (!confirm('このデッキを削除しますか？')) return;
         // 物理削除せず墓標を残す。消さないと他端末から同期で復活してしまう
-        const tombstone = { ...target, member: {}, live: {}, updatedAt: Date.now(), deleted: true };
+        const tombstone = { ...target, member: {}, live: {}, favorites: { member: [], live: [] }, updatedAt: Date.now(), deleted: true };
         commitSavedDecks({ ...savedDecks, [selectedDeckId]: tombstone }, {
             onSuccess: () => {
                 setSelectedDeckId(''); setDeckNameInput('');
@@ -632,7 +625,7 @@ const App = () => {
     };
 
     const handleExportFile = () => {
-        const simpleDeck = { member: {}, live: {} };
+        const simpleDeck = { member: {}, live: {}, favorites: normalizeFavoriteCards(favorites) };
         Object.values(deck.member).forEach(({ card, count }) => { simpleDeck.member[getExportKey(card)] = count; });
         Object.values(deck.live).forEach(({ card, count }) => { simpleDeck.live[getExportKey(card)] = count; });
         if (deckNameInput.trim()) simpleDeck.name = deckNameInput.trim();
@@ -673,6 +666,14 @@ const App = () => {
         return newDeck;
     };
 
+    const mergeImportedFavorites = (prev, imported) => {
+        const incoming = normalizeFavoriteCards(imported);
+        return {
+            member: [...new Set([...prev.member, ...incoming.member])],
+            live: [...new Set([...prev.live, ...incoming.live])]
+        };
+    };
+
     const handleImportFile = (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -682,6 +683,7 @@ const App = () => {
                 const parsed = JSON.parse(event.target.result);
                 if (!parsed.member && !parsed.live) throw new Error();
                 setDeck(prevDeck => applyImportedDeck(prevDeck, parsed));
+                if (parsed.favorites) setFavorites(prev => mergeImportedFavorites(prev, parsed.favorites));
                 if (parsed.name) setDeckNameInput(parsed.name);
                 setSelectedDeckId('');
                 showToast('ファイルからデッキに追加しました');
@@ -694,7 +696,7 @@ const App = () => {
     };
 
     const handleExportText = () => {
-        const simpleDeck = { member: {}, live: {} };
+        const simpleDeck = { member: {}, live: {}, favorites: normalizeFavoriteCards(favorites) };
         Object.values(deck.member).forEach(({ card, count }) => { simpleDeck.member[getExportKey(card)] = count; });
         Object.values(deck.live).forEach(({ card, count }) => { simpleDeck.live[getExportKey(card)] = count; });
         setIoText(JSON.stringify(simpleDeck));
@@ -706,6 +708,7 @@ const App = () => {
             const parsed = JSON.parse(ioText);
             if (!parsed.member && !parsed.live) throw new Error();
             setDeck(prevDeck => applyImportedDeck(prevDeck, parsed));
+            if (parsed.favorites) setFavorites(prev => mergeImportedFavorites(prev, parsed.favorites));
             setSelectedDeckId(''); setDeckNameInput(''); setIoText('');
             showToast('テキストデータからデッキに追加しました');
         } catch(e) {
@@ -757,9 +760,6 @@ const App = () => {
     const resetAll = () => setTabFilters(prev => ({ ...prev, [filterKey]: emptyFilterState() }));
 
     const handleTabChange = (newTab) => setActiveTab(newTab);
-
-    // 検討カードを全てクリア
-    const clearConsideration = () => setConsideration({ member: {}, live: {} });
 
     // ==========================================
     // Derived Data
@@ -946,18 +946,20 @@ const App = () => {
         return { member: members, live: lives };
     }, [deck, activeTab, deckSortType]);
 
-    const sortedConsiderationCards = useMemo(() => {
-        if (activeTab !== 'deck') return { member: [], live: [] };
+    const favoriteCards = useMemo(() => {
+        if (activeTab !== 'deck') return [];
         const sortFn = (a, b) => {
             const costA = parseInt(a.cost || a.req) || 0;
             const costB = parseInt(b.cost || b.req) || 0;
             if (costA !== costB) return costA - costB;
             return (a.number || '').localeCompare(b.number || '');
         };
-        const members = Object.values(consideration.member).sort(sortFn);
-        const lives = Object.values(consideration.live).sort(sortFn);
-        return { member: members, live: lives };
-    }, [consideration, activeTab]);
+        return ['member', 'live'].flatMap(type => favorites[type]
+            .filter(num => !deck[type][num]?.count)
+            .map(num => cardData[type].find(card => card.number === num))
+            .filter(Boolean)
+            .sort(sortFn));
+    }, [favorites, deck, cardData, activeTab]);
 
     const displayList = activeTab === 'deck' ? [...sortedDeckCards.member, ...sortedDeckCards.live] : sortedData;
     const actualViewMode = (activeTab !== 'deck' && viewMode === 'compact') ? 'grid' : viewMode;
@@ -1014,7 +1016,7 @@ const App = () => {
         filterBaseStats, setFilterBaseStats, filterMaxStats, setFilterMaxStats,
         numericFilters, updateNumericFilter: updateNumFilter, setNumericFilters,
         uniqueAbilities, uniqueKeywords, uniqueContains, uniqueUnits, resetFilters: resetAll, initial3State,
-        deckSortType, setDeckSortType
+        deckSortType, setDeckSortType, showFavorites, setShowFavorites
     };
 
     // カードのアビリティリストをタイプに応じて選択
@@ -1027,7 +1029,7 @@ const App = () => {
     const renderCardGrid = (items) => (
         <div className="grid gap-2 md:gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {items.map((item, index) => (
-                <CardItem key={`${item.number}-${index}`} item={item} deckCount={getDeckCount(item)} onAdd={addCardToDeck} onRemove={removeCardFromDeck} onSelect={setSelectedItem} abilitiesList={getAbilitiesList(item)} asGrid={true} />
+                <CardItem key={`${item.number}-${index}`} item={item} deckCount={getDeckCount(item)} onAdd={addCardToDeck} onRemove={removeCardFromDeck} onSelect={setSelectedItem} abilitiesList={getAbilitiesList(item)} isFavorite={isFavorite(item)} onToggleFavorite={toggleFavorite} asGrid={true} />
             ))}
         </div>
     );
@@ -1047,7 +1049,7 @@ const App = () => {
                 ) : (
                     <div className="grid gap-x-2 gap-y-6 md:gap-x-3 md:gap-y-8 px-1 pb-4" style={{ gridTemplateColumns: isMember ? `repeat(auto-fill, minmax(${deckCardSize}px, 1fr))` : `repeat(auto-fill, minmax(${Math.round(deckCardSize * 1.5)}px, 1fr))` }}>
                         {items.map((item, index) => (
-                            <CardItem key={`${item.number}-${index}`} item={item} deckCount={getDeckCount(item)} onAdd={addCardToDeck} onRemove={removeCardFromDeck} onSelect={setSelectedItem} abilitiesList={getAbilitiesList(item)} asGrid={true} />
+                            <CardItem key={`${item.number}-${index}`} item={item} deckCount={getDeckCount(item)} onAdd={addCardToDeck} onRemove={removeCardFromDeck} onSelect={setSelectedItem} abilitiesList={getAbilitiesList(item)} isFavorite={isFavorite(item)} onToggleFavorite={toggleFavorite} asGrid={true} />
                         ))}
                     </div>
                 )}
@@ -1074,9 +1076,9 @@ const App = () => {
                 <div className="flex items-center justify-between px-4 py-3">
                     <h1 className="text-xl font-bold text-gray-800 flex items-center gap-1"><span className="text-blue-600">Card</span>List</h1>
                     <div className="flex items-center gap-3">
-                        {isBrowsing && (
+                        {(isBrowsing || activeTab === 'deck') && (
                             <button onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)} className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-bold transition-colors ${isMobileFilterOpen ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}>
-                                <Icons.Filter className="w-4 h-4" /> Filter {activeFilters.length > 0 && <span className="bg-red-500 text-white text-[10px] px-1 rounded-full ml-1">{activeFilters.length}</span>}
+                                <Icons.Filter className="w-4 h-4" /> Filter {isBrowsing && activeFilters.length > 0 && <span className="bg-red-500 text-white text-[10px] px-1 rounded-full ml-1">{activeFilters.length}</span>}
                             </button>
                         )}
                     </div>
@@ -1117,7 +1119,7 @@ const App = () => {
                         <button onClick={resetAll} className="text-xs text-red-500 underline whitespace-nowrap ml-1">Clear All</button>
                     </div>
                 )}
-                {isMobileFilterOpen && isBrowsing && (
+                {isMobileFilterOpen && (isBrowsing || activeTab === 'deck') && (
                     <div className="border-t border-gray-100 bg-white px-4 py-4 max-h-[70vh] overflow-y-auto shadow-lg"><FilterPanel {...filterProps} isMobile={true} /></div>
                 )}
             </div>
@@ -1249,27 +1251,26 @@ const App = () => {
                                 {renderDeckSection('メンバーカード', sortedDeckCards.member, 'border-blue-200')}
                                 {renderDeckSection('ライブカード', sortedDeckCards.live, 'border-pink-200')}
 
-                                {/* 検討カードセクション */}
-                                {(sortedConsiderationCards.member.length > 0 || sortedConsiderationCards.live.length > 0) && (
+                                {showFavorites && (
                                     <div>
-                                        <div className="flex items-center justify-between border-b-2 border-amber-300 pb-1 md:pb-2 mb-3 md:mb-4">
-                                            <h3 className="text-base md:text-xl font-bold text-amber-700">検討カード</h3>
-                                            <button onClick={clearConsideration} className="text-xs text-amber-700 border border-amber-300 hover:bg-amber-50 px-2 py-1 rounded transition-colors flex items-center gap-1"><Icons.Close className="w-3 h-3" /> クリア</button>
-                                        </div>
-                                        {/* メンバー・ライブを同一グリッドに配置。ライブはspan 2で約2倍幅 */}
-                                        <div className={`px-1 pb-2 grid ${actualViewMode === 'compact' ? 'gap-1' : 'gap-x-2 gap-y-6 md:gap-x-3 md:gap-y-8'}`}
-                                             style={{ gridTemplateColumns: actualViewMode === 'compact' ? `repeat(${compactCols}, 1fr)` : `repeat(auto-fill, minmax(${deckCardSize}px, 1fr))` }}>
-                                            {[...sortedConsiderationCards.member, ...sortedConsiderationCards.live].map((item, index) => (
-                                                <ConsiderationCardItem
-                                                    key={`consider-${item.number}-${index}`}
-                                                    item={item}
-                                                    onRemove={removeFromConsideration}
-                                                    onAdd={(card) => addCardToDeck(null, card)}
-                                                    isCompact={actualViewMode === 'compact'}
-                                                    span={item._type === 'live' ? 2 : 1}
-                                                />
-                                            ))}
-                                        </div>
+                                        <h3 className="text-base md:text-xl font-bold text-pink-700 border-b-2 border-pink-300 pb-1 md:pb-2 mb-3 md:mb-4 flex items-center gap-2"><Icons.Star className="w-5 h-5" fill="currentColor" />お気に入りカード</h3>
+                                        {favoriteCards.length === 0 ? (
+                                            <p className="text-sm text-gray-500">カードの星を押すか、デッキから最後の1枚を外すと、ここに表示されます。</p>
+                                        ) : (
+                                            <div className={`px-1 pb-2 grid ${actualViewMode === 'compact' ? 'gap-1' : 'gap-x-2 gap-y-6 md:gap-x-3 md:gap-y-8'}`}
+                                                 style={{ gridTemplateColumns: actualViewMode === 'compact' ? `repeat(${compactCols}, 1fr)` : `repeat(auto-fill, minmax(${deckCardSize}px, 1fr))` }}>
+                                                {favoriteCards.map(item => (
+                                                    <FavoriteCardItem
+                                                        key={`favorite-${item._type}-${item.number}`}
+                                                        item={item}
+                                                        onToggleFavorite={toggleFavorite}
+                                                        onAdd={(card) => addCardToDeck(null, card)}
+                                                        isCompact={actualViewMode === 'compact'}
+                                                        span={item._type === 'live' ? 2 : 1}
+                                                    />
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -1277,7 +1278,7 @@ const App = () => {
                             renderCardGrid(displayList)
                         )}
 
-                        {displayList.length === 0 && (
+                        {displayList.length === 0 && !(activeTab === 'deck' && showFavorites && favoriteCards.length > 0) && (
                             <div className="flex flex-col items-center justify-center h-48 text-gray-400 text-sm">
                                 <Icons.Search className="w-8 h-8 mb-2 opacity-30" />
                                 <p>{activeTab === 'deck' ? 'デッキにカードがありません。' : 'No cards found.'}</p>

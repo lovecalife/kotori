@@ -180,7 +180,7 @@ const FilterPanel = ({
     uniqueAbilities, uniqueKeywords,
     filterKeywords, toggleKeyword, setFilterKeywords,
     filterContains, toggleContain, setFilterContains, uniqueContains,
-    resetFilters, initial3State, deckSortType, setDeckSortType
+    resetFilters, initial3State, deckSortType, setDeckSortType, showFavorites, setShowFavorites
 }) => {
     const resetColors = () => setFilterColors({ Pink: '', Red: '', Yellow: '', Green: '', Blue: '', Purple: '', Gray: '' });
 
@@ -207,6 +207,10 @@ const FilterPanel = ({
                         <option value="cost">コスト順</option>
                         <option value="bladeHeart">ブレードハート順</option>
                     </select>
+                    <label className="mt-4 flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                        <input type="checkbox" checked={showFavorites} onChange={e => setShowFavorites(e.target.checked)} className="accent-pink-500" />
+                        お気に入りカードを表示
+                    </label>
                     <p className="text-xs text-gray-500 mt-4">※ デッキタブではフィルタリングは行われず、デッキに追加されたすべてのカードが表示されます。</p>
                 </div>
             ) : (

@@ -10,7 +10,15 @@
 
 const DECKS_STORAGE_KEY = 'card_viewer_saved_decks';
 const DECKS_SCHEMA_KEY = 'card_viewer_decks_schema';
-const DECKS_SCHEMA_VERSION = 1;
+const DECKS_SCHEMA_VERSION = 2;
+
+// お気に入りはカード番号だけを保持する。旧デッキにはこの項目がないため空で補う。
+const normalizeFavoriteCards = (raw) => {
+    const normalizeList = (list) => Array.isArray(list)
+        ? [...new Set(list.filter(num => typeof num === 'string' && num.trim()).map(num => num.trim()))]
+        : [];
+    return { member: normalizeList(raw?.member), live: normalizeList(raw?.live) };
+};
 
 // 墓標を無限に溜めないよう、削除から一定期間経過したものは掃除する
 const TOMBSTONE_TTL_MS = 180 * 24 * 60 * 60 * 1000; // 180日
@@ -57,6 +65,7 @@ const normalizeDeckRecord = (raw, fallbackId, now) => {
         name: typeof raw.name === 'string' ? raw.name : '',
         member: counts(raw.member),
         live: counts(raw.live),
+        favorites: normalizeFavoriteCards(raw.favorites),
         updatedAt,
         deleted: raw.deleted === true
     };
