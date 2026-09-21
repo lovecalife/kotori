@@ -1049,7 +1049,7 @@ const App = () => {
                 ) : (
                     <div className="grid gap-x-2 gap-y-6 md:gap-x-3 md:gap-y-8 px-1 pb-4" style={{ gridTemplateColumns: isMember ? `repeat(auto-fill, minmax(${deckCardSize}px, 1fr))` : `repeat(auto-fill, minmax(${Math.round(deckCardSize * 1.5)}px, 1fr))` }}>
                         {items.map((item, index) => (
-                            <CardItem key={`${item.number}-${index}`} item={item} deckCount={getDeckCount(item)} onAdd={addCardToDeck} onRemove={removeCardFromDeck} onSelect={setSelectedItem} abilitiesList={getAbilitiesList(item)} isFavorite={isFavorite(item)} onToggleFavorite={toggleFavorite} asGrid={true} />
+                            <CardItem key={`${item.number}-${index}`} item={item} deckCount={getDeckCount(item)} onAdd={addCardToDeck} onRemove={removeCardFromDeck} onSelect={setSelectedItem} abilitiesList={getAbilitiesList(item)} isFavorite={isFavorite(item)} onToggleFavorite={toggleFavorite} showConsiderationButton={false} asGrid={true} />
                         ))}
                     </div>
                 )}

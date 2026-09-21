@@ -101,8 +101,9 @@ const CompactCardItem = ({ item, deckCount, onSelect, cols = 8 }) => {
 
 // グリッド / リスト共用カードコンポーネント
 // asGrid=true でカードグリッド表示、false でテーブル行として描画
-const CardItem = ({ item, deckCount, onAdd, onRemove, onSelect, abilitiesList, isFavorite = false, onToggleFavorite, asGrid = true }) => {
+const CardItem = ({ item, deckCount, onAdd, onRemove, onSelect, abilitiesList, isFavorite = false, onToggleFavorite, showConsiderationButton = true, asGrid = true }) => {
     const isLive = item._type === 'live';
+    const canShowConsiderationButton = showConsiderationButton && deckCount === 0;
 
     const handleImageError = (e) => {
         if (!e.target.dataset.triedFallback) {
@@ -157,7 +158,9 @@ const CardItem = ({ item, deckCount, onAdd, onRemove, onSelect, abilitiesList, i
                     </>
                 )}
                 <td className="px-3 py-2">
-                    <button type="button" onClick={(e) => onToggleFavorite(e, item)} aria-label={isFavorite ? '検討中から外す' : '検討中に追加'} aria-pressed={isFavorite} className={`p-1 rounded-full ${isFavorite ? 'text-pink-500' : 'text-gray-400'}`}><Icons.Star className="w-5 h-5" fill={isFavorite ? 'currentColor' : 'none'} /></button>
+                    {canShowConsiderationButton && (
+                        <button type="button" onClick={(e) => onToggleFavorite(e, item)} aria-label={isFavorite ? '検討中から外す' : '検討中に追加'} aria-pressed={isFavorite} className={`p-1 rounded-full ${isFavorite ? 'text-pink-500' : 'text-gray-400'}`}><Icons.Star className="w-5 h-5" fill={isFavorite ? 'currentColor' : 'none'} /></button>
+                    )}
                     <div className="flex items-center gap-2 bg-gray-100 rounded-full px-2 py-1 w-max ml-auto">
                         <button onClick={(e) => onRemove(e, item)} disabled={deckCount === 0} className={`p-1.5 rounded-full transition-colors ${deckCount === 0 ? 'text-gray-300' : 'text-gray-700 hover:bg-white hover:text-red-500 shadow-sm'}`}><Icons.Minus className="w-4 h-4"/></button>
                         <span className="text-sm font-bold w-4 text-center">{deckCount}</span>
@@ -175,16 +178,18 @@ const CardItem = ({ item, deckCount, onAdd, onRemove, onSelect, abilitiesList, i
                 onClick={() => item.image && onSelect(item)}
             >
                 <div className="absolute bottom-2 right-2 flex flex-col items-end gap-1.5 z-20 pointer-events-none">
-                    <button
-                        type="button"
-                        onClick={(e) => onToggleFavorite(e, item)}
-                        aria-label={isFavorite ? '検討中から外す' : '検討中に追加'}
-                        aria-pressed={isFavorite}
-                        title={isFavorite ? '検討中から外す' : '検討中に追加'}
-                        className={`pointer-events-auto p-1.5 rounded-full transition-all ${isFavorite ? 'text-pink-400 bg-black/65 drop-shadow-[0_0_6px_rgba(244,114,182,0.9)]' : 'text-white/90 bg-transparent hover:text-pink-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]'}`}
-                    >
-                        <Icons.Star className="w-5 h-5 md:w-6 md:h-6" fill={isFavorite ? 'currentColor' : 'none'} />
-                    </button>
+                    {canShowConsiderationButton && (
+                        <button
+                            type="button"
+                            onClick={(e) => onToggleFavorite(e, item)}
+                            aria-label={isFavorite ? '検討中から外す' : '検討中に追加'}
+                            aria-pressed={isFavorite}
+                            title={isFavorite ? '検討中から外す' : '検討中に追加'}
+                            className={`pointer-events-auto p-1.5 rounded-full transition-all ${isFavorite ? 'text-pink-400 bg-black/65 drop-shadow-[0_0_6px_rgba(244,114,182,0.9)]' : 'text-white/90 bg-transparent hover:text-pink-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]'}`}
+                        >
+                            <Icons.Star className="w-5 h-5 md:w-6 md:h-6" fill={isFavorite ? 'currentColor' : 'none'} />
+                        </button>
+                    )}
 
                     <div className="flex items-center gap-1.5 bg-black/70 rounded-full p-1 backdrop-blur-md border border-white/10 shadow-md pointer-events-auto" onClick={e => e.stopPropagation()}>
                         {deckCount > 0 && (
