@@ -81,7 +81,7 @@ npx wrangler d1 create kotori-sync-preview
 ### 3. マイグレーションを適用
 
 ```bash
-npx wrangler d1 migrations apply kotori-sync-preview --remote
+npx wrangler d1 migrations apply kotori-sync-preview --remote --env preview
 ```
 
 ```bash

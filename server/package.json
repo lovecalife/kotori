@@ -6,7 +6,7 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "migrate:local": "wrangler d1 migrations apply kotori-sync --local",
-    "migrate:preview": "wrangler d1 migrations apply kotori-sync-preview --remote",
+    "migrate:preview": "wrangler d1 migrations apply kotori-sync-preview --remote --env preview",
     "migrate:prod": "wrangler d1 migrations apply kotori-sync --remote"
   },
   "devDependencies": {

@@ -6,12 +6,11 @@ const GID_MEMBER = '0';
 const GID_LIVE = '1118651569';
 
 // デッキ同期 API のベース URL。
-// `wrangler deploy` で払い出された https://kotori-sync.<subdomain>.workers.dev を
-// 下の本番用の文字列に入れる。空のままなら同期 UI 自体が表示されず、
-// 従来どおりローカル保存のみで動作する。
+// 本番は Cloudflare Workers 上の同期 API を使う。空文字にすると同期 UI 自体が
+// 表示されず、従来どおりローカル保存のみで動作する。
 const SYNC_API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
     ? 'http://127.0.0.1:8787'   // ローカル開発（wrangler dev）
-    : '';                       // 本番: デプロイ後に workers.dev の URL を入れる
+    : 'https://kotori-sync.lovecalife-kotori.workers.dev';
 
 const COST_OPTIONS = [2, 4, 5, 7, 8, 9, 10, 11, 13, 15, 17, 20, 22].sort((a,b) => a-b);
 const BH_OPTIONS_MEMBER = ['Pink', 'Red', 'Yellow', 'Green', 'Blue', 'Purple', 'None'];
