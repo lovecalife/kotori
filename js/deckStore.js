@@ -12,7 +12,7 @@ const DECKS_STORAGE_KEY = 'card_viewer_saved_decks';
 const DECKS_SCHEMA_KEY = 'card_viewer_decks_schema';
 const DECKS_SCHEMA_VERSION = 2;
 
-// お気に入りはカード番号だけを保持する。旧デッキにはこの項目がないため空で補う。
+// 検討中のカードはカード番号だけを保持する。旧デッキにはこの項目がないため空で補う。
 const normalizeFavoriteCards = (raw) => {
     const normalizeList = (list) => Array.isArray(list)
         ? [...new Set(list.filter(num => typeof num === 'string' && num.trim()).map(num => num.trim()))]

@@ -200,7 +200,7 @@ const App = () => {
                     console.error("Failed to load autosave deck", e);
                 }
 
-                // 旧検討リストを編集中デッキのお気に入りへ一度だけ移行する。
+                // 旧検討リストを編集中デッキの検討中カードへ一度だけ移行する。
                 try {
                     const considerStr = localStorage.getItem('card_viewer_consideration');
                     if (considerStr) {
@@ -303,7 +303,7 @@ const App = () => {
             return { ...prev, [type]: nextTypeDeck };
         });
 
-        // 最後の1枚を外したカードはお気に入り（旧検討カード）に登録する。
+        // 最後の1枚を外したカードは検討中のカードに登録する。
         if (currentCount === 1) {
             setFavorites(prev => prev[type].includes(item.number) ? prev : {
                 ...prev,
@@ -1253,7 +1253,7 @@ const App = () => {
 
                                 {showFavorites && (
                                     <div>
-                                        <h3 className="text-base md:text-xl font-bold text-pink-700 border-b-2 border-pink-300 pb-1 md:pb-2 mb-3 md:mb-4 flex items-center gap-2"><Icons.Star className="w-5 h-5" fill="currentColor" />お気に入りカード</h3>
+                                        <h3 className="text-base md:text-xl font-bold text-pink-700 border-b-2 border-pink-300 pb-1 md:pb-2 mb-3 md:mb-4 flex items-center gap-2"><Icons.Star className="w-5 h-5" fill="currentColor" />検討中のカード</h3>
                                         {favoriteCards.length === 0 ? (
                                             <p className="text-sm text-gray-500">カードの星を押すか、デッキから最後の1枚を外すと、ここに表示されます。</p>
                                         ) : (

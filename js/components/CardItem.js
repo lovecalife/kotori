@@ -2,7 +2,7 @@
 // Card Item Components
 // ==========================================
 
-// お気に入りカード。星で登録解除、+でデッキに追加する。
+// 検討中のカード。星で登録解除、+でデッキに追加する。
 const FavoriteCardItem = ({ item, onToggleFavorite, onAdd, isCompact = false, span = 1 }) => {
     const isLive = item._type === 'live';
     return (
@@ -30,8 +30,8 @@ const FavoriteCardItem = ({ item, onToggleFavorite, onAdd, isCompact = false, sp
                         type="button"
                         onClick={(e) => onToggleFavorite(e, item)}
                         className={`text-pink-400 bg-black/65 rounded-full ${isCompact ? 'p-0.5' : 'p-1.5'} drop-shadow-[0_0_6px_rgba(244,114,182,0.9)]`}
-                        title="お気に入りから削除"
-                        aria-label="お気に入りから削除"
+                        title="検討中から外す"
+                        aria-label="検討中から外す"
                     >
                         <Icons.Star style={{width: isCompact ? 12 : 18, height: isCompact ? 12 : 18}} fill="currentColor" />
                     </button>
@@ -157,7 +157,7 @@ const CardItem = ({ item, deckCount, onAdd, onRemove, onSelect, abilitiesList, i
                     </>
                 )}
                 <td className="px-3 py-2">
-                    <button type="button" onClick={(e) => onToggleFavorite(e, item)} aria-label={isFavorite ? 'お気に入りから削除' : 'お気に入りに追加'} aria-pressed={isFavorite} className={`p-1 rounded-full ${isFavorite ? 'text-pink-500' : 'text-gray-400'}`}><Icons.Star className="w-5 h-5" fill={isFavorite ? 'currentColor' : 'none'} /></button>
+                    <button type="button" onClick={(e) => onToggleFavorite(e, item)} aria-label={isFavorite ? '検討中から外す' : '検討中に追加'} aria-pressed={isFavorite} className={`p-1 rounded-full ${isFavorite ? 'text-pink-500' : 'text-gray-400'}`}><Icons.Star className="w-5 h-5" fill={isFavorite ? 'currentColor' : 'none'} /></button>
                     <div className="flex items-center gap-2 bg-gray-100 rounded-full px-2 py-1 w-max ml-auto">
                         <button onClick={(e) => onRemove(e, item)} disabled={deckCount === 0} className={`p-1.5 rounded-full transition-colors ${deckCount === 0 ? 'text-gray-300' : 'text-gray-700 hover:bg-white hover:text-red-500 shadow-sm'}`}><Icons.Minus className="w-4 h-4"/></button>
                         <span className="text-sm font-bold w-4 text-center">{deckCount}</span>
@@ -178,9 +178,9 @@ const CardItem = ({ item, deckCount, onAdd, onRemove, onSelect, abilitiesList, i
                     <button
                         type="button"
                         onClick={(e) => onToggleFavorite(e, item)}
-                        aria-label={isFavorite ? 'お気に入りから削除' : 'お気に入りに追加'}
+                        aria-label={isFavorite ? '検討中から外す' : '検討中に追加'}
                         aria-pressed={isFavorite}
-                        title={isFavorite ? 'お気に入りから削除' : 'お気に入りに追加'}
+                        title={isFavorite ? '検討中から外す' : '検討中に追加'}
                         className={`pointer-events-auto p-1.5 rounded-full transition-all ${isFavorite ? 'text-pink-400 bg-black/65 drop-shadow-[0_0_6px_rgba(244,114,182,0.9)]' : 'text-white/90 bg-transparent hover:text-pink-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]'}`}
                     >
                         <Icons.Star className="w-5 h-5 md:w-6 md:h-6" fill={isFavorite ? 'currentColor' : 'none'} />
