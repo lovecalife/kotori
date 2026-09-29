@@ -23,8 +23,14 @@ const fetchSheetData = (gid) => {
     return new Promise((resolve, reject) => {
         const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv&gid=${gid}`;
         Papa.parse(url, {
-            download: true, header: true, skipEmptyLines: true,
-            complete: (results) => resolve(results.data),
+            download: true, header: false, skipEmptyLines: true,
+            complete: (results) => {
+                // 1行目はメモ、2行目が列名。CSV として解析してから行を選ぶ。
+                const [, headers = [], ...rows] = results.data;
+                resolve(rows.map(values => Object.fromEntries(
+                    headers.map((header, index) => [header, values[index] ?? ''])
+                )));
+            },
             error: (err) => reject(err)
         });
     });
