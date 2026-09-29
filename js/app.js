@@ -84,6 +84,7 @@ const App = () => {
     const [activeTab, setActiveTab] = useState('member');
     const [viewMode, setViewMode] = useState('grid');
     const [cardData, setCardData] = useState({ member: [], live: [] });
+    const [memberOrder, setMemberOrder] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedItem, setSelectedItem] = useState(null);
@@ -173,9 +174,14 @@ const App = () => {
             try {
                 const memRaw = await fetchSheetData(GID_MEMBER);
                 const livRaw = await fetchSheetData(GID_LIVE);
+                const order = await fetchMemberOrder().catch(err => {
+                    console.warn('Failed to load member order', err);
+                    return [];
+                });
                 const normMem = normalizeData(memRaw, 'member');
                 const normLiv = normalizeData(livRaw, 'live');
                 setCardData({ member: normMem, live: normLiv });
+                setMemberOrder(order);
 
                 let restoredFavorites = { member: [], live: [] };
 
@@ -902,9 +908,19 @@ const App = () => {
         });
     }, [currentTabData, filterName, filterContains, filterGroups, filterUnits, filterCosts, filterBladeHeart, filterColors, filterAbilities, filterKeywords, filterBaseStats, filterMaxStats, numericFilters, activeTab]);
 
+    const memberOrderIndex = useMemo(() => {
+        const ranks = new Map();
+        memberOrder.forEach((name, index) => {
+            const key = memberNameKey(name);
+            if (!ranks.has(key)) ranks.set(key, index);
+        });
+        return ranks;
+    }, [memberOrder]);
+
     const sortedData = useMemo(() => {
         let items = [...filteredData];
         items.sort((a, b) => {
+            if (sortConfig.key === 'memberName') return compareMemberCards(a, b, memberOrderIndex);
             const getVal = (i, k) => { const v = parseInt(i[k]); return isNaN(v) ? 0 : v; };
             let valA = getVal(a, sortConfig.key), valB = getVal(b, sortConfig.key);
             if (valA !== valB) return sortConfig.direction === 'asc' ? valA - valB : valB - valA;
@@ -912,7 +928,7 @@ const App = () => {
             return 0;
         });
         return items;
-    }, [filteredData, sortConfig]);
+    }, [filteredData, sortConfig, memberOrderIndex]);
 
     const sortedDeckCards = useMemo(() => {
         if (activeTab !== 'deck') return { member: [], live: [] };
@@ -941,10 +957,12 @@ const App = () => {
             return (a.number || '').localeCompare(b.number || '');
         };
 
-        members.sort(sortFn);
+        members.sort(deckSortType === 'memberName'
+            ? (a, b) => compareMemberCards(a, b, memberOrderIndex)
+            : sortFn);
         lives.sort(sortFn);
         return { member: members, live: lives };
-    }, [deck, activeTab, deckSortType]);
+    }, [deck, activeTab, deckSortType, memberOrderIndex]);
 
     const favoriteCards = useMemo(() => {
         if (activeTab !== 'deck') return [];
@@ -1204,6 +1222,7 @@ const App = () => {
                                         <option value="cost-asc">Cost 昇順</option><option value="cost-desc">Cost 降順</option>
                                         <option value="baseStats-asc">BaseStats 昇順</option><option value="baseStats-desc">BaseStats 降順</option>
                                         <option value="maxStats-asc">MaxStats 昇順</option><option value="maxStats-desc">MaxStats 降順</option>
+                                        <option value="memberName-asc">メンバー名順</option>
                                     </>
                                 )}
                                 {activeTab === 'live' && (

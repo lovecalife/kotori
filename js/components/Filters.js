@@ -206,6 +206,7 @@ const FilterPanel = ({
                     <select value={deckSortType} onChange={e => setDeckSortType(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-gray-800 bg-white">
                         <option value="cost">コスト順</option>
                         <option value="bladeHeart">ブレードハート順</option>
+                        <option value="memberName">メンバー名順</option>
                     </select>
                     <label className="mt-4 flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
                         <input type="checkbox" checked={showFavorites} onChange={e => setShowFavorites(e.target.checked)} className="accent-pink-500" />

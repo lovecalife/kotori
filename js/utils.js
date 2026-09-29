@@ -36,6 +36,34 @@ const fetchSheetData = (gid) => {
     });
 };
 
+const fetchMemberOrder = () => new Promise((resolve, reject) => {
+    const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv&gid=${GID_SETTINGS}`;
+    Papa.parse(url, {
+        download: true, header: false, skipEmptyLines: false,
+        complete: (results) => {
+            const rows = results.data;
+            if (rows[0]?.[1]?.trim() !== 'メンバー並び順') {
+                reject(new Error('設定シートのメンバー並び順が見つかりません'));
+                return;
+            }
+            resolve(rows.slice(1, 60).map(row => (row[1] || '').trim()).filter(Boolean));
+        },
+        error: reject
+    });
+});
+
+const memberNameKey = name => String(name || '').replace(/\s/g, '');
+
+const compareMemberCards = (a, b, orderIndex) => {
+    const nameA = memberNameKey(a.name);
+    const nameB = memberNameKey(b.name);
+    const rankA = orderIndex.get(nameA) ?? Infinity;
+    const rankB = orderIndex.get(nameB) ?? Infinity;
+    if (rankA !== rankB) return rankA - rankB;
+    if (nameA !== nameB) return nameA.localeCompare(nameB, 'ja');
+    return (a.number || '').localeCompare(b.number || '');
+};
+
 const normalizeData = (rawData, type) => {
     const map = COLUMN_MAP[type];
     return rawData.map(row => {

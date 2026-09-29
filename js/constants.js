@@ -4,6 +4,7 @@
 const SPREADSHEET_ID = '1LqPWdfJPvuKfljm-H0giBm4PrplGVYhTAGdGWzxA-V0';
 const GID_MEMBER = '0';
 const GID_LIVE = '1118651569';
+const GID_SETTINGS = '795172620';
 
 // デッキ同期 API のベース URL。
 // 本番は Cloudflare Workers 上の同期 API を使う。空文字にすると同期 UI 自体が
