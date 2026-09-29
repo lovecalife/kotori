@@ -61,6 +61,11 @@ const compareMemberCards = (a, b, orderIndex) => {
     const rankB = orderIndex.get(nameB) ?? Infinity;
     if (rankA !== rankB) return rankA - rankB;
     if (nameA !== nameB) return nameA.localeCompare(nameB, 'ja');
+    const costA = parseInt(a.cost, 10);
+    const costB = parseInt(b.cost, 10);
+    const valueA = Number.isNaN(costA) ? Infinity : costA;
+    const valueB = Number.isNaN(costB) ? Infinity : costB;
+    if (valueA !== valueB) return valueA - valueB;
     return (a.number || '').localeCompare(b.number || '');
 };
 
