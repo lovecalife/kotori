@@ -113,6 +113,8 @@ KOTRI 側の `js/constants.js` の `SYNC_API_BASE` に設定する。
 curl https://kotori-sync.<subdomain>.workers.dev/health
 ```
 
+DeckLog取り込みの更新後はリポジトリのルートで `node scripts/check-decklog.mjs` も実行し、実デッキ取得とCORSを確認する（外部通信あり）。
+
 ---
 
 ## ローカル開発

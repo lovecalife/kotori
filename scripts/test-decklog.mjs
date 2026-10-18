@@ -41,7 +41,8 @@ test('固定ホストへのPOSTとHTTP異常', async () => {
         assert.equal(url, 'https://decklog.bushiroad.com/system/app/api/view/19ATNY');
         assert.equal(options.method, 'POST');
         assert.equal(options.headers.Referer, 'https://decklog.bushiroad.com/view/19ATNY');
-        assert.equal(options.redirect, 'error');
+        assert.equal(options.headers['User-Agent'], 'KOTRI-DeckLog-Importer/1.0 (+https://lovecalife.github.io/kotori/)');
+        assert.equal(options.redirect, 'manual');
         return json(payload());
     });
     for (const [status, code] of [[403, 'upstream_forbidden'], [404, 'deck_not_found'], [429, 'upstream_rate_limited'], [500, 'upstream_unavailable']]) {
@@ -49,6 +50,7 @@ test('固定ホストへのPOSTとHTTP異常', async () => {
     }
     await assert.rejects(fetchDecklog('19ATNY', async () => new Response('<html>error</html>')), { code: 'invalid_response' });
     await assert.rejects(fetchDecklog('19ATNY', async () => json({})), { code: 'invalid_response' });
+    await assert.rejects(fetchDecklog('19ATNY', async () => new Response(null, { status: 302, headers: { Location: 'https://example.com/' } })), { code: 'upstream_unavailable' });
     await assert.rejects(fetchDecklog('19ATNY', async () => new Response('{', { headers: { 'Content-Type': 'application/json' } })), { code: 'invalid_response' });
     await assert.rejects(fetchDecklog('19ATNY', async () => new Response('x'.repeat(1024 * 1024 + 1), { headers: { 'Content-Type': 'application/json' } })), { code: 'invalid_response' });
     await assert.rejects(fetchDecklog('../other', async () => { throw new Error('must not fetch'); }), { code: 'invalid_code' });

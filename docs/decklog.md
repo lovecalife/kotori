@@ -23,3 +23,9 @@ Node.js / Cloudflare Workers 共通の `server/src/decklog.mjs` を使う。ブ�
 `node --test scripts/test-decklog.mjs` で入力、正規化、カード照合、HTTP異常、タイムアウト、キャッシュ・取得制限を確認。テストは外部通信を行わない。
 
 公開画面で使うには既存の Workers の更新デプロイも必要（D1マイグレーションは不要）。古い Workers は `/decklog/` を持たないため取得できない。
+
+デプロイ後は `node scripts/check-decklog.mjs` で本番の実取得・CORS・カード一覧を検証できる。この確認だけは外部通信を行う。ローカルWorkersを確認する場合は第1引数にそのURLを渡す。
+
+Workers実行環境では `redirect: 'error'` が例外になるため `manual` を使う。転送先は追跡せず、3xx応答を取得失敗として処理する。Nodeでのモックテストだけでは検出できなかったため、実Workers環境での疎通確認も行う。
+
+NodeのfetchはUser-Agentを自動付与するが、Workersからの取得では明示しないとDeckLogが403を返した。アプリ名と公開URLを示す `KOTRI-DeckLog-Importer/1.0 (+https://lovecalife.github.io/kotori/)` を設定して取得する。ブラウザーなど別のクライアントへの偽装やCookieの利用は行わない。

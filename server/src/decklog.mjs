@@ -59,8 +59,13 @@ export async function fetchDecklog(code, fetcher = fetch) {
         // 公式の閲覧画面で使われるPOST。ログインやCookieは使用しない。
         const response = await fetcher(`${ORIGIN}/system/app/api/view/${code}`, {
             method: 'POST',
-            headers: { Referer: `${ORIGIN}/view/${code}`, Accept: 'application/json' },
-            redirect: 'error',
+            headers: {
+                Referer: `${ORIGIN}/view/${code}`,
+                Accept: 'application/json',
+                'User-Agent': 'KOTRI-DeckLog-Importer/1.0 (+https://lovecalife.github.io/kotori/)'
+            },
+            // Workersは redirect: 'error' 非対応。転送を追わず、3xxも下の !ok で失敗にする。
+            redirect: 'manual',
             signal: controller.signal
         });
         if (response.status === 404) throw new DecklogError('deck_not_found', 'デッキが見つかりません。', 404);
