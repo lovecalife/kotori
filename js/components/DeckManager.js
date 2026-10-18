@@ -11,7 +11,7 @@ const DeckManagerPanel = ({
     onSelectSavedDeck, onSaveDeck, onLoadDeck, onDeleteDeck,
     onExportFile, onImportFile,
     onExportText, onImportText, onCopyToClipboard,
-    onExportToDecklog,
+    onExportToDecklog, cardData, onReplaceFromDecklog,
     onBackupExport, onBackupImport
 }) => (
     <div className="mb-6 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
@@ -108,6 +108,8 @@ const DeckManagerPanel = ({
                         <button onClick={onExportToDecklog} className="w-full py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 font-medium transition-colors shadow-sm flex items-center justify-center gap-1.5">
                             <Icons.ExternalLink className="w-4 h-4" />デッキログにインポート
                         </button>
+
+                        <DecklogImportPanel cardData={cardData} onReplace={onReplaceFromDecklog} />
 
                         <div>
                             <div className="text-xs text-gray-500 mb-1.5">またはテキストデータでコピー＆ペースト：</div>

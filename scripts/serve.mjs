@@ -2,6 +2,7 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { dirname, extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { handleDecklog } from '../server/src/decklog.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const port = Number(process.env.PORT || 3333);
@@ -25,6 +26,13 @@ createServer(async (request, response) => {
     pathname = decodeURIComponent(new URL(request.url, 'http://localhost').pathname);
   } catch {
     response.writeHead(400).end();
+    return;
+  }
+
+  if (pathname.startsWith('/api/decklog/')) {
+    const result = await handleDecklog(pathname.slice('/api/decklog/'.length), request.socket.remoteAddress);
+    response.writeHead(result.status, Object.fromEntries(result.headers));
+    response.end(request.method === 'HEAD' ? undefined : await result.text());
     return;
   }
 

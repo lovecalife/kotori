@@ -722,6 +722,14 @@ const App = () => {
         }
     };
 
+    const handleReplaceFromDecklog = (replacement, data) => {
+        setDeck(replacement);
+        setSelectedDeckId('');
+        setDeckNameInput(data.title || `DeckLog ${data.code}`);
+        setIoText('');
+        showToast(`デッキログ ${data.code} の内容に置き換えました`);
+    };
+
     const handleExportToDecklog = () => {
         const simpleDeck = { member: {}, live: {} };
         Object.values(deck.member).forEach(({ card, count }) => { simpleDeck.member[getExportKey(card)] = count; });
@@ -1196,6 +1204,8 @@ const App = () => {
                         onImportText={handleImportText}
                         onCopyToClipboard={copyToClipboard}
                         onExportToDecklog={handleExportToDecklog}
+                        cardData={cardData}
+                        onReplaceFromDecklog={handleReplaceFromDecklog}
                         onBackupExport={handleBackupExport}
                         onBackupImport={handleBackupImport}
                     />

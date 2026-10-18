@@ -10,7 +10,7 @@ Node.js を用意し、リポジトリのルートで次を実行します。フ
 node scripts/serve.mjs
 ```
 
-`http://localhost:3333/` を開きます。ポートを変える場合は `PORT` 環境変数を設定します。このサーバーは `index.html` と `js/` のファイルだけを配信します。
+`http://localhost:3333/` を開きます。ポートを変える場合は `PORT` 環境変数を設定します。このサーバーは `index.html` と `js/` のファイルを配信し、DeckLogの取得も中継します。
 
 ページ表示には React、Babel、Tailwind CSS、PapaParse、QR コードライブラリの CDN への接続が必要です。カードデータは公開 Google スプレッドシートの CSV から取得し、カード画像は Google の画像 URL を使います。ネットワークがない場合、画面やカード一覧は正常に表示できません。
 
@@ -25,6 +25,8 @@ node scripts/serve.mjs
 | `js/components/` | カード表示、フィルター、デッキ管理、比較・計算ツール、同期 UI |
 | `js/deckStore.js` | 保存デッキのスキーマ移行、`localStorage`、バックアップ入出力 |
 | `js/sync.js` | シンクキー生成・ハッシュ化、同期 API との通信 |
+| `js/decklog.js`、`js/components/DecklogImport.js` | DeckLogのID・共有URL入力、カード照合、置き換えプレビュー |
+| `server/src/decklog.mjs` | Node / Workers共通のDeckLog取得アダプター |
 | `server/` | 任意の端末間同期 API。Cloudflare Workers + D1 |
 | `scripts/serve.mjs` | 依存パッケージなしのローカル静的サーバー |
 
@@ -40,11 +42,18 @@ node scripts/serve.mjs
 
 ## 開発時の確認
 
+デッキタブの「デッキデータの保存 / 読み込み / 出力」を開き、「デッキログから読み込み」にID（例：`19ATNY`）か共有URLを入力します。「内容を取得」でデッキ名・枚数を確認し、「この内容でデッキを置き換える」で編集中のメンバー・ライブ全体を置き換えます。エネルギーは対象外です。取得失敗や未知カードがある場合は変更しません。保存済みデッキは変更せず、取り込み後に新規保存できます。
+
+ローカルでは上記の画面用サーバーだけで取得できます。公開ページは既存Workersの更新デプロイも必要です。取得方式と制約は [DeckLog調査メモ](docs/decklog.md) を参照してください。
+
 ```powershell
 node --check scripts/serve.mjs
 node --check js/deckStore.js
 node --check js/sync.js
 node --check server/src/index.js
+node --check server/src/decklog.mjs
+node --check js/decklog.js
+node --test scripts/test-decklog.mjs
 ```
 
-画面を変更したらローカルサーバーでブラウザー確認します。フロントエンドに自動テストやビルド手順はまだありません。サーバー側の依存関係とローカル実行手順は [server/README.md](server/README.md) を参照してください。
+画面を変更したらローカルサーバーでブラウザー確認します。DeckLogの自動テストは外部通信なしで実行できます。フロントエンドのビルド手順はありません。サーバー側の依存関係とローカル実行手順は [server/README.md](server/README.md) を参照してください。

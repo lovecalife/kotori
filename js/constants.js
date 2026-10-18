@@ -13,6 +13,11 @@ const SYNC_API_BASE = (location.hostname === 'localhost' || location.hostname ==
     ? 'http://127.0.0.1:8787'   // ローカル開発（wrangler dev）
     : 'https://kotori-sync.lovecalife-kotori.workers.dev';
 
+// ローカルは画面用サーバー、本番は同じ Workers の取得アダプターを使う。
+const DECKLOG_API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+    ? '/api'
+    : SYNC_API_BASE;
+
 const COST_OPTIONS = [2, 4, 5, 7, 8, 9, 10, 11, 13, 15, 17, 20, 22].sort((a,b) => a-b);
 const BH_OPTIONS_MEMBER = ['Pink', 'Red', 'Yellow', 'Green', 'Blue', 'Purple', 'None'];
 const BH_OPTIONS_LIVE = ['Pink', 'Red', 'Yellow', 'Green', 'Blue', 'Purple', 'ALL', 'Score', 'Draw', 'DoubleGray'];

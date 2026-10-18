@@ -6,6 +6,8 @@
 // ログには payload と keyHash を出さない（漏洩時にデッキ内容へ到達させないため）。
 // ==========================================
 
+import { handleDecklog } from './decklog.mjs';
+
 // --- ガードレールの上限値 ---
 const MAX_BODY_BYTES = 256 * 1024;   // 1リクエスト全体
 const MAX_PAYLOAD_BYTES = 64 * 1024; // デッキ1件
@@ -263,6 +265,16 @@ export default {
         if (request.method === 'OPTIONS') {
             if (!isAllowedOrigin) return new Response(null, { status: 403 });
             return new Response(null, { status: 204, headers: corsHeaders(origin) });
+        }
+
+        if (url.pathname.startsWith('/decklog/')) {
+            if (origin !== null && !isAllowedOrigin) return json({ error: 'origin_not_allowed' }, 403, null);
+            if (request.method !== 'GET') return json({ error: 'method_not_allowed' }, 405, isAllowedOrigin ? origin : null);
+            const result = await handleDecklog(url.pathname.slice('/decklog/'.length), request.headers.get('CF-Connecting-IP') || 'unknown');
+            return new Response(result.body, {
+                status: result.status,
+                headers: { ...Object.fromEntries(result.headers), ...(isAllowedOrigin ? corsHeaders(origin) : {}) }
+            });
         }
 
         if (url.pathname !== '/sync') {
