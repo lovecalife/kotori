@@ -3,10 +3,10 @@ main = "src/index.js"
 compatibility_date = "2025-01-01"
 
 # CORS 許可オリジン（カンマ区切り）。ワイルドカードは使わない。
-# KOTRI は GitHub Pages の https://lovecalife.github.io/kotori/ で公開されている。
-# オリジンにパスは含まれないので https://lovecalife.github.io が正しい値。
+# Cloudflare Pages を並行公開中。バックアップ完了まで旧 GitHub Pages も維持する。
+# オリジンにパスや末尾の / は含めない。
 [vars]
-ALLOWED_ORIGINS = "https://lovecalife.github.io"
+ALLOWED_ORIGINS = "https://lovecalife.github.io,https://kotori-591c8c0e6491.pages.dev"
 
 # 本番用 D1。database_id は `wrangler d1 create kotori-sync` の出力で置き換えること
 [[d1_databases]]

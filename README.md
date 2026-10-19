@@ -32,16 +32,16 @@ node scripts/serve.mjs
 
 ブラウザー側は ES module / bundler を使わず、`index.html` の順序でグローバルスクリプトを読み込みます。JSX ファイルはブラウザー内の Babel で変換されます。ファイルを追加するときは読み込み順とグローバル名の衝突に注意してください。
 
-## Cloudflare Pages への移行準備
+## Cloudflare Pages での配信
 
-移行はまだ実施していません。ログインなしの URL 共有と検索への掲載抑制を前提に、配信ファイルの生成と確認手順を用意しています。Cloudflare Pages は Private リポジトリから配信できますが、Web ページの URL 自体にアクセス制限はかかりません。
+Cloudflare Pages 側の並行公開が完了しています。旧 GitHub Pages はバックアップ・データ引き継ぎのため公開を継続し、リポジトリの Private 化も保留しています。新サイトはログインなしの URL 共有と検索への掲載抑制を前提とし、URL 自体にアクセス制限はかかりません。公開先は Cloudflare Dashboard の Pages プロジェクトで確認できます。
 
 ```powershell
 node scripts/prepare-pages.mjs
 node --test scripts/test-pages.mjs scripts/test-decklog.mjs
 ```
 
-`dist-pages/` には画面と配信設定だけを生成します。元の画面・保存データ・本番 API 設定は変更せず、デプロイも行いません。Pages の設定値、無料枠、バックアップの対象、非公開化から切り替えまでの順序は [移行手順](docs/cloudflare-pages-migration.md) を参照してください。
+`dist-pages/` には画面と配信設定だけを生成します。このコマンド自体は元の画面・保存データ・本番 API 設定を変更せず、デプロイも行いません。Pages は `main` への push で自動更新され、本番以外の自動プレビューと PR へのビルドコメントは無効です。同期 Worker は別途デプロイします。実施記録、無料枠、バックアップと今後の切り替えは [移行手順](docs/cloudflare-pages-migration.md) を参照してください。
 
 ## データと同期
 

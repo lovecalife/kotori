@@ -1,8 +1,29 @@
-# Cloudflare Pages への移行準備・実施手順
+# Cloudflare Pages の並行公開・移行手順
 
 更新日: 2026-10-19。方針は「URL を知っている人がログインなしで利用し、検索への掲載を抑える」。
 
 **2026-10-19 の追加指示: Cloudflare 側の並行公開を進める。バックアップはまだのため、旧 GitHub Pages の停止とリポジトリの Private 化は実施しない。** 以下の標準手順にある旧サイト停止・非公開化は保留し、Cloudflare の構築・動作確認を先行する。Public リポジトリとの連携中は GitHub のビルド・デプロイ履歴から新 URL が見える可能性があり、完全に公開範囲を絞る作業は後日となる。
+
+## 現在の状態（2026-10-19: 並行公開完了）
+
+- Cloudflare Pages の初回 Git ビルド・本番公開が成功。GitHub App は利用者の承認により `lovecalife/kotori` 1件だけを対象に導入。
+- Framework は None、ビルドは `node scripts/prepare-pages.mjs`、出力は `dist-pages`、Root はリポジトリのルート。本番 `main` の自動更新は有効、本番以外の自動プレビューと PR へのビルドコメントは無効。
+- 静的配信のみで、Pages Functions / DB binding / 独自ドメイン / 有料契約は追加していない。
+- 既存 Worker の本番 CORS に新オリジンを追加し、旧 GitHub オリジンも維持。D1 ID・スキーマはそのまま。
+- Worker の変更前バージョン: `11ff1a21-27db-4775-9f53-4d02dc364940`。変更後: `91a87248-c5d1-43c0-8903-82f23f3ffd25`。
+- Pages の公開 URL は Dashboard から確認する。API の許可オリジンは `server/wrangler.toml` が正。ハッシュ付き本番デプロイ URL も存在するが、通常の利用・同期にはプロジェクトの本番 URL を使う。
+- 旧 GitHub Pages は HTTP 200 と既存 DeckLog API の正常動作を確認済み。リポジトリは Public のままで、停止・非公開化・転送は行っていない。
+
+### 本番で確認した内容
+
+- HTML / JS14件の配信、noindex のヘッダーと meta、参照元 URL の送信抑制、設定ファイル・不明パスの404。
+- 新サイトのメンバー966件・ライブ237件、画像、キーワード検索、デッキ画面。
+- 新オリジン・旧オリジンそれぞれの DeckLog `19ATNY` 取得（メンバー48枚・ライブ12枚）。
+- 利用者のキーとは独立した使い捨て同期領域で、新旧オリジン間の作成・取得・更新・削除が成功。確認用デッキは削除済み（既存プロトコルどおり墓標は残る）。既存利用者のキー・デッキは参照していない。
+
+### 残っている切り替え
+
+各端末のバックアップと新サイトでの復元・同じキーでの同期確認を行う。**旧サイトの停止は利用者から改めて明示指示を受けるまで行わない。** 停止・リポジトリの Private 化・旧 CORS オリジンの削除は後日の作業である。以下の標準手順は参考資料であり、今回の実施状態はこの冒頭記録を優先する。
 
 ## 採用する構成
 
@@ -80,7 +101,7 @@ node scripts/check-pages.mjs http://127.0.0.1:8789
 
 出典: [Pages limits](https://developers.cloudflare.com/pages/platform/limits/)、[Pages pricing](https://developers.cloudflare.com/pages/functions/pricing/)、[Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/)、[D1 pricing](https://developers.cloudflare.com/d1/platform/pricing/)、[D1 limits](https://developers.cloudflare.com/d1/platform/limits/)
 
-## 移行当日に行うこと（ここからは今回実施しない）
+## 標準の移行手順（並行公開済みの箇所は再実行不要）
 
 ### 1. 旧サイトで全員のデータを退避する
 
@@ -182,9 +203,9 @@ node scripts/check-decklog.mjs https://kotori-sync.lovecalife-kotori.workers.dev
 - CDN / Google の読み込み不良: 既存と同じ外部依存があるため、該当サービスとブラウザーの通信状況を確認する。
 - 旧サイトへ戻すために自動で Public に戻さない。再公開は別の判断になる。Cloudflare 内で復旧し、バックアップから復元する。
 
-## 準備時の検証記録
+## 初回準備時の検証記録（公開前の履歴）
 
-2026-10-19、PC 内だけで確認。Cloudflare のプロジェクト作成、デプロイ、DNS・GitHub 設定変更、リモート D1 操作は行っていない。
+2026-10-19 の最初の準備段階では PC 内だけで確認し、その時点では Cloudflare の作成・デプロイ・リモート D1 操作は行わなかった。その後の並行公開と本番確認の結果は冒頭に記録している。
 
 - 配信物18ファイルの生成、元 HTML の保持、JS14件の配信。
 - 検索抑制ヘッダー / meta、参照元を送らないヘッダー、非配信ファイルと不明パスの404。
@@ -192,4 +213,4 @@ node scripts/check-decklog.mjs https://kotori-sync.lovecalife-kotori.workers.dev
 - 本番と同じ Worker ソースを PC 内で動かし、配信確認スクリプトの API 疎通・CORS 検証も成功。DB が呼ばれたら失敗させる設定で、DB アクセスがないことも確認。
 - 自動テスト14件中12件成功。リンク作成権限が必要な2件は実行環境の制限でスキップ。
 
-実際の新 URL、アカウント内の残り無料枠、GitHub 上の現在の公開設定、本番 API の新オリジンでの CORS・同期・DeckLog は移行当日に確認する。
+並行公開時に Pages の本番 URL、アカウントの使用量、GitHub の公開継続、新オリジンの CORS・同期・DeckLog を確認済み。利用者ごとのバックアップ・復元確認と旧サイト停止の判断は未実施。
