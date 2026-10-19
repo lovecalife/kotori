@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 
 const base = process.argv[2] || 'https://kotori-sync.lovecalife-kotori.workers.dev';
 const code = process.argv[3] || '19ATNY';
-const origin = 'https://lovecalife.github.io';
+const origin = process.argv[4] || 'https://lovecalife.github.io';
+assert.equal(new URL(origin).origin, origin, 'Origin は末尾の / やパスを含めず指定してください');
 const response = await fetch(`${base}/decklog/${code}`, {
     headers: { Origin: origin }, signal: AbortSignal.timeout(20000)
 });

@@ -1,0 +1,4 @@
+# Crawling is allowed so search engines can read the noindex header / meta tag.
+# This file does not provide access control. Do not add a sitemap.
+User-agent: *
+Disallow:

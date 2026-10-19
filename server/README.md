@@ -2,6 +2,8 @@
 
 KOTRI のデッキ同期 API（Cloudflare Workers + D1）。
 
+GitHub Pages から Cloudflare Pages への画面移行では、この Worker と既存 D1 を継続利用します。新 URL の CORS 設定と切り替え順は [移行手順](../docs/cloudflare-pages-migration.md) を参照してください。D1 の新規作成・置き換え・マイグレーションは不要です。以下の初回構築手順をやり直さないでください。移行用の設定変更・デプロイはまだ行っていません。
+
 シンクキーの SHA-256（`keyHash`）だけで識別する。平文のキーはサーバに届かない。
 `payload` はパースせず不透明な文字列として保存するため、KOTRI 側のデッキ形式が
 変わってもこのサーバは改修不要。

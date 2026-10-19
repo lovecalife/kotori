@@ -32,6 +32,17 @@ node scripts/serve.mjs
 
 ブラウザー側は ES module / bundler を使わず、`index.html` の順序でグローバルスクリプトを読み込みます。JSX ファイルはブラウザー内の Babel で変換されます。ファイルを追加するときは読み込み順とグローバル名の衝突に注意してください。
 
+## Cloudflare Pages への移行準備
+
+移行はまだ実施していません。ログインなしの URL 共有と検索への掲載抑制を前提に、配信ファイルの生成と確認手順を用意しています。Cloudflare Pages は Private リポジトリから配信できますが、Web ページの URL 自体にアクセス制限はかかりません。
+
+```powershell
+node scripts/prepare-pages.mjs
+node --test scripts/test-pages.mjs scripts/test-decklog.mjs
+```
+
+`dist-pages/` には画面と配信設定だけを生成します。元の画面・保存データ・本番 API 設定は変更せず、デプロイも行いません。Pages の設定値、無料枠、バックアップの対象、非公開化から切り替えまでの順序は [移行手順](docs/cloudflare-pages-migration.md) を参照してください。
+
 ## データと同期
 
 カード原本は `js/constants.js` の `SPREADSHEET_ID` と `GID_MEMBER` / `GID_LIVE` が指す公開シートです。両シートとも1行目はメモ、2行目は列名、3行目以降はカードデータです。CSV の列名対応は同ファイルの `COLUMN_MAP` にあります。保存中のデッキ、編集中のデッキ、検討中のカード、フィルター設定はブラウザーごとの `localStorage` に入ります。リポジトリには利用者のデッキデータは含まれません。
