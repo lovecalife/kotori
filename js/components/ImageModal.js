@@ -23,6 +23,10 @@ const ImageModal = ({ selectedItem, onClose, sourceList, deckCount, onAdd, onRem
 
     // テキスト表示モード
     const [showText, setShowText] = React.useState(false);
+    const [loadedImage, setLoadedImage] = React.useState(null);
+    const imageRatio = loadedImage?.image === selectedItem.image
+        ? loadedImage.ratio
+        : (isLive ? 88 / 63 : 63 / 88);
 
     const handleImageError = (e) => {
         if (!e.target.dataset.triedFallback) {
@@ -37,14 +41,27 @@ const ImageModal = ({ selectedItem, onClose, sourceList, deckCount, onAdd, onRem
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 p-4 sm:p-8" onClick={() => onClose(null)}>
             <div className="flex flex-col items-center w-full h-full max-w-6xl">
 
-                <div className="flex-1 min-h-0 w-full flex items-center justify-center mb-2">
-                    {/* 画像実寸に合わせてテキストを重ねるため relative ラッパーで包む */}
-                    {/* min-w/min-h は画像が未読込・読込失敗でもテキストが潰れないための保険 */}
-                    <div className="relative flex items-center justify-center max-w-full max-h-full min-w-[240px] min-h-[80px]" onClick={(e) => e.stopPropagation()}>
-                        <SafeImage
+                <div className="flex-1 min-h-0 w-full flex items-center justify-center mb-2" style={{ containerType: 'size' }}>
+                    {/* 元画像の解像度によらず表示領域いっぱいに拡大し、縦横比とテキストの重ね位置を保つ。 */}
+                    <div
+                        className="relative flex items-center justify-center"
+                        style={{
+                            width: `min(100cqw, calc(100cqh * ${imageRatio}))`,
+                            height: `min(100cqh, calc(100cqw / ${imageRatio}))`
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <img
+                            key={selectedItem.image}
                             src={getImageUrl(selectedItem.image)}
                             alt={selectedItem.name}
-                            className="max-w-full max-h-full object-contain rounded-lg shadow-2xl bg-white/5"
+                            className="w-full h-full object-contain rounded-lg shadow-2xl bg-white/5"
+                            onLoad={(e) => {
+                                const { naturalWidth, naturalHeight } = e.currentTarget;
+                                if (naturalWidth && naturalHeight) {
+                                    setLoadedImage({ image: selectedItem.image, ratio: naturalWidth / naturalHeight });
+                                }
+                            }}
                             onError={handleImageError}
                         />
                         {showText && (

@@ -344,6 +344,13 @@ const App = () => {
         }
     };
 
+    const handleClearFavorites = () => {
+        if (window.confirm('検討中のカードをすべてクリアしますか？')) {
+            setFavorites({ member: [], live: [] });
+            showToast('検討中のカードをクリアしました');
+        }
+    };
+
     const deckStats = useMemo(() => {
         const costs = {};
         const bhs = { Pink: 0, Red: 0, Yellow: 0, Green: 0, Blue: 0, Purple: 0, None: 0, ALL: 0, Score: 0, Draw: 0 };
@@ -396,8 +403,8 @@ const App = () => {
     };
 
     const handleSelectSavedDeck = (id) => {
-        if (!id) { setSelectedDeckId(''); setDeckNameInput(''); }
-        else { setSelectedDeckId(id); setDeckNameInput(activeDecks[id]?.name || ''); }
+        setSelectedDeckId(id);
+        if (id) setDeckNameInput(activeDecks[id]?.name || '');
     };
 
     // 保存デッキ一覧を更新して永続化する。書き込みに失敗した場合は state も戻さない。
@@ -1282,7 +1289,18 @@ const App = () => {
 
                                 {showFavorites && (
                                     <div>
-                                        <h3 className="text-base md:text-xl font-bold text-pink-700 border-b-2 border-pink-300 pb-1 md:pb-2 mb-3 md:mb-4 flex items-center gap-2"><Icons.Star className="w-5 h-5" fill="currentColor" />検討中のカード</h3>
+                                        <div className="border-b-2 border-pink-300 pb-1 md:pb-2 mb-3 md:mb-4 flex items-center justify-between gap-2">
+                                            <h3 className="text-base md:text-xl font-bold text-pink-700 flex items-center gap-2"><Icons.Star className="w-5 h-5" fill="currentColor" />検討中のカード</h3>
+                                            <button
+                                                type="button"
+                                                onClick={handleClearFavorites}
+                                                disabled={favorites.member.length === 0 && favorites.live.length === 0}
+                                                aria-label="検討中のカードを全クリア"
+                                                className="px-3 py-1.5 bg-red-50 text-red-600 border border-red-200 rounded text-[10px] md:text-xs hover:bg-red-100 transition-colors shadow-sm flex items-center justify-center gap-1 flex-shrink-0 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                <Icons.Trash className="w-3.5 h-3.5" /> 全クリア
+                                            </button>
+                                        </div>
                                         {favoriteCards.length === 0 ? (
                                             <p className="text-sm text-gray-500">カードの星を押すか、デッキから最後の1枚を外すと、ここに表示されます。</p>
                                         ) : (
