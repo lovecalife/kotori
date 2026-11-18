@@ -13,6 +13,11 @@ const normalizeUnitName = (unit) => unit === 'みらくらぱーく！' ? 'み�
 const splitUnitNames = (value) => value ? value.split(/[,、\r\n]+/).map(unit => normalizeUnitName(unit.trim())).filter(Boolean) : [];
 const hasUnit = (units, unit) => unit === 'None' ? units.length === 0 : units.includes(unit);
 
+const emptyColorFilter = () => ({ value: '', isMaximum: false });
+const emptyColorFilters = () => Object.fromEntries(
+    ['Pink', 'Red', 'Yellow', 'Green', 'Blue', 'Purple', 'Gray'].map(color => [color, emptyColorFilter()])
+);
+
 const emptyFilterState = () => ({
     filterName: '',
     filterContains: { include: new Set(), exclude: new Set() },
@@ -20,7 +25,7 @@ const emptyFilterState = () => ({
     filterUnits: { include: new Set(), exclude: new Set() },
     filterCosts: { include: new Set(), exclude: new Set() },
     filterBladeHeart: { include: new Set(), exclude: new Set() },
-    filterColors: { Pink: '', Red: '', Yellow: '', Green: '', Blue: '', Purple: '', Gray: '' },
+    filterColors: emptyColorFilters(),
     filterAbilities: { include: new Set(), exclude: new Set() },
     filterKeywords: { include: new Set(), exclude: new Set() },
     filterBaseStats: { min: '', max: '' },
@@ -51,7 +56,16 @@ const deserializeFilterState = (raw) => {
     out.filterUnits.include = new Set([...out.filterUnits.include].map(normalizeUnitName));
     out.filterUnits.exclude = new Set([...out.filterUnits.exclude].map(normalizeUnitName));
     out.filterUnits.exclude.forEach(unit => out.filterUnits.include.delete(unit));
-    out.filterColors = { ...base.filterColors, ...(raw.filterColors || {}) };
+    out.filterColors = base.filterColors;
+    Object.keys(out.filterColors).forEach(color => {
+        const saved = raw.filterColors?.[color];
+        // 旧形式では、色ごとにハート数の文字列だけが保存されている。
+        const value = typeof saved === 'string' ? saved : saved?.value;
+        out.filterColors[color] = {
+            value: typeof value === 'string' ? value : '',
+            isMaximum: saved?.isMaximum === true
+        };
+    });
     out.filterBaseStats = { ...base.filterBaseStats, ...(raw.filterBaseStats || {}) };
     out.filterMaxStats = { ...base.filterMaxStats, ...(raw.filterMaxStats || {}) };
     out.numericFilters = (raw.numericFilters && typeof raw.numericFilters === 'object') ? raw.numericFilters : {};
@@ -826,6 +840,7 @@ const App = () => {
     }, [currentTabData]);
 
     const filteredData = useMemo(() => {
+        const colorFilters = Object.entries(filterColors);
         return currentTabData.filter(item => {
             if (item.noViewer == 1) return false;
 
@@ -871,13 +886,16 @@ const App = () => {
                 });
             }
 
-            for (const color of Object.keys(filterColors)) {
-                const reqVal = filterColors[color];
-                if (reqVal === '') continue;
-                const reqNum = parseInt(reqVal, 10);
+            for (const [color, { value, isMaximum }] of colorFilters) {
+                if (value === '') continue;
+                const reqNum = parseInt(value, 10);
                 if (isNaN(reqNum)) continue;
-                if (reqNum === 0) { if (colorCounts[color] > 0) return false; }
-                else { if (colorCounts[color] < reqNum) return false; }
+                const count = colorCounts[color];
+                if (reqNum === 0) {
+                    if (count > 0) return false;
+                } else if (isMaximum ? (count < 1 || count > reqNum) : count < reqNum) {
+                    return false;
+                }
             }
 
             const a = item.ability ? item.ability.split(/[,、\s]+/).map(s => s.trim()) : [];
@@ -1023,15 +1041,16 @@ const App = () => {
         add3StateFilters(filterCosts, 'c', 'Cost', setFilterCosts);
         add3StateFilters(filterBladeHeart, 'bh', 'BH', setFilterBladeHeart);
 
-        Object.entries(filterColors).forEach(([color, val]) => {
-            if (val !== '') {
-                list.push({
-                    id: `color-${color}`,
-                    label: `${color}: ${val === '0' ? '0(含まない)' : val + '以上'}`,
-                    fn: () => setFilterColors(p => ({ ...p, [color]: '' })),
-                    isExclude: val === '0'
-                });
-            }
+        Object.entries(filterColors).forEach(([color, { value, isMaximum }]) => {
+            if (value === '') return;
+            const isZero = parseInt(value, 10) === 0;
+            const condition = isZero ? '0(含まない)' : `${value}${isMaximum ? '以下' : '以上'}`;
+            list.push({
+                id: `color-${color}`,
+                label: `${color}: ${condition}`,
+                fn: () => setFilterColors(prev => ({ ...prev, [color]: emptyColorFilter() })),
+                isExclude: isZero
+            });
         });
 
         const addRange = (obj, label, setter) => { if(obj.min || obj.max) list.push({ id: label, label: `${label}: ${obj.min||'0'}~${obj.max||'∞'}`, fn: () => setter({min:'',max:''}), isExclude: false }); };
@@ -1052,7 +1071,7 @@ const App = () => {
         filterKeywords, toggleKeyword: (v) => toggle3State(filterKeywords, v, setFilterKeywords), setFilterKeywords,
         filterCosts, toggleCost: (v) => toggle3State(filterCosts, v, setFilterCosts), setFilterCosts,
         filterBladeHeart, toggleBladeHeart: (v) => toggle3State(filterBladeHeart, v, setFilterBladeHeart), setFilterBladeHeart,
-        filterColors, setFilterColors,
+        filterColors, setFilterColors, resetColorFilters: () => setFilterColors(emptyColorFilters()),
         filterBaseStats, setFilterBaseStats, filterMaxStats, setFilterMaxStats,
         numericFilters, updateNumericFilter: updateNumFilter, setNumericFilters,
         uniqueAbilities, uniqueKeywords, uniqueContains, uniqueUnits, resetFilters: resetAll, initial3State,

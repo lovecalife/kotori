@@ -89,17 +89,21 @@ const TagFilter = ({ label, options, filterState, onChange, onReset, noCollapse 
 };
 
 // カラーカウントフィルター（専用コンポーネント）
-// 各色の所持枚数条件を指定する。空欄=条件なし、0=含まない、1以上=その数以上
+// 各色のハート数の下限・上限を指定する。空欄=条件なし、0=含まない
 const ColorCountFilter = ({ filterColors, setFilterColors, onReset, label = 'Color Count' }) => {
-    const colors = ['Pink', 'Red', 'Yellow', 'Green', 'Blue', 'Purple', 'Gray'];
-    const isActive = colors.some(c => filterColors[c] !== '');
+    const colors = Object.entries(filterColors);
+    const isActive = colors.some(([, { value, isMaximum }]) => value !== '' || isMaximum);
 
     const handleChange = (color, value) => {
-        setFilterColors(prev => ({ ...prev, [color]: value }));
+        setFilterColors(prev => ({ ...prev, [color]: { ...prev[color], value } }));
+    };
+
+    const toggleMaximum = (color) => {
+        setFilterColors(prev => ({ ...prev, [color]: { ...prev[color], isMaximum: !prev[color].isMaximum } }));
     };
 
     const handleDecrement = (color) => {
-        const val = filterColors[color];
+        const val = filterColors[color].value;
         if (val === '0') {
             handleChange(color, '');
         } else if (val !== '') {
@@ -109,7 +113,7 @@ const ColorCountFilter = ({ filterColors, setFilterColors, onReset, label = 'Col
     };
 
     const handleIncrement = (color) => {
-        const val = filterColors[color];
+        const val = filterColors[color].value;
         if (val === '') {
             handleChange(color, '0');
         } else {
@@ -122,44 +126,58 @@ const ColorCountFilter = ({ filterColors, setFilterColors, onReset, label = 'Col
         <div className="mb-4">
             <FilterHeader label={label} onReset={onReset} isActive={isActive} />
             <div className="grid grid-cols-1 gap-2">
-                {colors.map(color => {
+                {colors.map(([color, { value, isMaximum }]) => {
                     const style = BH_STYLES[color];
                     return (
                         <div key={color} className="flex items-center justify-between border border-gray-200 rounded px-1.5 py-1 bg-white shadow-sm focus-within:ring-1 focus-within:ring-blue-500">
                             <div className="flex items-center gap-1.5">
                                 <span className={`w-3 h-3 rounded-full flex-shrink-0 ${style.bg}`}></span>
-                                <span className="text-[10px] font-bold text-gray-600 w-8 flex-shrink-0 truncate">{color}</span>
+                                <span className="text-[10px] font-bold text-gray-600">{color}</span>
                             </div>
-                            <div className="flex items-center bg-gray-50 rounded border border-gray-200 h-8">
+                            <div className="flex items-center gap-1.5">
+                                <div className="flex items-center bg-gray-50 rounded border border-gray-200 h-8">
+                                    <button
+                                        aria-label={`${color}のハート数を減らす`}
+                                        onClick={() => handleDecrement(color)}
+                                        className="w-7 flex items-center justify-center text-gray-500 hover:text-gray-800 hover:bg-gray-200 h-full rounded-l transition-colors"
+                                    >
+                                        <Icons.Minus style={{width: 12, height: 12}} />
+                                    </button>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        placeholder="-"
+                                        aria-label={`${color}のハート数`}
+                                        value={value}
+                                        onChange={(e) => {
+                                            const v = e.target.value;
+                                            if (v === '' || parseInt(v) >= 0) handleChange(color, v);
+                                        }}
+                                        className="w-8 text-center text-xs outline-none bg-transparent font-bold text-gray-700 hide-spin"
+                                    />
+                                    <button
+                                        aria-label={`${color}のハート数を増やす`}
+                                        onClick={() => handleIncrement(color)}
+                                        className="w-7 flex items-center justify-center text-gray-500 hover:text-gray-800 hover:bg-gray-200 h-full rounded-r transition-colors"
+                                    >
+                                        <Icons.Plus style={{width: 12, height: 12}} />
+                                    </button>
+                                </div>
                                 <button
-                                    onClick={() => handleDecrement(color)}
-                                    className="w-7 flex items-center justify-center text-gray-500 hover:text-gray-800 hover:bg-gray-200 h-full rounded-l transition-colors"
+                                    role="switch"
+                                    aria-label={`${color}のハート数の上限指定`}
+                                    aria-checked={isMaximum}
+                                    onClick={() => toggleMaximum(color)}
+                                    className={`h-8 w-11 rounded border text-xs font-bold transition-colors ${isMaximum ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100' : 'border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
                                 >
-                                    <Icons.Minus style={{width: 12, height: 12}} />
-                                </button>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    placeholder="-"
-                                    value={filterColors[color]}
-                                    onChange={(e) => {
-                                        const v = e.target.value;
-                                        if (v === '' || parseInt(v) >= 0) handleChange(color, v);
-                                    }}
-                                    className="w-8 text-center text-xs outline-none bg-transparent font-bold text-gray-700 hide-spin"
-                                />
-                                <button
-                                    onClick={() => handleIncrement(color)}
-                                    className="w-7 flex items-center justify-center text-gray-500 hover:text-gray-800 hover:bg-gray-200 h-full rounded-r transition-colors"
-                                >
-                                    <Icons.Plus style={{width: 12, height: 12}} />
+                                    {isMaximum ? '以下' : '以上'}
                                 </button>
                             </div>
                         </div>
                     );
                 })}
             </div>
-            <p className="text-[10px] text-gray-400 mt-1.5 leading-tight">※空欄:条件なし / 0:含まない / 1以上:その数以上</p>
+            <p className="text-[10px] text-gray-400 mt-1.5 leading-tight">空欄は条件なし。「以下」は1個から指定数まで。0はその色を含まないカードを表示します。</p>
         </div>
     );
 };
@@ -175,15 +193,13 @@ const FilterPanel = ({
     filterCosts, toggleCost, setFilterCosts,
     numericFilters, updateNumericFilter, setNumericFilters,
     filterBladeHeart, toggleBladeHeart, setFilterBladeHeart,
-    filterColors, setFilterColors,
+    filterColors, setFilterColors, resetColorFilters,
     filterBaseStats, setFilterBaseStats, filterMaxStats, setFilterMaxStats,
     uniqueAbilities, uniqueKeywords,
     filterKeywords, toggleKeyword, setFilterKeywords,
     filterContains, toggleContain, setFilterContains, uniqueContains,
     resetFilters, initial3State, deckSortType, setDeckSortType, showFavorites, setShowFavorites
 }) => {
-    const resetColors = () => setFilterColors({ Pink: '', Red: '', Yellow: '', Green: '', Blue: '', Purple: '', Gray: '' });
-
     return (
         <div className="space-y-4">
             {!isMobile && (
@@ -257,7 +273,7 @@ const FilterPanel = ({
                             {/* ブレードハート */}
                             <ButtonGroupFilter label="ブレードハート" options={BH_OPTIONS_MEMBER} filterState={filterBladeHeart} onChange={toggleBladeHeart} styles={BH_STYLES} defaultStyle={BH_STYLES['None']} onReset={() => setFilterBladeHeart(initial3State())} />
                             {/* ハート数 */}
-                            <ColorCountFilter label="ハート数" filterColors={filterColors} setFilterColors={setFilterColors} onReset={resetColors} />
+                            <ColorCountFilter label="ハート数" filterColors={filterColors} setFilterColors={setFilterColors} onReset={resetColorFilters} />
                             {/* ブレード数 */}
                             <DropdownRangeFilter label="ブレード数" minVal={numericFilters.blade?.min||''} maxVal={numericFilters.blade?.max||''} options={[0,1,2,3,4,5,6,7]} onMinChange={(v) => updateNumericFilter('blade', 'min', v)} onMaxChange={(v) => updateNumericFilter('blade', 'max', v)} onReset={() => setNumericFilters(p => ({...p, blade: {min:'',max:''}}))} />
                             {/* 基本スタッツ */}
@@ -281,7 +297,7 @@ const FilterPanel = ({
                             {/* ユニット */}
                             <TagFilter label="ユニット" options={uniqueUnits} filterState={filterUnits} onChange={toggleUnit} onReset={() => setFilterUnits(initial3State())} />
                             {/* ハート数 */}
-                            <ColorCountFilter label="ハート数" filterColors={filterColors} setFilterColors={setFilterColors} onReset={resetColors} />
+                            <ColorCountFilter label="ハート数" filterColors={filterColors} setFilterColors={setFilterColors} onReset={resetColorFilters} />
                             {/* スコア */}
                             <RangeFilter label="スコア" minVal={numericFilters.score?.min||''} maxVal={numericFilters.score?.max||''} onMinChange={(v) => updateNumericFilter('score', 'min', v)} onMaxChange={(v) => updateNumericFilter('score', 'max', v)} onReset={() => setNumericFilters(p => ({...p, score: {min:'',max:''}}))} />
                             {/* 最大スコア */}
