@@ -54,6 +54,12 @@ const fetchMemberOrder = () => new Promise((resolve, reject) => {
 
 const memberNameKey = name => String(name || '').replace(/\s/g, '');
 
+const parseLiveMetric = (value) => {
+    const text = String(value ?? '').trim();
+    const number = Number(text);
+    return text && Number.isFinite(number) ? number : null;
+};
+
 const compareMemberCards = (a, b, orderIndex) => {
     const nameA = memberNameKey(a.name);
     const nameB = memberNameKey(b.name);

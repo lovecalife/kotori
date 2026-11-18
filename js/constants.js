@@ -120,6 +120,7 @@ const COLUMN_MAP = {
         bladeHeart: ['BladeHeart', 'ブレードハート', 'BH'],
         keyword: ['Keyword', 'キーワード', '特徴'],
         efficiency: ['Efficiency', '効率', 'Eff'],
+        effectiveEfficiency: ['EffectiveEfficiency'],
         noViewer: ['NoViewer', '非表示', 'NoView'],
         sortId: ['SortID', 'SortId', 'sort_id'],
         rarity: ['Rarity', 'レアリティ', 'rarity'],

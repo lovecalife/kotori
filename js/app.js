@@ -933,16 +933,23 @@ const App = () => {
     }, [memberOrder]);
 
     const sortedData = useMemo(() => {
-        let items = [...filteredData];
-        items.sort((a, b) => {
-            if (sortConfig.key === 'memberName') return compareMemberCards(a, b, memberOrderIndex);
+        const { key, direction } = sortConfig;
+        return [...filteredData].sort((a, b) => {
+            if (key === 'memberName') return compareMemberCards(a, b, memberOrderIndex);
+            if (key === 'effectiveEfficiency' || key === 'maxScore') {
+                const valueA = parseLiveMetric(a[key]);
+                const valueB = parseLiveMetric(b[key]);
+                if (valueA === valueB) return 0;
+                if (valueA === null) return 1;
+                if (valueB === null) return -1;
+                return direction === 'asc' ? valueA - valueB : valueB - valueA;
+            }
             const getVal = (i, k) => { const v = parseInt(i[k]); return isNaN(v) ? 0 : v; };
-            let valA = getVal(a, sortConfig.key), valB = getVal(b, sortConfig.key);
-            if (valA !== valB) return sortConfig.direction === 'asc' ? valA - valB : valB - valA;
-            if (sortConfig.key !== 'baseStats') return getVal(a, 'baseStats') - getVal(b, 'baseStats');
+            const valA = getVal(a, key), valB = getVal(b, key);
+            if (valA !== valB) return direction === 'asc' ? valA - valB : valB - valA;
+            if (key !== 'baseStats') return getVal(a, 'baseStats') - getVal(b, 'baseStats');
             return 0;
         });
-        return items;
     }, [filteredData, sortConfig, memberOrderIndex]);
 
     const sortedDeckCards = useMemo(() => {
@@ -1246,6 +1253,8 @@ const App = () => {
                                     <>
                                         <option value="score-asc">Score 昇順</option><option value="score-desc">Score 降順</option>
                                         <option value="req-asc">Cost 昇順</option><option value="req-desc">Cost 降順</option>
+                                        <option value="effectiveEfficiency-asc">スコア効率 昇順</option><option value="effectiveEfficiency-desc">スコア効率 降順</option>
+                                        <option value="maxScore-asc">最大スコア 昇順</option><option value="maxScore-desc">最大スコア 降順</option>
                                     </>
                                 )}
                             </select>

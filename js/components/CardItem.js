@@ -101,6 +101,17 @@ const CompactCardItem = ({ item, deckCount, onSelect, cols = 8 }) => {
 
 // グリッド / リスト共用カードコンポーネント
 // asGrid=true でカードグリッド表示、false でテーブル行として描画
+const liveEfficiencyPercent = new Intl.NumberFormat('ja-JP', {
+    style: 'percent',
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1
+});
+
+const formatLiveEfficiency = (value) => {
+    const ratio = parseLiveMetric(value);
+    return ratio === null ? '-' : liveEfficiencyPercent.format(ratio);
+};
+
 const CardItem = ({ item, deckCount, onAdd, onRemove, onSelect, abilitiesList, isFavorite = false, onToggleFavorite, showConsiderationButton = true, asGrid = true }) => {
     const isLive = item._type === 'live';
     const canShowConsiderationButton = showConsiderationButton && deckCount === 0;
@@ -235,6 +246,10 @@ const CardItem = ({ item, deckCount, onAdd, onRemove, onSelect, abilitiesList, i
                         <div className="pt-1.5 border-t border-dashed border-gray-100 space-y-1">
                             <div className="flex justify-between items-center"><span className="text-[9px] text-gray-400 uppercase">Score</span><span className="text-[10px] font-bold text-pink-600">{item.score||'-'} <span className="text-gray-300">/</span> {item.maxScore||'-'}</span></div>
                             <div className="flex justify-between items-center"><span className="text-[9px] text-gray-400 uppercase">Cost</span><span className="text-[10px] font-bold text-gray-700">{item.req||'-'} <span className="text-gray-300">/</span> {item.effReq||'-'}</span></div>
+                            <div className="flex flex-wrap justify-between items-center gap-x-1">
+                                <span className="text-[9px] text-gray-400 whitespace-nowrap">効率 / 実質効率</span>
+                                <span className="ml-auto text-[10px] font-bold text-gray-700 whitespace-nowrap">{formatLiveEfficiency(item.efficiency)} <span className="text-gray-300">/</span> {formatLiveEfficiency(item.effectiveEfficiency)}</span>
+                            </div>
                         </div>
                     )}
                 </div>
